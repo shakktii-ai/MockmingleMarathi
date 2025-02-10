@@ -52,7 +52,7 @@ export default async function handler(req, res) {
       console.log("Sending request to backend...");
       
       // Increase timeout (if the backend takes time, this may help)
-      const timeout = 30000; // 30 seconds timeout for example
+      const timeout = 10000; // 10 seconds timeout for example
       const response = await Promise.race([
         fetch(url, {
           method: "POST",
