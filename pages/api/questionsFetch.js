@@ -40,7 +40,7 @@ export const getApiResponse = async (jobrole, level) => {
 
   const data = {
     model: "gemma:2b",
-    prompt: `give me 5 questions for ${jobrole} at ${level} level`,
+    prompt: `give me 6 questions for ${jobrole} at ${level} level`,
     stream: false,
   };
 

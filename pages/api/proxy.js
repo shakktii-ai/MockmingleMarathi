@@ -40,7 +40,7 @@ export default async function handler(req, res) {
   
     const data = {
       model: "gemma:2b",
-      prompt: `give me 5 questions for ${req.query.jobrole} at ${req.query.level} level`,
+      prompt: `give me 6 questions for ${req.query.jobrole} at ${req.query.level} level`,
       stream: false,
     };
   
