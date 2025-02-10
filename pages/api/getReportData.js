@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import JobRole from '/models/JobRole'; // Adjust the path to your JobRole model
+import JobRole from '../../models/JobRole'; // Adjust the path to your JobRole model
 
 // Function to connect to the MongoDB database
 const connectToDatabase = async () => {

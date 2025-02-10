@@ -186,7 +186,7 @@
 // export default handler;
 
 
-import JobRole from '/models/jobRole';
+import JobRole from '../../models/JobRole';
 
 export async function handler(req, res) {
   const { email ,_id} = req.query;

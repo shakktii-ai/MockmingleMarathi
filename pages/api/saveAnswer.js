@@ -144,7 +144,7 @@
 // }
 
 // export default handler;
-import JobRole from '/models/jobRole';
+import JobRole from '../../models/JobRole';
 import { ObjectId } from 'mongodb'; // Import ObjectId for comparison
 
 // Save answer API
