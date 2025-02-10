@@ -99,7 +99,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { getApiResponse } from './/questionsFetch';
+import { getApiResponse } from './api/questionsFetch';
 import { IoIosArrowBack } from "react-icons/io";
 import Link from "next/link";
 
