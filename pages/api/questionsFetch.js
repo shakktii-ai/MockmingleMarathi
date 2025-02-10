@@ -33,7 +33,7 @@
   
 
 export const getApiResponse = async (jobrole, level) => {
-  const url = "https://shakktii-ai-xg9u.vercel.app/api/proxy"; // Replace with your Vercel proxy URL
+  const url = `${process.env.NEXT_PUBLIC_HOST}/api/proxy`; // Replace with your Vercel proxy URL
   const headers = {
     "Content-Type": "application/json",
   };
