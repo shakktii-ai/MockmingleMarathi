@@ -170,6 +170,7 @@ const handleSubmit = async (e) => {
                         accept="image/*"
                         onChange={handleChange}
                         placeholder="fullName"
+                        required
                         className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
                     />
                     <input
@@ -178,6 +179,7 @@ const handleSubmit = async (e) => {
                         value={fullName}
                         onChange={handleChange}
                         placeholder="fullName"
+                      required
                         className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
                     />
                     <input
@@ -186,6 +188,7 @@ const handleSubmit = async (e) => {
                         value={email}
                         onChange={handleChange}
                         placeholder="Email Address"
+                        required
                         className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
                     />
                     <input
@@ -194,6 +197,7 @@ const handleSubmit = async (e) => {
                         value={mobileNo}
                         onChange={handleChange}
                         placeholder="Mobile Number"
+                        required
                         className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
                     />
                     <input
@@ -202,6 +206,7 @@ const handleSubmit = async (e) => {
                         value={address}
                         onChange={handleChange}
                         placeholder="Address"
+                        required
                         className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
                     />
                     <input
@@ -210,6 +215,7 @@ const handleSubmit = async (e) => {
                         value={DOB}
                         onChange={handleChange}
                         placeholder="DOB"
+                        required
                         className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
                     />
                     <input
@@ -218,6 +224,7 @@ const handleSubmit = async (e) => {
                         value={education}
                         onChange={handleChange}
                         placeholder="Education"
+                        required
                         className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
                     />
 
@@ -229,6 +236,7 @@ const handleSubmit = async (e) => {
                             value={password}
                             onChange={handlePasswordChange}
                             placeholder="🔒 Password"
+                            required
                             className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
                         />
                         <span
@@ -246,6 +254,7 @@ const handleSubmit = async (e) => {
                             value={confirmPassword}
                             onChange={handleConfirmPasswordChange}
                             placeholder="🔒 Confirm Password"
+                            required
                             className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
                         />
                         <span

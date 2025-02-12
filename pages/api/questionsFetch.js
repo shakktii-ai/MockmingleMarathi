@@ -116,7 +116,7 @@ export const getApiResponse = async (jobRole, level) => {
   };
   const data = {
     model: "gemma:2b",
-    prompt: `Give me 15 questions for the ${jobRole} job role at ${level} level`, // Fixed template string
+    prompt: `Give me 3 questions for the ${jobRole} job role at ${level} level`, // Fixed template string
     stream: false,
   };
 
