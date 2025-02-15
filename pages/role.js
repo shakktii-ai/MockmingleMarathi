@@ -106,7 +106,7 @@ import Link from "next/link";
 export default function Role() {
   const router = useRouter();
   const [jobRole, setJobRole] = useState("");
-  const [level, setLevel] = useState("");
+  const [level, setLevel] = useState("Beginner");
   const [email, setEmail] = useState("");
   const [questions, setQuestions] = useState("");
   const [user, setUser] = useState(null);
@@ -607,6 +607,7 @@ export default function Role() {
             value={jobRole} 
             onChange={(e) => setJobRole(e.target.value)} 
             placeholder="Enter Job Role" 
+            required
             className="w-full p-3 mb-5 bg-opacity-20 bg-white text-white border-none rounded-md text-lg text-center" 
           />
           <input 
@@ -619,7 +620,7 @@ export default function Role() {
 
           <h2 className=" text-3xl font-light mt-8"></h2>
           <h3 className=" text-2xl text-[#e600ff] mb-4">Select Level</h3>
-          <div className=" flex flex-col text-white text-left pl-16 text-lg mb-6">
+          <div className=" flex flex-col text-white text-left pl-16 text-lg mb-6" >
             <label>
               <input 
                 type="radio" 
