@@ -236,11 +236,11 @@ export const getApiResponseReport = async (reportData) => {
       // Prepare the data object for the API
       const data = {
         model: "llama3:latest",
-<<<<<<< HEAD
-        prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube embed links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
-=======
+
+        // prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube embed links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
+
         prompt: `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence, and language fluency. Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(questionsWithAnswers, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`,
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
         stream: false
       };
   

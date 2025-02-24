@@ -5325,7 +5325,7 @@ const QuestionForm = () => {
     setIsExitModalVisible(false);
     router.push('/report');
 
-    router.push('/report'); // Redirect to /report page
+     // Redirect to /report page
 
   };
 
