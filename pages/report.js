@@ -3251,21 +3251,16 @@
 
 
 import React, { useState, useEffect } from 'react'; 
-<<<<<<< HEAD
 
-=======
 import { getApiResponseReport } from './api/report'; 
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
 import { IoIosArrowBack } from "react-icons/io";
 import { useRouter } from 'next/router';
 
 function Report() { 
   const router = useRouter(); 
-<<<<<<< HEAD
 
-=======
   const [openReport, setOpenReport] = useState(false);
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
   const [reportData, setReportData] = useState(null); 
   const [user, setUser] = useState('');
   const [email, setEmail] = useState(''); 
@@ -3278,8 +3273,7 @@ function Report() {
 
 
 
-<<<<<<< HEAD
-=======
+
 //     const url = "http://139.59.42.156:11434/api/generate";  // Consider passing URL dynamically
 //     const headers = {
 //       "Content-Type": "application/json"
@@ -3330,7 +3324,7 @@ function Report() {
 //       return null;
 //     }
 // };
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       router.push(`${process.env.NEXT_PUBLIC_HOST}/login`);
@@ -3416,11 +3410,8 @@ console.log("model return this report ",analysisData);
         setJobRole(data.data.role);
 
         await storeReport(data.data.role, data.data.email, analysisData);
-<<<<<<< HEAD
-        
-=======
-        // localStorage.removeItem('_idForReport');
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
+        // localStorage.removeItem('_idForReport')
         localStorage.removeItem('status');
         localStorage.setItem('store',"success");
         setIsEmailFetched(true);  
@@ -3453,18 +3444,16 @@ console.log("model return this report ",analysisData);
       }
 
       const result = await response.json();
-<<<<<<< HEAD
+
       localStorage.removeItem('_idForReport');
-=======
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
       console.log('Report stored successfully:', result);
     } catch (err) {
       console.error('Error storing report:', err);
     }
   };
 
-<<<<<<< HEAD
-=======
+
   // const downloadReport = (reportAnalysis) => {
   //   const formattedHTML = reportAnalysis
   //     .replace(/The user's/g, "You'r")
@@ -3492,7 +3481,7 @@ console.log("model return this report ",analysisData);
   //   link.click();
   // };
 
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -3512,13 +3501,13 @@ console.log("model return this report ",analysisData);
       <div className="text-white">
         <h1 className="text-center text-4xl font-bold">Interview Report</h1>
         <h1 className="text-center items-center align-middle text-4xl font-bold"> Report update after 5 min</h1>
-<<<<<<< HEAD
+
         <iframe width="420" height="345" src="https://www.youtube.com/embed/L1nDUbFKnwY"></iframe>
         <iframe src="https://read.bookcreator.com/aWAhdfUWXPQR1UPW7fJOHnfObsb2/_or2hLPmR3WlS34sPH_WKQ" height="550" allow="clipboard-write self https://read.bookcreator.com"></iframe>
         
-=======
 
->>>>>>> 009b69a5ab2f2d93c5a750d8a06bd345fbee11f8
+
+
        
       </div>
     </div>
