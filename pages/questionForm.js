@@ -6345,6 +6345,32 @@ const QuestionForm = () => {
   const [micTimeout, setMicTimeout] = useState(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
 
+  useEffect(() => {
+    // Request microphone (audio) access
+    const requestPermissions = async () => {
+      try {
+        // Requesting audio permission (microphone)
+        await navigator.mediaDevices.getUserMedia({ audio: true, sound: true });
+        console.log("Microphone and sound access granted.");
+      } catch (err) {
+        console.error("Microphone and sound access denied:", err);
+        // Optionally, show an alert or message to the user about the permission issue
+      }
+    };
+
+    requestPermissions();
+
+    // Check if there’s a notification stored in localStorage when the component mounts
+    const checkStorage = () => {
+      const storedNotification = localStorage.getItem("store");
+      if (storedNotification) {
+        setNotification(true);
+      }
+    };
+
+    checkStorage();
+  }, []);
+
  
   const goodResponses = [
         "Great! Let's move on to the next question.",
