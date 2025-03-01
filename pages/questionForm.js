@@ -6,7 +6,7 @@
 //   const [questions, setQuestions] = useState([]);
 //   const [email, setEmail] = useState('');
 //   const [user, setUser] = useState(null);
-  
+
 //   useEffect(() => { 
 //     // Ensure the user is logged in before fetching questions
 //     if (!localStorage.getItem("token")) {
@@ -43,7 +43,7 @@
 //   }
 // }, [email]);
 
-  
+
 
 //   const handleAnswerChange = (questionText, answerText) => {
 //     setQuestions(prevQuestions => 
@@ -536,7 +536,7 @@
 //   const startListening = () => {
 //     setIsListening(true);
 //     setLoading(true);
-    
+
 //     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 //     recognition.lang = 'en-US';
 //     recognition.interimResults = false;
@@ -1261,7 +1261,7 @@
 //             <button
 //               className={`mic-button absolute right-4 ${isListening ? 'text-red-500' : 'text-pink-400'}`}
 //               onClick={handleMicClick}
-              
+
 //             >
 //               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6">
 //                 <path fill="currentColor" d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3zM5 10a1 1 0 1 1 2 0v2a5 5 0 0 0 10 0v-2a1 1 0 1 1 2 0v2a7 7 0 0 1-6 6.93V21a1 1 0 1 1-2 0v-2.07A7 7 0 0 1 5 12v-2z"/>
@@ -1425,8 +1425,8 @@
 //       questionText: question.questionText,
 //       answerText: question.answer || '',
 //     }));
-    
-    
+
+
 
 //     const res = await fetch('/api/saveAnswer', {
 //       method: 'POST',
@@ -1893,7 +1893,7 @@
 //         answer: answer, // The user's answer
 //       }),
 //     });
-  
+
 //     if (res.ok) {
 //       console.log('Answer submitted successfully');
 //     } else {
@@ -1902,7 +1902,7 @@
 //       alert('Error saving data');
 //     }
 //   };
-  
+
 
 //   // const submitAnswer = async (questionId, answer) => {
 //   //   try {
@@ -1917,7 +1917,7 @@
 //   //         answer,
 //   //       }),
 //   //     });
-  
+
 //   //     if (res.ok) {
 //   //       console.log('Answer submitted successfully');
 //   //     } else {
@@ -1930,7 +1930,7 @@
 //   //     alert('An error occurred while saving the answer.');
 //   //   }
 //   // };
-  
+
 
 //   const speakQuestion = (questionText) => {
 //     setIsSpeaking(true); // Set isSpeaking to true when the question is being spoken
@@ -2711,12 +2711,12 @@
 //         recognition.stop(); // Stop recognition on second click
 //         setIsListening(false); // Update the state to show mic is off
 //         setLoading(false); // Hide the loading state when recognition ends
-  
+
 //         // Submit the answer when mic stops
 //         const currentQuestion = questions[currentQuestionIndex];
 //         const answer = recordedText; // Get the recorded text as the answer
 //         submitAnswer(currentQuestion._id, answer); // Submit the answer
-  
+
 //         // Move to the next question automatically after submitting the answer
 //         handleNext(); // Move to the next question (calls handleNext)
 //       } else {
@@ -2726,7 +2726,7 @@
 //       }
 //     }
 //   };
-  
+
 //   const submitAnswer = async (questionId, answer) => {
 //     const res = await fetch('/api/saveAnswer', {
 //       method: 'PUT',
@@ -3425,7 +3425,7 @@
 //   //   const responseText = isGoodAnswer 
 //   //     ? "Good, let's move to the next question" 
 //   //     : "Um, okay, let's move to the next question";
-    
+
 //   //   speakResponse(responseText);
 
 //   //   // Submit the answer
@@ -3442,26 +3442,26 @@
 //   const handleNext = () => {
 //     const currentQuestion = questions[currentQuestionIndex];
 //     const answer = recordedText.trim(); // Get the recorded answer
-  
+
 //     // Check if any word in the question exists in the answer
 //     const questionWords = currentQuestion.questionText.split(' ').map(word => word.toLowerCase());
 //     const answerWords = answer.split(' ').map(word => word.toLowerCase());
-  
+
 //     // Check if any word in the question is present in the answer
 //     const isGoodAnswer = questionWords.some(word => answerWords.includes(word));
-  
+
 //     // Speak the appropriate response
 //     const responseText = isGoodAnswer 
 //       ? "Good, let's move to the next question" 
 //       : "Um, okay, let's move to the next question";
-      
+
 //     speakResponse(responseText);
-  
+
 //     // Submit the answer
 //     if (answer) {
 //       submitAnswer(currentQuestion._id, answer); // Submit the answer
 //     }
-  
+
 //     // Check if we have reached the last question
 //     if (currentQuestionIndex === questions.length - 1) {
 //       // All questions are answered, interview ended
@@ -3475,7 +3475,7 @@
 //       setRecordedText(''); // Clear the recorded text for the next question
 //     }
 //   };
-  
+
 //   // Function to speak the response
 //   const speakResponse = (responseText) => {
 //     const utterance = new SpeechSynthesisUtterance(responseText);
@@ -3579,7 +3579,7 @@
 //   }, []);
 
 //   const _id = localStorage.getItem('_id');  // Get _id from localStorage
-  
+
 //   useEffect(() => {
 //     const fetchQuestions = async () => {
 //       if (!email || !_id) {
@@ -3595,7 +3595,7 @@
 
 //         const data = await res.json();
 //         console.log('Fetched questions:', data);
-        
+
 //         setQuestions(data);  // Set the fetched questions in state
 //       } catch (error) {
 //         console.error('Error fetching questions:', error);
@@ -3656,7 +3656,7 @@
 //     }
 //   };
 
-  
+
 //   const submitAnswer = async (questionId, answer) => {
 //     try {
 //       const res = await fetch('/api/saveAnswer', {
@@ -3671,7 +3671,7 @@
 //           answer: answer,
 //         }),
 //       });
-  
+
 //       // Check if the request was successful
 //       if (res.ok) {
 //         console.log('Answer submitted successfully');
@@ -3687,7 +3687,7 @@
 //       alert('Network or other error occurred');
 //     }
 //   };
-  
+
 
 //   const speakQuestion = (questionText) => {
 //     setIsSpeaking(true);
@@ -3730,7 +3730,7 @@
 //     }
 
 //     if (currentQuestionIndex === questions.length - 1) {
-      
+
 //       speakResponse("Your interview has ended.");
 //       setIsModalVisible(true);
 //       localStorage.removeItem("_id"); // Show modal when interview ends
@@ -3863,7 +3863,7 @@
 //   }, []);
 
 //   const _id = localStorage.getItem('_id');  // Get _id from localStorage
-  
+
 //   useEffect(() => {
 //     const fetchQuestions = async () => {
 //       if (!email || !_id) {
@@ -3879,7 +3879,7 @@
 
 //         const data = await res.json();
 //         console.log('Fetched questions:', data);
-        
+
 //         setQuestions(data);  // Set the fetched questions in state
 //       } catch (error) {
 //         console.error('Error fetching questions:', error);
@@ -3958,7 +3958,7 @@
 //           answer: answer,
 //         }),
 //       });
-  
+
 //       // Check if the request was successful
 //       if (res.ok) {
 //         console.log('Answer submitted successfully');
@@ -4049,7 +4049,7 @@
 //   //       },
 //   //       body: JSON.stringify({
 //   //         interviewData: answers,
-        
+
 //   //         email: user?.email,
 //   //       }),
 //   //     });
@@ -4070,18 +4070,18 @@
 //   const handleNext = () => {
 //     const currentQuestion = questions[currentQuestionIndex];
 //     const answer = recordedText.trim();
-  
+
 //     const questionWords = currentQuestion.questionText.split(' ').map(word => word.toLowerCase());
 //     const answerWords = answer.split(' ').map(word => word.toLowerCase());
-  
+
 //     const isGoodAnswer = questionWords.some(word => answerWords.includes(word));
-  
+
 //     const responseText = isGoodAnswer
 //       ? "Good, let's move to the next question"
 //       : "Um, okay, let's move to the next question";
-  
+
 //     speakResponse(responseText);
-  
+
 //     if (answer) {
 //       setAnswers((prevAnswers) => [
 //         ...prevAnswers,
@@ -4089,7 +4089,7 @@
 //       ]);
 //     }
 
-  
+
 //     // After answering the last question, mark the interview as complete and send the report
 //     if (currentQuestionIndex === questions.length - 1) {
 //       speakResponse("Your interview has ended.");
@@ -4102,7 +4102,7 @@
 //       setRecordedText('');  // Clear recorded text for the next question
 //     }
 //   };
-  
+
 //   const sendInterviewReport = async () => {
 //     try {
 //       // Only send the report after the interview is complete
@@ -4110,7 +4110,7 @@
 //         return;  // Don't send the report if the interview isn't completed
 //       }
 //   console.log(answers);
-  
+
 //       const res = await fetch('/api/report', {
 //         method: 'POST',
 //         headers: {
@@ -4121,7 +4121,7 @@
 //           email: user?.email,       // Send the user's email
 //         }),
 //       });
-  
+
 //       if (res.ok) {
 //         console.log('Interview report sent successfully');
 //       } else {
@@ -4134,7 +4134,7 @@
 //       alert('Error occurred while sending the report.');
 //     }
 //   };
-  
+
 //   const handleModalClose = () => {
 //     setIsModalVisible(false); // Close modal
 //     router.push('/'); // Redirect to index page
@@ -4251,7 +4251,7 @@
 //     "Let's keep going with the next question.",
 //     "Let's continue with the next one."
 //   ];
-  
+
 //   const badResponses = [
 //     "Um, okay, let's move to the next question.",
 //     "Not quite, but let's move to the next question.",
@@ -4269,7 +4269,7 @@
 //     "Not exactly what we needed, but let's continue.",
 //     "Close, but not quite there, let’s move on."
 //   ];
-  
+
 
 //   useEffect(() => {
 //     if (typeof window !== 'undefined') {
@@ -4314,7 +4314,7 @@
 
 //         const data = await res.json();
 //         console.log('Fetched questions:', data);
-        
+
 //         setQuestions(data);  // Set the fetched questions in state
 //       } catch (error) {
 //         console.error('Error fetching questions:', error);
@@ -4424,14 +4424,14 @@
 //   useEffect(() => {
 //     if (questions.length > 0) {
 //       const currentQuestion = questions[currentQuestionIndex];
-      
+
 //       // Clean up the question text by removing "currentQuestion", commas, and asterisks
 //       const cleanedQuestionText = currentQuestion.questionText.replace(/(currentQuestion|[,*])/g, "");
-  
+
 //       speakQuestion(cleanedQuestionText);
 //     }
 //   }, [currentQuestionIndex, questions]);
-  
+
 //   const handleNext = () => {
 //     const currentQuestion = questions[currentQuestionIndex];
 //     const answer = recordedText.trim();
@@ -4455,7 +4455,7 @@
 //     }
 
 //     if (currentQuestionIndex === questions.length - 1) {
-     
+
 //       speakResponse("Your interview has ended.");
 //       setInterviewComplete(true);  // Set interview as complete
 //       setIsModalVisible(true);  // Show the modal when interview ends
@@ -4479,14 +4479,14 @@
 //     speechSynthesis.speak(utterance);
 //   };
 
- 
+
 
 //   const handleModalClose = () => {
 //     setIsModalVisible(false); // Close modal
 //     router.push('/report'); // Redirect to index page
 //   };
-  
-  
+
+
 
 //   const handleBeforeUnload = (event) => {
 //     if (!interviewComplete) {
@@ -4664,7 +4664,7 @@
 //         "Let’s keep going with the next question and stay positive!",
 //         "Let’s continue with the next one, things are going well!"
 //       ];
-      
+
 //       const badResponses = [
 //         "Um, okay, let's move to the next question.",
 //         "Not quite, but let's move to the next question.",
@@ -4726,7 +4726,7 @@
 
 //         const data = await res.json();
 //         console.log('Fetched questions:', data);
-        
+
 //         setQuestions(data);
 //       } catch (error) {
 //         console.error('Error fetching questions:', error);
@@ -4831,7 +4831,7 @@
 //     };
 
 //     speechSynthesis.speak(utterance);
-    
+
 //     // Set a timer to check if the mic is activated within 20 seconds
 //     const timeout = setTimeout(() => {
 //       if (!isListening) {
@@ -4846,10 +4846,10 @@
 //   useEffect(() => {
 //     if (questions.length > 0) {
 //       const currentQuestion = questions[currentQuestionIndex];
-      
+
 //       // Clean up the question text by removing "currentQuestion", commas, and asterisks
 //       const cleanedQuestionText = currentQuestion.questionText.replace(/(currentQuestion|[,*])/g, "");
-  
+
 //       speakQuestion(cleanedQuestionText);
 //     }
 //   }, [currentQuestionIndex, questions]);
@@ -5011,8 +5011,8 @@
 //   ];
 
 
-  
-  
+
+
 
 //   const badResponses = [
 //     "Um, okay, let's move to the next question.",
@@ -5033,7 +5033,7 @@
 //   ];
 
 
- 
+
 
 //   useEffect(() => {
 //     if (typeof window !== 'undefined') {
@@ -5079,7 +5079,7 @@
 
 //         const data = await res.json();
 //         console.log('Fetched questions:', data);
-        
+
 
 //         setQuestions(data);  // Set the fetched questions in state
 
@@ -5233,7 +5233,7 @@
 //       ? goodResponses[Math.floor(Math.random() * goodResponses.length)] 
 //       : badResponses[Math.floor(Math.random() * badResponses.length)];
 
-  
+
 
 //     speakResponse(responseText);
 
@@ -5262,7 +5262,7 @@
 //       clearTimeout(micTimeout);
 //       setMicTimeout(null);
 
-     
+
 //       speakResponse("Your interview has ended.");
 //       setInterviewComplete(true);  // Set interview as complete
 //       setIsModalVisible(true);  // Show the modal when interview ends
@@ -5293,11 +5293,11 @@
 //     router.push('/report');
 //   };
 
- 
 
- 
-  
-  
+
+
+
+
 
 
 //   const handleBeforeUnload = (event) => {
@@ -5408,7 +5408,7 @@
 //             <h2 className="text-xl font-semibold mb-4">Your interview has ended</h2>
 //             <button
 
-          
+
 //               onClick={handleModalClose}
 
 //               className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none"
@@ -5509,11 +5509,11 @@
 //         "Let’s keep going with the next question and stay positive!",
 //         "Let’s continue with the next one, things are going well!"
 //       ];
-    
-    
-      
-      
-    
+
+
+
+
+
 //       const badResponses = [
 //         "Um, okay, let's move to the next question.",
 //         "Not quite, but let's move to the next question.",
@@ -5936,11 +5936,11 @@
 //         "Let’s keep going with the next question and stay positive!",
 //         "Let’s continue with the next one, things are going well!"
 //       ];
-    
-    
-      
-      
-    
+
+
+
+
+
 //       const badResponses = [
 //         "Um, okay, let's move to the next question.",
 //         "Not quite, but let's move to the next question.",
@@ -6323,8 +6323,1795 @@
 // };
 
 // export default QuestionForm;
+
+
+
+// import { useState, useEffect } from 'react';
+// import { useRouter } from 'next/router';
+
+// const QuestionForm = () => {
+//   const router = useRouter();
+//   const [questions, setQuestions] = useState([]);
+//   const [email, setEmail] = useState('');
+//   const [user, setUser] = useState(null);
+//   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+//   const [recordedText, setRecordedText] = useState('');
+//   const [isListening, setIsListening] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [recognition, setRecognition] = useState(null);
+//   const [isSpeaking, setIsSpeaking] = useState(false);
+//   const [isModalVisible, setIsModalVisible] = useState(false);
+//   const [answers, setAnswers] = useState([]);
+//   const [interviewComplete, setInterviewComplete] = useState(false);
+//   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
+
+//   const [micTimeout, setMicTimeout] = useState(null);
+//   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
+
+//   useEffect(() => {
+//     // Request microphone (audio) access
+//     const requestPermissions = async () => {
+//       try {
+//         // Requesting audio permission (microphone)
+//         await navigator.mediaDevices.getUserMedia({ audio: true, sound: true });
+//         console.log("Microphone and sound access granted.");
+//       } catch (err) {
+//         console.error("Microphone and sound access denied:", err);
+//         // Optionally, show an alert or message to the user about the permission issue
+//       }
+//     };
+
+//     requestPermissions();
+
+//     // Check if there’s a notification stored in localStorage when the component mounts
+//     const checkStorage = () => {
+//       const storedNotification = localStorage.getItem("store");
+//       if (storedNotification) {
+//         setNotification(true);
+//       }
+//     };
+
+//     checkStorage();
+//   }, []);
+
+
+//   const goodResponses = [
+//         "Great! Let's move on to the next question.",
+//         "Awesome! Let's continue to the next one",
+//         "Perfect, let's go ahead with the next question.",
+//         "Let's move on to the next question now and keep going strong!",
+//         "Wonderful! Proceeding to the next question.",
+//         "Let’s move forward to the next one with excitement!",
+//         "Next question, please—let's dive right in!",
+//         "Let’s go to the next one and keep the momentum going.",
+//         "Moving on to the next question, excited to see what's next!",
+//         "Let's continue with the next question and keep up the good work!",
+//         "Now, let’s go to the next question and stay on track!",
+//         "Time to proceed with the next question—let’s keep it up!",
+//         "Next question, let’s go, we’re doing great!",
+//         "Let’s keep going with the next question and stay positive!",
+//         "Let’s continue with the next one, things are going well!"
+//       ];
+
+
+
+
+
+//       const badResponses = [
+//         "Um, okay, let's move to the next question.",
+//         "Not quite, but let's move to the next question.",
+//         "Hmm, not exactly, let's continue to the next question.",
+//         "Well, that’s not right, but let’s go on to the next one.",
+//         "Close enough, let’s move on to the next question.",
+//         "It’s not perfect, but let’s proceed to the next one.",
+//         "Hmm, I see where you’re going, but let’s move to the next one.",
+//         "That’s not the answer we were looking for, but let’s continue.",
+//         "Not quite right, but let's continue to the next question.",
+//         "Almost, but we’ll keep going.",
+//         "I think we missed it, let’s move on.",
+//         "Hmm, not quite, but let’s keep going.",
+//         "That’s a bit off, but let's move to the next one.",
+//         "Not exactly what we needed, but let's continue.",
+//         "Close, but not quite there, let’s move on."
+//       ];
+
+//   useEffect(() => {
+//     if (typeof window !== 'undefined') {
+//       const token = localStorage.getItem('token');
+//       if (!token) {
+//         router.push('/login');
+//       } else {
+//         const userFromStorage = JSON.parse(localStorage.getItem('user'));
+//         if (userFromStorage) {
+//           setUser(userFromStorage);
+//           setEmail(userFromStorage.email || '');
+//         }
+//       }
+//     }
+//   }, []);
+
+//   const [userId, setUserId] = useState(null);
+
+//   useEffect(() => {
+//     if (typeof window !== 'undefined') {
+//       const _id = localStorage.getItem('_id');
+//       if (_id) {
+//         setUserId(_id);
+//       }
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     const fetchQuestions = async () => {
+//       if (!email || !userId) {
+//         console.error('Email or _id is missing');
+//         return;
+//       }
+
+//       try {
+//         const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/fetchQuestions?email=${email}&_id=${userId}`);
+//         if (!res.ok) {
+//           throw new Error(`Failed to fetch questions: ${res.statusText}`);
+//         }
+
+//         const data = await res.json();
+//         setQuestions(data);
+//       } catch (error) {
+//         console.error('Error fetching questions:', error);
+//         alert('An error occurred while fetching the questions.');
+//       }
+//     };
+
+//     if (email && userId) {
+//       fetchQuestions();
+//     }
+//   }, [email, userId]);
+
+//   useEffect(() => {
+//     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+//       const recognitionInstance = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+//       recognitionInstance.lang = 'en-US';
+//       recognitionInstance.interimResults = false;
+//       recognitionInstance.maxAlternatives = 1;
+//       recognitionInstance.continuous = true;
+
+//       recognitionInstance.onresult = (event) => {
+//         const transcript = event.results[event.results.length - 1][0].transcript;
+//         setRecordedText((prevText) => prevText + ' ' + transcript);
+//       };
+
+//       recognitionInstance.onerror = (event) => {
+//         console.error('Speech recognition error', event.error);
+//         setIsListening(false);
+//         setLoading(false);
+//       };
+
+//       recognitionInstance.onend = () => {
+//         setIsListening(false);
+//         setLoading(false);
+//       };
+
+//       setRecognition(recognitionInstance);
+//     } else {
+//       alert('Speech recognition is not supported in this browser.');
+//     }
+//   }, [currentQuestionIndex]);
+
+//   const handleMicClick = () => {
+//     if (recognition) {
+//       if (isListening) {
+//         recognition.stop();
+//         setIsListening(false);
+//         setLoading(false);
+//         const currentQuestion = questions[currentQuestionIndex];
+//         const answer = recordedText;
+//         setAnswers((prevAnswers) => [
+//           ...prevAnswers,
+//           { questionId: currentQuestion._id, answer: answer }
+//         ]);
+//         submitAnswer(currentQuestion._id, answer);
+//         handleNext();
+//       } else {
+//         recognition.start();
+//         setIsListening(true);
+//         setLoading(true);
+
+//         if (micTimeout) {
+//           clearTimeout(micTimeout);
+//           setMicTimeout(null);
+//         }
+//       }
+//     }
+//   };
+
+//   const submitAnswer = async (questionId, answer) => {
+//     try {
+//       const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAnswer`, {
+//         method: 'PUT',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//           _id: userId,
+//           email: user?.email,
+//           questionId: questionId,
+//           answer: answer,
+//         }),
+//       });
+
+//       if (res.ok) {
+//         console.log('Answer submitted successfully');
+//       } else {
+//         const errorData = await res.json();
+//         console.error('Error saving answer:', errorData);
+//         alert(`Error saving data: ${errorData.message}`);
+//       }
+//     } catch (error) {
+//       console.error('Network or other error:', error);
+//       alert('Network or other error occurred');
+//     }
+//   };
+
+//   const speakQuestion = (questionText) => {
+//     setIsSpeaking(true);
+//     const utterance = new SpeechSynthesisUtterance(questionText);
+//     utterance.lang = 'en-US';
+//     utterance.pitch = 1;
+//     utterance.rate = 1;
+
+//     utterance.onend = () => {
+//       setIsSpeaking(false);
+//       // Start the microphone timeout after the question has been spoken
+//       startMicTimeout();
+//     };
+
+//     speechSynthesis.speak(utterance);
+//   };
+
+//   // Start the 20-second microphone timeout when the question is spoken
+//   const startMicTimeout = () => {
+//     // Clear any existing timeout
+//     if (micTimeout) {
+//       clearTimeout(micTimeout);
+//     }
+
+//     const timeout = setTimeout(() => {
+//       if (!isListening && !isAnswerSubmitted) {
+//         speakResponse("You're too late to turn on the mic.");
+//         handleNext();
+//       }
+//     }, 20000); // Timeout of 20 seconds for the user to respond
+
+//     setMicTimeout(timeout);
+//   };
+
+//   useEffect(() => {
+//     if (questions.length > 0) {
+//       const currentQuestion = questions[currentQuestionIndex];
+//       const cleanedQuestionText = currentQuestion.questionText.replace(/(currentQuestion|[,*])/g, "");
+//       speakQuestion(cleanedQuestionText);
+//     }
+//   }, [currentQuestionIndex, questions]);
+
+//   const handleNext = () => {
+//     const currentQuestion = questions[currentQuestionIndex];
+//     const answer = recordedText.trim();
+
+//     const questionWords = currentQuestion.questionText.split(' ').map(word => word.toLowerCase());
+//     const answerWords = answer.split(' ').map(word => word.toLowerCase());
+
+//     const isGoodAnswer = questionWords.some(word => answerWords.includes(word));
+
+//     const responseText = Math.random() > 0.15 
+//       ? goodResponses[Math.floor(Math.random() * goodResponses.length)] 
+//       : badResponses[Math.floor(Math.random() * badResponses.length)];
+
+//     speakResponse(responseText);
+
+//     if (answer) {
+//       setAnswers((prevAnswers) => [
+//         ...prevAnswers,
+//         { questionId: currentQuestion._id, answer: answer }
+//       ]);
+//     }
+
+//     if (currentQuestionIndex === questions.length - 1) {
+//       speakResponse("Your interview has ended.");
+//       setInterviewComplete(true);
+//       setIsModalVisible(true);
+//       localStorage.removeItem("_id");
+//     } else {
+//       setCurrentQuestionIndex(currentQuestionIndex + 1);
+//       setRecordedText('');
+//       setIsAnswerSubmitted(false);
+//     }
+
+//     // Reset the mic timeout after each question
+//     if (micTimeout) {
+//       clearTimeout(micTimeout);
+//       setMicTimeout(null);
+//     }
+//   };
+
+//   const speakResponse = (responseText) => {
+//     const utterance = new SpeechSynthesisUtterance(responseText);
+//     utterance.lang = 'en-US';
+//     utterance.pitch = 1;
+//     utterance.rate = 1;
+
+//     utterance.onend = () => {
+//       setIsSpeaking(false);
+//     };
+
+//     speechSynthesis.speak(utterance);
+//   };
+
+//   const handleModalClose = () => {
+//     setIsModalVisible(false);
+//     router.push('/report');
+//   };
+
+//   const handleBeforeUnload = (event) => {
+//     if (!interviewComplete) {
+//       const message = "Are you sure you want to leave? Your interview will be lost.";
+//       event.returnValue = message;
+//       return message;
+//     }
+//   };
+
+//   const handleExitModalClose = () => {
+//     setIsExitModalVisible(false);
+//   };
+
+//   const handleExitConfirmation = () => {
+//     setIsExitModalVisible(false);
+//     router.push('/report');
+//   };
+
+//   const handlePopState = () => {
+//     if (!interviewComplete) {
+//       setIsExitModalVisible(true);
+//     }
+//   };
+
+//   useEffect(() => {
+//     window.history.pushState(null, document.title);
+//     window.addEventListener('popstate', handlePopState);
+
+//     return () => {
+//       window.removeEventListener('popstate', handlePopState);
+//     };
+//   }, [interviewComplete]);
+
+//   useEffect(() => {
+//     window.addEventListener('beforeunload', handleBeforeUnload);
+
+//     return () => {
+//       window.removeEventListener('beforeunload', handleBeforeUnload);
+//     };
+//   }, [interviewComplete]);
+
+//   return (
+//     <div className="m-auto items-center justify-center min-h-screen bg-cover bg-center " style={{ backgroundImage: "url('/BG.jpg')" }}>
+//       {/* Main content */}
+//       <div className="flex justify-center">
+//         <img id="mainImage" src="main.gif" className="w-60 h-60 text-center" alt="Shakti AI Logo" />
+//       </div>
+//       {questions.length > 0 && (
+//         <div className="p-4 pb-10 rounded-lg m-auto">
+//           <label className="block text-xl font-semibold text-center text-white">
+//             {questions[currentQuestionIndex].questionText}
+//           </label>
+//           <div className="hidden input-box mt-6 relative flex items-center bg-gray-800 rounded-xl px-4 py-2">
+//             <input
+//               type="text"
+//               id="textContent"
+//               className="bg-transparent border-none text-white focus:outline-none w-full"
+//               placeholder="Type Here"
+//               value={recordedText}
+//               onChange={(e) => setRecordedText(e.target.value)}
+//               disabled={isListening || loading || isSpeaking}
+//             />
+//           </div>
+//           <div className="text-center mt-10">
+//             {(isListening || isSpeaking) && (
+//               <div className="sound-waves">
+//                 <div className="wave"></div>
+//                 <div className="wave"></div>
+//                 <div className="wave"></div>
+//               </div>
+//             )}
+//             <button
+//               className={`mic-button absolute text-5xl ${isListening || isSpeaking ? 'text-red-500' : 'text-pink-400'}`}
+//               onClick={handleMicClick}
+//               disabled={isSpeaking}
+//             >
+//               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-10 h-10">
+//                 <path fill="currentColor" d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3zM5 10a1 1 0 1 1 2 0v2a5 5 0 0 0 10 0v-2a1 1 0 1 1 2 0v2a7 7 0 0 1-6 6.93V21a1 1 0 1 1-2 0v-2.07A7 7 0 0 1 5 12v-2z"/>
+//               </svg>
+//             </button>
+//           </div>
+//         </div>
+//       )}
+
+//       <div className="mt-6 flex hidden justify-center">
+//         <button
+//           onClick={handleNext}
+//           disabled={isListening || loading || isSpeaking || currentQuestionIndex === questions.length - 1}
+//           className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+//         >
+//           Next
+//         </button>
+//       </div>
+
+//       {/* Modal for interview end */}
+//       {isModalVisible && (
+//         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+//           <div className="bg-white p-6 rounded-lg max-w-sm">
+//             <h2 className="text-xl font-semibold mb-4">Your interview has ended</h2>
+//             <button
+//               onClick={handleModalClose}
+//               className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none"
+//             >
+//               OK
+//             </button>
+//           </div>
+//         </div>
+//       )}
+
+//       {isExitModalVisible && (
+//         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+//           <div className="bg-white p-6 rounded-lg max-w-sm">
+//             <h2 className="text-xl font-semibold mb-4">Are you sure you want to leave? Your interview will be lost.</h2>
+//             <div className="flex justify-between">
+//               <button
+//                 onClick={handleExitConfirmation}
+//                 className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none"
+//               >
+//                 Yes, Exit
+//               </button>
+//               <button
+//                 onClick={handleExitModalClose}
+//                 className="px-6 py-2 bg-gray-300 text-black font-semibold rounded-lg shadow-md hover:bg-gray-400 focus:outline-none"
+//               >
+//                 No, Stay
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default QuestionForm;
+
+
+
+// import { useState, useEffect } from 'react';
+// import { useRouter } from 'next/router';
+
+// const QuestionForm = () => {
+//   const router = useRouter();
+//   const [questions, setQuestions] = useState([]);
+//   const [email, setEmail] = useState('');
+//   const [user, setUser] = useState(null);
+//   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+//   const [recordedText, setRecordedText] = useState('');
+//   const [isListening, setIsListening] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [recognition, setRecognition] = useState(null);
+//   const [isSpeaking, setIsSpeaking] = useState(false);
+//   const [isModalVisible, setIsModalVisible] = useState(false);
+//   const [answers, setAnswers] = useState([]);
+//   const [interviewComplete, setInterviewComplete] = useState(false);
+//   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
+
+//   const [micTimeout, setMicTimeout] = useState(null);
+//   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
+
+//   const [isIphone, setIsIphone] = useState(false);
+
+//   useEffect(() => {
+//     // Check if the device is an iPhone
+//     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+//       setIsIphone(true);
+//     }
+
+//     // Request microphone (audio) access
+//     const requestPermissions = async () => {
+//       try {
+//         // Requesting audio permission (microphone)
+//         await navigator.mediaDevices.getUserMedia({ audio: true, sound: true });
+//         console.log("Microphone and sound access granted.");
+//       } catch (err) {
+//         console.error("Microphone and sound access denied:", err);
+//       }
+//     };
+
+//     requestPermissions();
+
+//     // Check if there’s a notification stored in localStorage when the component mounts
+//     const checkStorage = () => {
+//       const storedNotification = localStorage.getItem("store");
+//       if (storedNotification) {
+//         setNotification(true);
+//       }
+//     };
+
+//     checkStorage();
+//   }, []);
+
+//   useEffect(() => {
+//     if (typeof window !== 'undefined') {
+//       const token = localStorage.getItem('token');
+//       if (!token) {
+//         router.push('/login');
+//       } else {
+//         const userFromStorage = JSON.parse(localStorage.getItem('user'));
+//         if (userFromStorage) {
+//           setUser(userFromStorage);
+//           setEmail(userFromStorage.email || '');
+//         }
+//       }
+//     }
+//   }, []);
+
+//   const [userId, setUserId] = useState(null);
+
+//   useEffect(() => {
+//     if (typeof window !== 'undefined') {
+//       const _id = localStorage.getItem('_id');
+//       if (_id) {
+//         setUserId(_id);
+//       }
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     const fetchQuestions = async () => {
+//       if (!email || !userId) {
+//         console.error('Email or _id is missing');
+//         return;
+//       }
+
+//       try {
+//         const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/fetchQuestions?email=${email}&_id=${userId}`);
+//         if (!res.ok) {
+//           throw new Error(`Failed to fetch questions: ${res.statusText}`);
+//         }
+
+//         const data = await res.json();
+//         setQuestions(data);
+//       } catch (error) {
+//         console.error('Error fetching questions:', error);
+//         alert('An error occurred while fetching the questions.');
+//       }
+//     };
+
+//     if (email && userId) {
+//       fetchQuestions();
+//     }
+//   }, [email, userId]);
+
+//   useEffect(() => {
+//     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+//       const recognitionInstance = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+//       recognitionInstance.lang = 'en-US';
+//       recognitionInstance.interimResults = false;
+//       recognitionInstance.maxAlternatives = 1;
+//       recognitionInstance.continuous = true;
+
+//       recognitionInstance.onresult = (event) => {
+//         const transcript = event.results[event.results.length - 1][0].transcript;
+//         setRecordedText((prevText) => prevText + ' ' + transcript);
+//       };
+
+//       recognitionInstance.onerror = (event) => {
+//         console.error('Speech recognition error', event.error);
+//         setIsListening(false);
+//         setLoading(false);
+//       };
+
+//       recognitionInstance.onend = () => {
+//         setIsListening(false);
+//         setLoading(false);
+//       };
+
+//       setRecognition(recognitionInstance);
+//     } else {
+//       alert('Speech recognition is not supported in this browser.');
+//     }
+//   }, [currentQuestionIndex]);
+
+//   const handleMicClick = () => {
+//     if (recognition) {
+//       if (isListening) {
+//         recognition.stop();
+//         setIsListening(false);
+//         setLoading(false);
+//         const currentQuestion = questions[currentQuestionIndex];
+//         const answer = recordedText;
+//         setAnswers((prevAnswers) => [
+//           ...prevAnswers,
+//           { questionId: currentQuestion._id, answer: answer }
+//         ]);
+//         submitAnswer(currentQuestion._id, answer);
+//         handleNext();
+//       } else {
+//         recognition.start();
+//         setIsListening(true);
+//         setLoading(true);
+
+//         if (micTimeout) {
+//           clearTimeout(micTimeout);
+//           setMicTimeout(null);
+//         }
+//       }
+//     }
+//   };
+
+//   const submitAnswer = async (questionId, answer) => {
+//     try {
+//       const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAnswer`, {
+//         method: 'PUT',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//           _id: userId,
+//           email: user?.email,
+//           questionId: questionId,
+//           answer: answer,
+//         }),
+//       });
+
+//       if (res.ok) {
+//         console.log('Answer submitted successfully');
+//       } else {
+//         const errorData = await res.json();
+//         console.error('Error saving answer:', errorData);
+//         alert(`Error saving data: ${errorData.message}`);
+//       }
+//     } catch (error) {
+//       console.error('Network or other error:', error);
+//       alert('Network or other error occurred');
+//     }
+//   };
+
+//   const speakQuestion = (questionText) => {
+//     setIsSpeaking(true);
+//     const utterance = new SpeechSynthesisUtterance(questionText);
+//     utterance.lang = 'en-US';
+//     utterance.pitch = 1;
+//     utterance.rate = 1;
+
+//     utterance.onend = () => {
+//       setIsSpeaking(false);
+//     };
+
+//     speechSynthesis.speak(utterance);
+//   };
+
+//   const handleNext = () => {
+//     const currentQuestion = questions[currentQuestionIndex];
+//     const answer = recordedText.trim();
+
+//     setAnswers((prevAnswers) => [
+//       ...prevAnswers,
+//       { questionId: currentQuestion._id, answer: answer }
+//     ]);
+
+//     if (currentQuestionIndex === questions.length - 1) {
+//       setInterviewComplete(true);
+//       setIsModalVisible(true);
+//       localStorage.removeItem("_id");
+//     } else {
+//       setCurrentQuestionIndex(currentQuestionIndex + 1);
+//       setRecordedText('');
+//       setIsAnswerSubmitted(false);
+//     }
+
+//     // Reset the mic timeout after each question
+//     if (micTimeout) {
+//       clearTimeout(micTimeout);
+//       setMicTimeout(null);
+//     }
+//   };
+
+//   const speakResponse = (responseText) => {
+//     const utterance = new SpeechSynthesisUtterance(responseText);
+//     utterance.lang = 'en-US';
+//     utterance.pitch = 1;
+//     utterance.rate = 1;
+
+//     utterance.onend = () => {
+//       setIsSpeaking(false);
+//     };
+
+//     speechSynthesis.speak(utterance);
+//   };
+
+//   return (
+//     <div className="m-auto items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
+//       <div className="flex justify-center">
+//         <img id="mainImage" src="main.gif" className="w-60 h-60 text-center" alt="Shakti AI Logo" />
+//       </div>
+
+//       {questions.length > 0 && (
+//         <div className="p-4 pb-10 rounded-lg m-auto">
+//           <label className="block text-xl font-semibold text-center text-white">
+//             {questions[currentQuestionIndex].questionText}
+//           </label>
+
+//           <div className="text-center mt-10">
+//             {isIphone && (
+//               <button
+//                 onClick={() => speakQuestion(questions[currentQuestionIndex].questionText)}
+//                 className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none"
+//               >
+//                 Speak
+//               </button>
+//             )}
+
+// <div className="hidden input-box mt-6 relative flex items-center bg-gray-800 rounded-xl px-4 py-2">
+//              <input
+//               type="text"
+//               id="textContent"
+//               className="bg-transparent border-none text-white focus:outline-none w-full"
+//               placeholder="Type Here"
+//               value={recordedText}
+//               onChange={(e) => setRecordedText(e.target.value)}
+//               disabled={isListening || loading || isSpeaking}
+//             />
+//           </div>
+//           <div className="text-center mt-10">
+//             {(isListening || isSpeaking) && (
+//               <div className="sound-waves">
+//                 <div className="wave"></div>
+//                 <div className="wave"></div>
+//                 <div className="wave"></div>
+//               </div>
+//             )}
+//             <button
+//               className={`mic-button absolute text-5xl ${isListening || isSpeaking ? 'text-red-500' : 'text-pink-400'}`}
+//               onClick={handleMicClick}
+//               disabled={isSpeaking}
+//             >
+//               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-10 h-10">
+//                 <path fill="currentColor" d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3zM5 10a1 1 0 1 1 2 0v2a5 5 0 0 0 10 0v-2a1 1 0 1 1 2 0v2a7 7 0 0 1-6 6.93V21a1 1 0 1 1-2 0v-2.07A7 7 0 0 1 5 12v-2z"/>
+//               </svg>
+//             </button>
+//           </div>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Modal for interview end */}
+//       {isModalVisible && (
+//         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+//           <div className="bg-white p-6 rounded-lg max-w-sm">
+//             <h2 className="text-xl font-semibold mb-4">Your interview has ended</h2>
+//             <button
+//               onClick={() => router.push('/report')}
+//               className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none"
+//             >
+//               OK
+//             </button>
+//           </div>
+//         </div>
+//       )}
+
+// {isExitModalVisible && (
+//         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+//           <div className="bg-white p-6 rounded-lg max-w-sm">
+//             <h2 className="text-xl font-semibold mb-4">Are you sure you want to leave? Your interview will be lost.</h2>
+//             <div className="flex justify-between">
+//               <button
+//                 onClick={handleExitConfirmation}
+//                 className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none"
+//               >
+//                 Yes, Exit
+//               </button>
+//               <button
+//                 onClick={handleExitModalClose}
+//                 className="px-6 py-2 bg-gray-300 text-black font-semibold rounded-lg shadow-md hover:bg-gray-400 focus:outline-none"
+//               >
+//                 No, Stay
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default QuestionForm;
+
+
+// import { useState, useEffect } from 'react';
+// import { useRouter } from 'next/router';
+
+// const QuestionForm = () => {
+//   const router = useRouter();
+//   const [questions, setQuestions] = useState([]);
+//   const [email, setEmail] = useState('');
+//   const [user, setUser] = useState(null);
+//   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+//   const [recordedText, setRecordedText] = useState('');
+//   const [isListening, setIsListening] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [recognition, setRecognition] = useState(null);
+//   const [isSpeaking, setIsSpeaking] = useState(false);
+//   const [isModalVisible, setIsModalVisible] = useState(false);
+//   const [answers, setAnswers] = useState([]);
+//   const [interviewComplete, setInterviewComplete] = useState(false);
+//   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
+
+//   const [micTimeout, setMicTimeout] = useState(null);
+//   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
+
+//   const [isIphone, setIsIphone] = useState(false);
+
+//   useEffect(() => {
+//     // Check if the device is an iPhone
+//     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+//       setIsIphone(true);
+//     }
+
+//     // Request microphone (audio) access
+//     const requestPermissions = async () => {
+//       try {
+//         // Requesting audio permission (microphone)
+//         await navigator.mediaDevices.getUserMedia({ audio: true, sound: true });
+//         console.log("Microphone and sound access granted.");
+//       } catch (err) {
+//         console.error("Microphone and sound access denied:", err);
+//       }
+//     };
+
+//     requestPermissions();
+
+//     // Check if there’s a notification stored in localStorage when the component mounts
+//     const checkStorage = () => {
+//       const storedNotification = localStorage.getItem("store");
+//       if (storedNotification) {
+//         setNotification(true);
+//       }
+//     };
+
+//     checkStorage();
+//   }, []);
+
+//   useEffect(() => {
+//     if (typeof window !== 'undefined') {
+//       const token = localStorage.getItem('token');
+//       if (!token) {
+//         router.push('/login');
+//       } else {
+//         const userFromStorage = JSON.parse(localStorage.getItem('user'));
+//         if (userFromStorage) {
+//           setUser(userFromStorage);
+//           setEmail(userFromStorage.email || '');
+//         }
+//       }
+//     }
+//   }, []);
+
+//   const [userId, setUserId] = useState(null);
+
+//   useEffect(() => {
+//     if (typeof window !== 'undefined') {
+//       const _id = localStorage.getItem('_id');
+//       if (_id) {
+//         setUserId(_id);
+//       }
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     const fetchQuestions = async () => {
+//       if (!email || !userId) {
+//         console.error('Email or _id is missing');
+//         return;
+//       }
+
+//       try {
+//         const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/fetchQuestions?email=${email}&_id=${userId}`);
+//         if (!res.ok) {
+//           throw new Error(`Failed to fetch questions: ${res.statusText}`);
+//         }
+
+//         const data = await res.json();
+//         setQuestions(data);
+//       } catch (error) {
+//         console.error('Error fetching questions:', error);
+//         alert('An error occurred while fetching the questions.');
+//       }
+//     };
+
+//     if (email && userId) {
+//       fetchQuestions();
+//     }
+//   }, [email, userId]);
+
+//   useEffect(() => {
+//     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+//       const recognitionInstance = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+//       recognitionInstance.lang = 'en-US';
+//       recognitionInstance.interimResults = false;
+//       recognitionInstance.maxAlternatives = 1;
+//       recognitionInstance.continuous = true;
+
+//       recognitionInstance.onresult = (event) => {
+//         const transcript = event.results[event.results.length - 1][0].transcript;
+//         setRecordedText((prevText) => prevText + ' ' + transcript);
+//       };
+
+//       recognitionInstance.onerror = (event) => {
+//         console.error('Speech recognition error', event.error);
+//         setIsListening(false);
+//         setLoading(false);
+//       };
+
+//       recognitionInstance.onend = () => {
+//         setIsListening(false);
+//         setLoading(false);
+//       };
+
+//       setRecognition(recognitionInstance);
+//     } else {
+//       alert('Speech recognition is not supported in this browser.');
+//     }
+//   }, [currentQuestionIndex]);
+
+//   useEffect(() => {
+//     if (questions.length > 0) {
+//       const currentQuestionText = questions[currentQuestionIndex].questionText;
+
+//       if (!isIphone) {
+//         speakQuestion(currentQuestionText); // Speak automatically for non-iOS devices
+//       }
+//     }
+//   }, [currentQuestionIndex, isIphone, questions]);
+
+//   const handleMicClick = () => {
+//     if (recognition) {
+//       if (isListening) {
+//         recognition.stop();
+//         setIsListening(false);
+//         setLoading(false);
+//         const currentQuestion = questions[currentQuestionIndex];
+//         const answer = recordedText;
+//         setAnswers((prevAnswers) => [
+//           ...prevAnswers,
+//           { questionId: currentQuestion._id, answer: answer }
+//         ]);
+//         submitAnswer(currentQuestion._id, answer);
+//         handleNext();
+//       } else {
+//         recognition.start();
+//         setIsListening(true);
+//         setLoading(true);
+
+//         if (micTimeout) {
+//           clearTimeout(micTimeout);
+//           setMicTimeout(null);
+//         }
+//       }
+//     }
+//   };
+
+//   const submitAnswer = async (questionId, answer) => {
+//     try {
+//       const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAnswer`, {
+//         method: 'PUT',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//           _id: userId,
+//           email: user?.email,
+//           questionId: questionId,
+//           answer: answer,
+//         }),
+//       });
+
+//       if (res.ok) {
+//         console.log('Answer submitted successfully');
+//       } else {
+//         const errorData = await res.json();
+//         console.error('Error saving answer:', errorData);
+//         alert(`Error saving data: ${errorData.message}`);
+//       }
+//     } catch (error) {
+//       console.error('Network or other error:', error);
+//       alert('Network or other error occurred');
+//     }
+//   };
+
+//   const speakQuestion = (questionText) => {
+//     setIsSpeaking(true);
+//     const utterance = new SpeechSynthesisUtterance(questionText);
+//     utterance.lang = 'en-US';
+//     utterance.pitch = 1;
+//     utterance.rate = 1;
+
+//     utterance.onend = () => {
+//       setIsSpeaking(false);
+//     };
+
+//     speechSynthesis.speak(utterance);
+//   };
+
+//   const handleNext = () => {
+//     const currentQuestion = questions[currentQuestionIndex];
+//     const answer = recordedText.trim();
+
+//     setAnswers((prevAnswers) => [
+//       ...prevAnswers,
+//       { questionId: currentQuestion._id, answer: answer }
+//     ]);
+
+//     if (currentQuestionIndex === questions.length - 1) {
+//       setInterviewComplete(true);
+//       setIsModalVisible(true);
+//       localStorage.removeItem("_id");
+//     } else {
+//       setCurrentQuestionIndex(currentQuestionIndex + 1);
+//       setRecordedText('');
+//       setIsAnswerSubmitted(false);
+//     }
+
+//     // Reset the mic timeout after each question
+//     if (micTimeout) {
+//       clearTimeout(micTimeout);
+//       setMicTimeout(null);
+//     }
+//   };
+
+//   return (
+//     <div className="m-auto items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
+//       <div className="flex justify-center">
+//         <img id="mainImage" src="main.gif" className="w-60 h-60 text-center" alt="Shakti AI Logo" />
+//       </div>
+
+//       {questions.length > 0 && (
+//         <div className="p-4 pb-10 rounded-lg m-auto">
+//           <label className="block text-xl font-semibold text-center text-white">
+//             {questions[currentQuestionIndex].questionText}
+//           </label>
+
+//           <div className="text-center mt-10">
+//             {isIphone && (
+//               <button
+//                 onClick={() => speakQuestion(questions[currentQuestionIndex].questionText)}
+//                 className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none"
+//               >
+//                 <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGHklEQVR4nO2afWwURRTAF0UiQfnoztztzB1pJEAbIgmaGBXB7/iHHxE1xIQajV/l3ruWBi0BTEwtQSyoaEw0FkzgrhCiMUDwEzUq3mFSg/EfhUBi+ENbJH4ifkD3cMzs7d4d7e7dbru37d31JS9hH3sz837z5vXNzCrKuIxl6ZhIOG4kHE4QjicJg03KvKWTlFoRwrGLchSFakCoBQmHWy6jDH/NOg4LKcNFBgAOJ5RqF6Lh9TLkrVm37IOfq3XNd1AOemHY1wSAcDh2OWXYa4a8Thl21gSAafVt0ymHl/KzDkdUDa6S/1fVACjFSyiDtQWJTs76i9Hoysm5d6oRAI3ibMrghbzjRmbfq7KWxiHvVg+AjokhhncTDh9SDudyCY5hL9HgBqdfVTSAaHTlZJXDXZRjN+HwUz6rwznK4J0Qh1tLtVFRAOrrH7qYsNhiwvApyvF9wuCf8yo4jscJxw0zOMx02+aYBDCtvm16KBqfT3j8TsLhCcJgG+V4iDA4M7hspRy/owzXExa/cjh9BQdg3tJJctNBGfbbOOFSjbV9mDDc7tdAAwNAbDYdRZXBUSPMOb5CGK5QI7Gb6+pap/o9UCcAlMPXslAKhVaER9qHIZRBn7XpUIqIW8fKDyA3Eb9TDe4daT+K346VG4Aaid9IGb5rPmeoFrvP147GOgDzcYJMsGY98Uc4HAv51lGFALBsn5sQOn3rqJIAyARsJUbfOvLyHmF4kHBIlXqvbBEgN1VZ+5++deQkDiE4FAqHFOX4hVKrAPwSNwBCHG8Z1SVARxlAPgnCM751VCEAJlAOz1oFkaa1Ut86GusA1AjcJEvxfCE0wmqQWqUww0VeBuRk8yrpROazVDLzzZc7zs73VgrjbyEWv0cJfjOExwjH/ZTB65ZtavTRuuH2n05mRFb1f1M9mTYhxIQSAA7J4/MRVX822+Gu/KZoWPqfsf/n2E0j8KC82fEOIKupZGZvb0KobpJgWYQyPGastUEHlZY9xGCJ3IDI0x/CsUceZdtDgSPynCHE49fKpOUWgAEhoeeO0YIHwOGAlWzc2fENaScME5ThGsrwU8rwbCEMwvF7ymCdXWTYAZBq/fZQt7goWAAMdmUjAJtK2eXsGs4yHKiLtEYtezj85BQSwdsJw1cL7/myh6K4jzK4zYqKUgBSyUxvaqeYFSSAzeZg24vZpfPyttZMjOudW1x6oXSYMnhTgiqIjK9IBO4oBcBcEqeCXALtZoGx2c5OOOymHLZazhCOexSl4wJXbVPUZAYnDH6xHLrumk1i+4bjRQEUPu9PiilKOUVl2GQC2GVrz4ezTjg+LWfYTbvfviUmpRL6xnRC7/9k699i1eMfiVmzVxlthSNx8cCSneKD7lMlAThFjBtNJfS+dELvkmNRHAFkKy3p4AEH+yk5i5qG9V7Ayo4HD2j/ltPisfvfFnzmCsO5hsa14rWOw2UDkNOE3uUMgLU0WgWPG7sHAP1OA9r1/A9i4dVduWiINe0tL4Ck7vyliTziNtf6Xw7208MCUGJQB7YNiLaH3xPazJbz6onyAMgUT6bSSdlZ4Xl/oV1VH7nUbwCWdnceFbPnrh5dALRENajyWEO5AEjd/fLJXILcuu6Y2NJ51Pj3nIY1AQHg3qpBvwFIXb5sz5Dy+ooFnTtSiYFFAUQA2FaDsrIzE+E+u48a/AQgc0Lzsj1ibsNaMadhtQHE+lAyCACb7apBGfryALJga9wvYREGzTNmNU/zC8DB5MBCu5l2asvp/ZEsgXa7alBKnbZ8ntz45Mrg/IbnZ8pxgR8AnH7j1T5sAKpDNTj0vZZGVcPlhEPaBOF4HO7HTHu1F4sMpahjDtWgk+RqBAZnvADwy1Gv9pIA6iKtUavslV92lQIgP48xI6avKgBIIQw/9no0Rjg8p1QLAMaaCeWww/gQoeRBKfTJc8Vi3/NXHAC/ZRxAcjwCxGAIxp+onoHF5Qp1p/bHzBJIO6hfANz0EZh4GZzXyCg20xUJIO0xMkbSVmDix6CHM9NVBSDtoyrjAAKWdK1HQEpeSowBx41cktR/DByA3cXI6KnuuGkrm8jrKAlhNCPB1dWYUkPyP56IzZ4O9YzjAAAAAElFTkSuQmCC" alt="external-speaker-neighborhood-watch-inipagistudio-lineal-color-inipagistudio" />
+//               </button>
+//             )}
+
+//             <div className="hidden input-box mt-6 relative flex items-center bg-gray-800 rounded-xl px-4 py-2">
+//               <input
+//                 type="text"
+//                 id="textContent"
+//                 className="bg-transparent border-none text-white focus:outline-none w-full"
+//                 placeholder="Type Here"
+//                 value={recordedText}
+//                 onChange={(e) => setRecordedText(e.target.value)}
+//                 disabled={isListening || loading || isSpeaking}
+//               />
+//             </div>
+
+//             <div className="text-center mt-10">
+//               {(isListening || isSpeaking) && (
+//                 <div className="sound-waves">
+//                   <div className="wave"></div>
+//                   <div className="wave"></div>
+//                   <div className="wave"></div>
+//                 </div>
+//               )}
+//               <button
+//                 className={`mic-button absolute text-5xl ${isListening || isSpeaking ? 'text-red-500' : 'text-pink-400'}`}
+//                 onClick={handleMicClick}
+//                 disabled={isSpeaking}
+//               >
+//                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-10 h-10">
+//                   <path fill="currentColor" d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3zM5 10a1 1 0 1 1 2 0v2a5 5 0 0 0 10 0v-2a1 1 0 1 1 2 0v2a7 7 0 0 1-6 6.93V21a1 1 0 1 1-2 0v-2.07A7 7 0 0 1 5 12v-2z"/>
+//                 </svg>
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//       {/* Modal for interview end */}
+//       {isModalVisible && (
+//         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+//           <div className="bg-white p-6 rounded-lg max-w-sm">
+//             <h2 className="text-xl font-semibold mb-4">Your interview has ended</h2>
+//             <button
+//               onClick={() => router.push('/report')}
+//               className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none"
+//             >
+//               OK
+//             </button>
+//           </div>
+//         </div>
+//       )}
+
+//       {isExitModalVisible && (
+//         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+//           <div className="bg-white p-6 rounded-lg max-w-sm">
+//             <h2 className="text-xl font-semibold mb-4">Are you sure you want to leave? Your interview will be lost.</h2>
+//             <div className="flex justify-between">
+//               <button
+//                 onClick={handleExitConfirmation}
+//                 className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none"
+//               >
+//                 Yes, Exit
+//               </button>
+//               <button
+//                 onClick={handleExitModalClose}
+//                 className="px-6 py-2 bg-gray-300 text-black font-semibold rounded-lg shadow-md hover:bg-gray-400 focus:outline-none"
+//               >
+//                 No, Stay
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default QuestionForm;
+
+
+
+
+// import { useState, useEffect } from 'react';
+// import { useRouter } from 'next/router';
+
+// import { FcSpeaker } from "react-icons/fc";
+
+
+// const QuestionForm = () => {
+//   const router = useRouter();
+//   const [questions, setQuestions] = useState([]);
+//   const [email, setEmail] = useState('');
+//   const [user, setUser] = useState(null);
+//   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+//   const [recordedText, setRecordedText] = useState('');
+//   const [isListening, setIsListening] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [recognition, setRecognition] = useState(null);
+//   const [isSpeaking, setIsSpeaking] = useState(false);
+//   const [isModalVisible, setIsModalVisible] = useState(false);
+//   const [answers, setAnswers] = useState([]);
+//   const [interviewComplete, setInterviewComplete] = useState(false);
+//   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
+//   const [micTimeout, setMicTimeout] = useState(null);  // timer to check mic inactivity
+//   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
+//   const [isIphone, setIsIphone] = useState(false);
+
+//   const [userId, setUserId] = useState(null);
+//   useEffect(() => {
+//     // Check if the device is an iPhone
+//     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+//       setIsIphone(true);
+//     }
+
+//     // Request microphone (audio) access
+//     const requestPermissions = async () => {
+//       try {
+//         await navigator.mediaDevices.getUserMedia({ audio: true, sound: true });
+//         console.log("Microphone and sound access granted.");
+//       } catch (err) {
+//         console.error("Microphone and sound access denied:", err);
+//       }
+//     };
+
+//     requestPermissions();
+
+//     // Check if there’s a notification stored in localStorage when the component mounts
+//     const checkStorage = () => {
+//       const storedNotification = localStorage.getItem("store");
+//       if (storedNotification) {
+//         setNotification(true);
+//       }
+//     };
+
+//     checkStorage();
+//   }, []);
+
+//   useEffect(() => {
+//     if (typeof window !== 'undefined') {
+//       const token = localStorage.getItem('token');
+//       if (!token) {
+//         router.push('/login');
+//       } else {
+//         const userFromStorage = JSON.parse(localStorage.getItem('user'));
+//         if (userFromStorage) {
+//           setUser(userFromStorage);
+//           setEmail(userFromStorage.email || '');
+//         }
+//       }
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     const fetchQuestions = async () => {
+//       if (!email || !userId) {
+//         console.error('Email or _id is missing');
+//         return;
+//       }
+
+//       try {
+//         const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/fetchQuestions?email=${email}&_id=${userId}`);
+//         if (!res.ok) {
+//           throw new Error(`Failed to fetch questions: ${res.statusText}`);
+//         }
+
+//         const data = await res.json();
+//         setQuestions(data);
+//       } catch (error) {
+//         console.error('Error fetching questions:', error);
+//         alert('An error occurred while fetching the questions.');
+//       }
+//     };
+
+//     if (email && userId) {
+//       fetchQuestions();
+//     }
+//   }, [email, userId]);
+
+
+//   useEffect(() => {
+//     if (typeof window !== 'undefined') {
+//       const _id = localStorage.getItem('_id');
+//       if (_id) {
+//         setUserId(_id);
+//       }
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+//       const recognitionInstance = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+//       recognitionInstance.lang = 'en-US';
+//       recognitionInstance.interimResults = false;
+//       recognitionInstance.maxAlternatives = 1;
+//       recognitionInstance.continuous = true;
+
+//       recognitionInstance.onresult = (event) => {
+//         const transcript = event.results[event.results.length - 1][0].transcript;
+//         setRecordedText((prevText) => prevText + ' ' + transcript);
+//       };
+
+//       recognitionInstance.onerror = (event) => {
+//         console.error('Speech recognition error', event.error);
+//         setIsListening(false);
+//         setLoading(false);
+//       };
+
+//       recognitionInstance.onend = () => {
+//         setIsListening(false);
+//         setLoading(false);
+//       };
+
+//       setRecognition(recognitionInstance);
+//     } else {
+//       alert('Speech recognition is not supported in this browser.');
+//     }
+//   }, [currentQuestionIndex]);
+
+//   useEffect(() => {
+//     if (questions.length > 0) {
+//       const currentQuestionText = questions[currentQuestionIndex].questionText;
+
+//       if (!isIphone) {
+//         speakQuestion(currentQuestionText); // Speak automatically for non-iOS devices
+//       }
+
+//       // Start timer for 20 seconds
+//       if (micTimeout) {
+//         clearTimeout(micTimeout);
+//       }
+//       setMicTimeout(setTimeout(handleNext, 20000)); // Move to next question after 20 seconds
+//     }
+//   }, [currentQuestionIndex, isIphone, questions]);
+
+//   const speakQuestion = (questionText) => {
+//     setIsSpeaking(true);
+//     const utterance = new SpeechSynthesisUtterance(questionText);
+//     utterance.lang = 'en-US';
+//     utterance.pitch = 1;
+//     utterance.rate = 1;
+
+//     utterance.onend = () => {
+//       setIsSpeaking(false);
+//     };
+
+//     speechSynthesis.speak(utterance);
+//   };
+
+//   const handleMicClick = () => {
+//     if (recognition) {
+//       if (isListening) {
+//         recognition.stop();
+//         setIsListening(false);
+//         setLoading(false);
+//         const currentQuestion = questions[currentQuestionIndex];
+//         const answer = recordedText;
+//         setAnswers((prevAnswers) => [
+//           ...prevAnswers,
+//           { questionId: currentQuestion._id, answer: answer }
+//         ]);
+//         submitAnswer(currentQuestion._id, answer);
+//         handleNext();
+//       } else {
+//         recognition.start();
+//         setIsListening(true);
+//         setLoading(true);
+
+//         // Reset the timer when the mic is activated
+//         if (micTimeout) {
+//           clearTimeout(micTimeout);
+//         }
+//       }
+//     }
+//   };
+
+//   const submitAnswer = async (questionId, answer) => {
+//     try {
+//       const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAnswer`, {
+//         method: 'PUT',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//           _id: userId,
+//           email: user?.email,
+//           questionId: questionId,
+//           answer: answer,
+//         }),
+//       });
+
+//       if (res.ok) {
+//         console.log('Answer submitted successfully');
+//       } else {
+//         const errorData = await res.json();
+//         console.error('Error saving answer:', errorData);
+//         alert(`Error saving data: ${errorData.message}`);
+//       }
+//     } catch (error) {
+//       console.error('Network or other error:', error);
+//       alert('Network or other error occurred');
+//     }
+//   };
+
+//   const handleNext = () => {
+//     const currentQuestion = questions[currentQuestionIndex];
+//     const answer = recordedText.trim();
+
+//     setAnswers((prevAnswers) => [
+//       ...prevAnswers,
+//       { questionId: currentQuestion._id, answer: answer }
+//     ]);
+
+//     if (currentQuestionIndex === questions.length - 1) {
+//       setInterviewComplete(true);
+//       setIsModalVisible(true);
+//       localStorage.removeItem("_id");
+//     } else {
+//       setCurrentQuestionIndex(currentQuestionIndex + 1);
+//       setRecordedText('');
+//       setIsAnswerSubmitted(false);
+//     }
+
+//     // Reset the mic timeout after each question
+//     if (micTimeout) {
+//       clearTimeout(micTimeout);
+//       setMicTimeout(null);
+//     }
+//   };
+
+
+//   return (
+//     <div className="m-auto items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
+//       <div className="flex justify-center">
+//         <img id="mainImage" src="main.gif" className="w-60 h-60 text-center" alt="Shakti AI Logo" />
+
+//       </div>
+
+//       {questions.length > 0 && (
+//         <div className="p-4 pb-10 rounded-lg m-auto">
+//           <label className="block text-xl font-semibold text-center text-white">
+//             {questions[currentQuestionIndex].questionText}
+
+//           </label>
+
+
+//           <div className="text-center mt-10">
+
+
+//             <div className="hidden input-box mt-6 relative flex items-center bg-gray-800 rounded-xl px-4 py-2">
+//               <input
+//                 type="text"
+//                 id="textContent"
+//                 className="bg-transparent border-none text-white focus:outline-none w-full"
+//                 placeholder="Type Here"
+//                 value={recordedText}
+//                 onChange={(e) => setRecordedText(e.target.value)}
+//                 disabled={isListening || loading || isSpeaking}
+//               />
+//             </div>
+
+//             <div className="text-center mt-10">
+//               {(isListening || isSpeaking) && (
+//                 <div className="sound-waves">
+//                   <div className="wave"></div>
+//                   <div className="wave"></div>
+//                   <div className="wave"></div>
+//                 </div>
+//               )}
+//               {isIphone && (
+//                 <button
+//                   onClick={() => speakQuestion(questions[currentQuestionIndex].questionText)}
+//                   className="px-6 py-3 text-5xl text-white font-semibold rounded-lg shadow-md  focus:outline-none"
+//                 >
+//                   <FcSpeaker />
+//                 </button>
+//               )}
+
+
+//             </div>
+//             <div className="flex justify-center  ">
+//               <button
+//                 className={`mic-button absolute text-5xl ${isListening || isSpeaking ? 'text-red-500' : 'text-pink-400'}`}
+//                 onClick={handleMicClick}
+//                 disabled={isSpeaking}
+//               >
+//                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-10 h-10">
+//                   <path fill="currentColor" d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3zM5 10a1 1 0 1 1 2 0v2a5 5 0 0 0 10 0v-2a1 1 0 1 1 2 0v2a7 7 0 0 1-6 6.93V21a1 1 0 1 1-2 0v-2.07A7 7 0 0 1 5 12v-2z" />
+//                 </svg>
+//               </button>
+//             </div>
+
+//           </div>
+//         </div>
+//       )}
+//       {/* Modal for interview end */}
+//       {isModalVisible && (
+//         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+//           <div className="bg-white p-6 rounded-lg max-w-sm">
+//             <h2 className="text-xl font-semibold mb-4">Your interview has ended</h2>
+//             <button
+//               onClick={() => router.push('/report')}
+//               className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none"
+//             >
+//               OK
+//             </button>
+//           </div>
+//         </div>
+//       )}
+
+//       {isExitModalVisible && (
+//         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+//           <div className="bg-white p-6 rounded-lg max-w-sm">
+//             <h2 className="text-xl font-semibold mb-4">Are you sure you want to leave? Your interview will be lost.</h2>
+//             <div className="flex justify-between">
+//               <button
+//                 onClick={handleExitConfirmation}
+//                 className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none"
+//               >
+//                 Yes, Exit
+//               </button>
+//               <button
+//                 onClick={handleExitModalClose}
+//                 className="px-6 py-2 bg-gray-300 text-black font-semibold rounded-lg shadow-md hover:bg-gray-400 focus:outline-none"
+//               >
+//                 No, Stay
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default QuestionForm;
+
+
+
+// import { useState, useEffect } from 'react';
+// import { useRouter } from 'next/router';
+// import { FcSpeaker } from 'react-icons/fc';
+
+// const QuestionForm = () => {
+//   const router = useRouter();
+//   const [questions, setQuestions] = useState([]);
+//   const [email, setEmail] = useState('');
+//   const [user, setUser] = useState(null);
+//   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+//   const [recordedText, setRecordedText] = useState('');
+//   const [isListening, setIsListening] = useState(false);
+//   const [loading, setLoading] = useState(false);
+//   const [recognition, setRecognition] = useState(null);
+//   const [isSpeaking, setIsSpeaking] = useState(false);
+//   const [isModalVisible, setIsModalVisible] = useState(false);
+//   const [answers, setAnswers] = useState([]);
+//   const [interviewComplete, setInterviewComplete] = useState(false);
+//   const [isIphone, setIsIphone] = useState(false);
+//   const [userId, setUserId] = useState(null);
+
+//   const [isRecognizing, setIsRecognizing] = useState(false); // Track if recognition is in progress
+//   const [noSpeechTimer, setNoSpeechTimer] = useState(null); // Timer to restart recognition after no speech
+//   const [recognitionTimer, setRecognitionTimer] = useState(null); // Timer for limiting recognition time (max 15 minutes)
+
+//   useEffect(() => {
+//     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+//       setIsIphone(true);
+//     }
+
+//     const requestPermissions = async () => {
+//       try {
+//         await navigator.mediaDevices.getUserMedia({ audio: true });
+//         console.log('Microphone and sound access granted.');
+//       } catch (err) {
+//         console.error('Microphone access denied:', err);
+//       }
+//     };
+
+//     requestPermissions();
+//   }, []);
+
+//   useEffect(() => {
+//     if (typeof window !== 'undefined') {
+//       const token = localStorage.getItem('token');
+//       if (!token) {
+//         router.push('/login');
+//       } else {
+//         const userFromStorage = JSON.parse(localStorage.getItem('user'));
+//         if (userFromStorage) {
+//           setUser(userFromStorage);
+//           setEmail(userFromStorage.email || '');
+//         }
+//       }
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     const fetchQuestions = async () => {
+//       if (!email || !userId) {
+//         console.error('Email or _id is missing');
+//         return;
+//       }
+
+//       try {
+//         const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/fetchQuestions?email=${email}&_id=${userId}`);
+//         if (!res.ok) {
+//           throw new Error(`Failed to fetch questions: ${res.statusText}`);
+//         }
+//         const data = await res.json();
+//         setQuestions(data);
+//       } catch (error) {
+//         console.error('Error fetching questions:', error);
+//         alert('An error occurred while fetching the questions.');
+//       }
+//     };
+
+//     if (email && userId) {
+//       fetchQuestions();
+//     }
+//   }, [email, userId]);
+
+//   useEffect(() => {
+//     if (typeof window !== 'undefined') {
+//       const _id = localStorage.getItem('_id');
+//       if (_id) {
+//         setUserId(_id);
+//       }
+//     }
+//   }, []);
+
+ 
+//   useEffect(() => {
+//     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+//       const recognitionInstance = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+//       recognitionInstance.lang = 'en-US';
+//       recognitionInstance.interimResults = true;  // Enable interim results for real-time feedback
+//       recognitionInstance.maxAlternatives = 1;
+//       recognitionInstance.continuous = true;  // Keep recognizing continuously as long as the mic is on
+
+//       // Handler when results are returned from speech recognition
+//       recognitionInstance.onresult = (event) => {
+//         const transcript = event.results[event.results.length - 1][0].transcript;
+//         setRecordedText((prevText) => prevText + ' ' + transcript);
+
+//         // Restart recognition if it ends and the mic is still on
+//         if (!recognitionInstance.running && isListening) {
+//           recognitionInstance.start();
+//         }
+//       };
+
+//       // Handler for errors
+//       recognitionInstance.onerror = (event) => {
+//         console.error('Speech recognition error:', event.error);
+//         if (event.error === 'no-speech') {
+//           console.log('No speech detected, continuing...');
+//         }
+
+//         // Restart recognition if there's an error
+//         if (event.error !== 'aborted' && isListening) {
+//           recognitionInstance.start();
+//         }
+//       };
+
+//       setRecognition(recognitionInstance);
+//     } else {
+//       alert('Speech recognition is not supported in this browser.');
+//     }
+//   }, []);
+
+//   const handleMicClick = () => {
+//     if (recognition) {
+//       if (isListening) {
+//         recognition.stop();  // Stop recognition
+//         setIsListening(false);  // Update mic state to off
+//         submitAnswer(recordedText); // Submit the answer when mic is stopped
+//       } else {
+//         recognition.start();  // Start recognition
+//         setIsListening(true);  // Update mic state to on
+//         console.log('Microphone started...');
+//       }
+//     }
+//   };
+
+//   const submitAnswer = async (questionId, answer) => {
+//     console.log('Submitting Answer:', answer);
+//     try {
+      
+      
+//       const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAnswer`, {
+//         method: 'PUT',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//           _id: userId,
+//           email: user?.email,
+//           questionId: questionId,
+//           answer: answer,
+//         }),
+//       });
+
+//       if (res.ok) {
+//         console.log('Answer submitted successfully');
+//       } else {
+//         const errorData = await res.json();
+//         console.error('Error saving answer:', errorData);
+//         alert(`Error saving data: ${errorData.message}`);
+//       }
+//     } catch (error) {
+//       console.error('Network or other error:', error);
+//       alert('Network or other error occurred');
+//     }
+//   };
+
+//   const handleNext = () => {
+//     const currentQuestion = questions[currentQuestionIndex];
+//     const answer = recordedText.trim();
+
+//     setAnswers((prevAnswers) => [
+//       ...prevAnswers,
+//       { questionId: currentQuestion._id, answer: answer },
+//     ]);
+
+//     if (currentQuestionIndex === questions.length - 1) {
+//       setInterviewComplete(true);
+//       setIsModalVisible(true);
+//       localStorage.removeItem('_id');
+//     } else {
+//       setCurrentQuestionIndex(currentQuestionIndex + 1);
+//       setRecordedText('');
+//     }
+//   };
+
+//   const speakQuestion = (questionText) => {
+//     setIsSpeaking(true);
+//     const utterance = new SpeechSynthesisUtterance(questionText);
+//     utterance.lang = 'en-US';
+//     utterance.pitch = 1;
+//     utterance.rate = 1;
+
+//     utterance.onend = () => {
+//       setIsSpeaking(false);
+//     };
+
+//     speechSynthesis.speak(utterance);
+//   };
+
+//   return (
+//     <div
+//       className="m-auto items-center justify-center min-h-screen bg-cover bg-center"
+//       style={{ backgroundImage: 'url("/BG.jpg")' }}
+//     >
+//       <div className="flex justify-center">
+//         <img
+//           id="mainImage"
+//           src="main.gif"
+//           className="w-60 h-60 text-center"
+//           alt="Shakti AI Logo"
+//         />
+//       </div>
+
+//       {questions.length > 0 && (
+//         <div className="p-4 pb-10 rounded-lg m-auto">
+//           <label className="block text-xl font-semibold text-center text-white">
+//             {questions[currentQuestionIndex].questionText}
+//           </label>
+
+//           <div className="text-center mt-10">
+//             {(isListening || isSpeaking) && (
+//               <div className="sound-waves">
+//                 <div className="wave"></div>
+//                 <div className="wave"></div>
+//                 <div className="wave"></div>
+//               </div>
+//             )}
+//             {isIphone && (
+//               <button
+//                 onClick={() => speakQuestion(questions[currentQuestionIndex].questionText)}
+//                 className="px-6 py-3 text-5xl text-white font-semibold rounded-lg shadow-md focus:outline-none"
+//               >
+//                 <FcSpeaker />
+//               </button>
+//             )}
+//             <div className="flex justify-center">
+//             <button
+//                 className={`mic-button absolute text-5xl ${isListening || isSpeaking ? 'text-red-500' : 'text-pink-400'}`}
+//                 onClick={handleMicClick}
+//                 disabled={isSpeaking}
+//               >
+//                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-10 h-10">
+//                   <path fill="currentColor" d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3zM5 10a1 1 0 1 1 2 0v2a5 5 0 0 0 10 0v-2a1 1 0 1 1 2 0v2a7 7 0 0 1-6 6.93V21a1 1 0 1 1-2 0v-2.07A7 7 0 0 1 5 12v-2z" />
+//                 </svg>
+//               </button>
+
+//             </div>
+//           </div>
+//         </div>
+//       )}
+
+//       {isModalVisible && (
+//         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+//           <div className="bg-white p-6 rounded-lg max-w-sm">
+//             <h2 className="text-xl font-semibold mb-4">Your interview has ended</h2>
+//             <button
+//               onClick={() => router.push('/dashboard')}
+//               className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none"
+//             >
+//               OK
+//             </button>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default QuestionForm;
+
+
+
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { FcSpeaker } from 'react-icons/fc'; 
 
 const QuestionForm = () => {
   const router = useRouter();
@@ -6341,11 +8128,19 @@ const QuestionForm = () => {
   const [answers, setAnswers] = useState([]);
   const [interviewComplete, setInterviewComplete] = useState(false);
   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
+  const [isIphone, setIsIphone] = useState(false);
 
   const [micTimeout, setMicTimeout] = useState(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
 
+ 
+        // Check if the device is an iPhone
+       
+
   useEffect(() => {
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      setIsIphone(true);
+    }
     // Request microphone (audio) access
     const requestPermissions = async () => {
       try {
@@ -6468,7 +8263,7 @@ const QuestionForm = () => {
     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
       const recognitionInstance = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognitionInstance.lang = 'en-US';
-      recognitionInstance.interimResults = false;
+      recognitionInstance.interimResults = true;
       recognitionInstance.maxAlternatives = 1;
       recognitionInstance.continuous = true;
 
@@ -6688,6 +8483,8 @@ const QuestionForm = () => {
     };
   }, [interviewComplete]);
 
+
+
   return (
     <div className="m-auto items-center justify-center min-h-screen bg-cover bg-center " style={{ backgroundImage: "url('/BG.jpg')" }}>
       {/* Main content */}
@@ -6699,7 +8496,7 @@ const QuestionForm = () => {
           <label className="block text-xl font-semibold text-center text-white">
             {questions[currentQuestionIndex].questionText}
           </label>
-          <div className="hidden input-box mt-6 relative flex items-center bg-gray-800 rounded-xl px-4 py-2">
+          <div className=" hidden input-box mt-6 relative flex items-center bg-gray-800 rounded-xl px-4 py-2">
             <input
               type="text"
               id="textContent"
@@ -6718,15 +8515,26 @@ const QuestionForm = () => {
                 <div className="wave"></div>
               </div>
             )}
+             {isIphone && (
+              <button
+                onClick={() => speakQuestion(questions[currentQuestionIndex].questionText)}
+                className="px-6 py-3 text-5xl text-white font-semibold rounded-lg shadow-md focus:outline-none"
+              >
+                <FcSpeaker />
+              </button>
+            )}
+            <div className="flex justify-center">
             <button
-              className={`mic-button absolute text-5xl ${isListening || isSpeaking ? 'text-red-500' : 'text-pink-400'}`}
-              onClick={handleMicClick}
-              disabled={isSpeaking}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-10 h-10">
-                <path fill="currentColor" d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3zM5 10a1 1 0 1 1 2 0v2a5 5 0 0 0 10 0v-2a1 1 0 1 1 2 0v2a7 7 0 0 1-6 6.93V21a1 1 0 1 1-2 0v-2.07A7 7 0 0 1 5 12v-2z"/>
-              </svg>
-            </button>
+                className={`mic-button absolute text-5xl ${isListening || isSpeaking ? 'text-red-500' : 'text-pink-400'}`}
+                onClick={handleMicClick}
+                disabled={isSpeaking}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-10 h-10">
+                  <path fill="currentColor" d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3zM5 10a1 1 0 1 1 2 0v2a5 5 0 0 0 10 0v-2a1 1 0 1 1 2 0v2a7 7 0 0 1-6 6.93V21a1 1 0 1 1-2 0v-2.07A7 7 0 0 1 5 12v-2z" />
+                </svg>
+              </button>
+
+            </div>
           </div>
         </div>
       )}
