@@ -10,8 +10,7 @@
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.3",
-    "@react-three/drei": "^10.0.2",
-    "@react-three/fiber": "^9.0.4",
+    
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "classnames": "^2.5.1",
@@ -26,9 +25,9 @@
     "jspdf": "^3.0.0",
     "mongoose": "^8.9.2",
     "next": "^14.2.22",
-    "react": "^19",
+    "react": "^18.3.1",
     "react-circular-progressbar": "^2.1.0",
-    "react-dom": "^19",
+    "react-dom": "^18.3.1",
     "react-icons": "^5.4.0",
     "react-modal": "^3.16.3",
     "react-toastify": "^11.0.2",
