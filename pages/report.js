@@ -305,13 +305,12 @@ function Report() {
     const regexWithoverallParentheses = new RegExp(`${category}:\\s*\\((\\d+\\/50)\\)`, 'i');
     const scoreStarOverallRegex = new RegExp(`${category}:\\*\\*\\s*(\\d+/50)`, 'i');
     const scoreStarOverallwithoutRegex =new RegExp( /^(\d+)\/50$/);
-    const scoreStarOverallwithoutRegexx = new RegExp("^(?:[1-9]|[1-4][0-9]|50)/50$");
+    
 
     const scoreMatch = reportAnalysis.match(scoreoverallRegex)
       || reportAnalysis.match(regexWithoverallParentheses)
       || reportAnalysis.match(scoreStarOverallRegex)
-      || reportAnalysis.match(scoreStarOverallwithoutRegex)
-      || reportAnalysis.match(scoreStarOverallwithoutRegexx);
+      || reportAnalysis.match(scoreStarOverallwithoutRegex);
 
     // If a match is found, extract the score
     const overallScore = scoreMatch ? parseInt(scoreMatch[1].split('/')[0], 10) : 0; // Extract the number before /50
