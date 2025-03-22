@@ -304,7 +304,7 @@ function Report() {
     const scoreoverallRegex = new RegExp(`${category}:\\s*(\\d+\\/50)`, 'i');
     const regexWithoverallParentheses = new RegExp(`${category}:\\s*\\((\\d+\\/50)\\)`, 'i');
     const scoreStarOverallRegex = new RegExp(`${category}:\\*\\*\\s*(\\d+/50)`, 'i');
-    const scoreStarOverallwithoutRegex =new RegExp( /^(\d+)\/50$/);
+    const scoreStarOverallwithoutRegex =new RegExp(`/^(\d+)\/50$/`,'i');
     
 
     const scoreMatch = reportAnalysis.match(scoreoverallRegex)
