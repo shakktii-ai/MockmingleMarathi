@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import 'react-circular-progressbar/dist/styles.css';
-import Chart from '@/components/chart';
+
 
 export default function Index() {
   // State to hold the active test count, loading state, and total users
@@ -82,8 +82,7 @@ export default function Index() {
 
   return (
     <>
-      {/* Main Dashboard */}
-      <Chart />
+     
       <main className="flex-1 p-8 bg-[#6c57ec] bg-opacity-20 m-20 rounded-xl">
         <div className="bg-white text-center flex items-center justify-around gap-4 p-4 rounded-lg">
           <div>
