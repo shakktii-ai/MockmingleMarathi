@@ -266,6 +266,9 @@
 
 // export default Report;
 
+
+
+
 import React, { useState, useEffect } from 'react';
 import { IoIosArrowBack } from "react-icons/io";
 import { useRouter } from 'next/router';
@@ -277,7 +280,6 @@ function Report() {
   const [user, setUser] = useState('');
   const [email, setEmail] = useState('');
   const [jobRole, setJobRole] = useState('');
-  const [overallScore, setOverallScore] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [jobRoleId, setJobRoleId] = useState(null);
@@ -314,9 +316,9 @@ function Report() {
       || reportAnalysis.match(scoreStarOverallwithoutRegex);
 
     // If a match is found, extract the score
-    // const overallScore = scoreMatch ? parseInt(scoreMatch[1].split('/')[0], 10) : 0; // Extract the number before /50
+    const overallScore = scoreMatch ? parseInt(scoreMatch[1].split('/')[0], 10) : 0; // Extract the number before /50
 
-    const overallScore = scoreMatch && scoreMatch[1] ? parseInt(scoreMatch[1], 10) : 0;
+    // const overallScore = scoreMatch && scoreMatch[1] ? parseInt(scoreMatch[1], 10) : 0;
     return { overallScore }; 
   };
 
@@ -415,7 +417,7 @@ function Report() {
         console.log("Model returned this report", analysisData);
 
         // Extract overallScore from report data using the extractScoreAndFeedback function
-        const { score: overallScore } = extractScoreAndFeedback(data.data.reportAnalysis, "Overall Score"||"Overall");
+        const { overallScore } = extractScoreAndFeedback(data.data.reportAnalysis, "Overall Score"||"Overall");
 
         // Store the extracted overall score
         await storeScore(data.data.role, data.data.email, overallScore);
