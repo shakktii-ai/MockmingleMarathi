@@ -299,7 +299,8 @@ function Report() {
 
   const extractScoreAndFeedback = (reportAnalysis, category) => {
     if (!reportAnalysis) {
-      return { score: 0, feedback: 'No data available.' };
+      console.log("reportAnalysis is null");
+      
     }
 
     // Match scores like "Category: 25/50" or "Category: (25/50)"
@@ -314,6 +315,7 @@ function Report() {
       || reportAnalysis.match(regexWithoverallParentheses)
       || reportAnalysis.match(scoreStarOverallRegex)
       || reportAnalysis.match(scoreStarOverallwithoutRegex);
+console.log("match Score",scoreMatch);
 
     // If a match is found, extract the score
     const overallScore = scoreMatch ? parseInt(scoreMatch[1].split('/')[0], 10) : 0; // Extract the number before /50
@@ -417,11 +419,11 @@ function Report() {
         console.log("Model returned this report", analysisData);
 
         // Extract overallScore from report data using the extractScoreAndFeedback function
-        const { overallScore } = extractScoreAndFeedback(data.data.reportAnalysis, "Overall Score"||"Overall");
+        const { overallScore } = extractScoreAndFeedback(analysisData, "Overall Score"||"Overall");
 
+        console.log("Extracted overall score:", overallScore);
         // Store the extracted overall score
         await storeScore(data.data.role, data.data.email, overallScore);
-
         // Store the report analysis
         await storeReport(data.data.role, data.data.email, analysisData);
 
