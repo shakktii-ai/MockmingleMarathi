@@ -314,8 +314,9 @@ function Report() {
       || reportAnalysis.match(scoreStarOverallwithoutRegex);
 
     // If a match is found, extract the score
-    const overallScore = scoreMatch ? parseInt(scoreMatch[1].split('/')[0], 10) : 0; // Extract the number before /50
+    // const overallScore = scoreMatch ? parseInt(scoreMatch[1].split('/')[0], 10) : 0; // Extract the number before /50
 
+    const overallScore = scoreMatch && scoreMatch[1] ? parseInt(scoreMatch[1], 10) : 0;
     return { score: overallScore, feedback: 'No feedback available.' }; // Returning the score along with feedback
   };
 
