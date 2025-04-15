@@ -154,66 +154,59 @@ const QuestionForm = () => {
     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
       const recognitionInstance = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognitionInstance.lang = 'en-US';
-      recognitionInstance.interimResults = true; // Enable interim results to see what user is saying in real-time
+      recognitionInstance.interimResults = true;
       recognitionInstance.maxAlternatives = 1;
-      recognitionInstance.continuous = true; // Keep listening until manually stopped
-
-      // Keep track of processed results to avoid duplicates
-      let processedResults = [];
-      let currentFullText = '';
+      recognitionInstance.continuous = true;
+      
+      // Track the last processed result index to avoid duplicates
+      let lastProcessedIndex = -1;
+      // Store interim results
+      let interimTranscript = '';
+      // Track if we've processed final results
+      let finalTranscriptProcessed = false;
       
       recognitionInstance.onresult = (event) => {
-        // Process results that haven't been processed yet
-        for (let i = processedResults.length; i < event.results.length; i++) {
-          // If it's a final result and not already processed
-          if (event.results[i].isFinal && !processedResults.includes(i)) {
-            const transcript = event.results[i][0].transcript.trim();
-            if (transcript) {
-              // Only add if it's not already part of our text
-              if (!currentFullText.includes(transcript)) {
-                currentFullText += (currentFullText ? ' ' : '') + transcript;
-              }
-            }
-            // Mark as processed
-            processedResults.push(i);
+        // Clear the state once when we get new results
+        if (!finalTranscriptProcessed && event.results[0].isFinal) {
+          setRecordedText(''); // Clear previous text on first final result
+          finalTranscriptProcessed = true;
+        }
+        
+        // Process new results
+        let finalTranscript = '';
+        
+        // Only process results we haven't seen before
+        for (let i = Math.max(lastProcessedIndex + 1, 0); i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+            lastProcessedIndex = i;
+          } else {
+            interimTranscript = event.results[i][0].transcript;
           }
         }
         
-        // Show partial results if we have no final results yet
-        if (currentFullText === '' && event.results.length > 0) {
-          const latestResult = event.results[event.results.length - 1];
-          if (!latestResult.isFinal) {
-            setRecordedText(latestResult[0].transcript.trim());
-            return;
-          }
-        }
-        
-        // Set the processed text
-        if (currentFullText) {
-          setRecordedText(currentFullText);
+        // Update the text in state - only add finalTranscript if it has content
+        if (finalTranscript) {
+          setRecordedText((prevText) => {
+            // Normalize spaces and remove excess whitespace
+            const newText = (prevText + ' ' + finalTranscript).replace(/\s+/g, ' ').trim();
+            return newText;
+          });
         }
       };
-
-      recognitionInstance.onerror = (event) => {
-        console.error('Speech recognition error', event.error);
-        setIsListening(false);
-        setLoading(false);
-      };
-
+      
+      // Reset recognition if it ends unexpectedly
       recognitionInstance.onend = () => {
-        console.log('Speech recognition ended');
-        // If we're still marked as listening but recognition ended, restart it
+        // Only restart if we're still supposed to be listening
         if (isListening) {
           try {
-            // Try to restart - sometimes it auto-stops after silence
+            // Small delay to prevent rapid restarts
             setTimeout(() => {
-              if (isListening) {
-                recognitionInstance.start();
-                console.log('Restarted speech recognition after auto-end');
-              }
+              recognitionInstance.start();
+              console.log('Speech recognition restarted after unexpected end');
             }, 300);
-          } catch (e) {
-            console.error('Failed to restart speech recognition:', e);
+          } catch (error) {
+            console.error('Failed to restart speech recognition:', error);
             setIsListening(false);
             setLoading(false);
           }
@@ -223,92 +216,100 @@ const QuestionForm = () => {
         }
       };
 
+      recognitionInstance.onerror = (event) => {
+        console.error('Speech recognition error', event.error);
+        // Don't stop listening on 'no-speech' error, only on fatal errors
+        if (event.error === 'no-speech') {
+          console.log('No speech detected, continuing recognition');
+          return;
+        }
+        setIsListening(false);
+        setLoading(false);
+      };
+
       setRecognition(recognitionInstance);
     } else {
       alert('Speech recognition is not supported in this browser.');
     }
-  }, [currentQuestionIndex]);
+  }, [currentQuestionIndex, isListening]);
 
   const handleMicClick = useCallback(() => {
     if (!recognition) return;
-
+    
     if (isListening) {
+      // User wants to stop recording and submit their answer
       try {
         recognition.stop();
         setIsListening(false);
-        setLoading(true);
-
+        setLoading(true); // Show loading while processing the answer
+        
+        // Add a small delay before processing to ensure all recognition results are captured
         setTimeout(() => {
+          // Safety check - ensure questions exist and index is valid
           if (!questions.length || currentQuestionIndex >= questions.length) {
             console.error('No questions available or invalid question index');
             setLoading(false);
             return;
           }
-
+          
           const currentQuestion = questions[currentQuestionIndex];
           if (!currentQuestion) {
             console.error('Current question is undefined');
             setLoading(false);
             return;
           }
-
-          const answer = recordedText.trim();
-
+          
+          // Process the final answer, removing any extra spaces and normalizing it
+          const answer = recordedText.trim().replace(/\s+/g, ' ');
+          
           if (answer) {
-            setAnswers((prevAnswers) => [
-              ...prevAnswers,
-              { questionId: currentQuestion._id, answer: answer }
-            ]);
-            submitAnswer(currentQuestion._id, answer);
+            // Prevent double-submission by checking if an answer with the same ID exists
+            const hasSubmittedAlready = answers.some(a => a.questionId === currentQuestion._id);
+            
+            if (!hasSubmittedAlready) {
+              setAnswers((prevAnswers) => [
+                ...prevAnswers,
+                { questionId: currentQuestion._id, answer: answer }
+              ]);
+              submitAnswer(currentQuestion._id, answer);
+            }
           } else {
+            // If answer is empty, speak a notification
             speakResponse("I couldn't hear your answer. Let's try again.");
             setLoading(false);
-            return;
+            return; // Don't proceed to next question if no answer
           }
-
+          
           setLoading(false);
           handleNext();
-        }, 1000);
+        }, 1500); // Slightly longer delay to ensure processing completes
       } catch (error) {
         console.error('Error stopping recognition:', error);
         setIsListening(false);
         setLoading(false);
       }
     } else {
+      // User wants to start recording
       try {
-        // Clear previous text when starting new recording
+        // Clear previous text and reset speech recognition state
         setRecordedText('');
         
-        // Start a new recognition session
+        // Ensure any previous instances are stopped
         try {
-          recognition.abort(); // Stop any existing session first
+          recognition.abort();
         } catch (e) {
-          console.log('No active recognition to abort');
+          // Ignore errors from aborting
         }
         
-        // Reset the tracking variables
-        if (recognition.processedResults) {
-          recognition.processedResults = [];
-        }
-        if (recognition.currentFullText) {
-          recognition.currentFullText = '';
-        }
+        // Start a fresh recognition session
+        recognition.start();
+        setIsListening(true);
         
-        setTimeout(() => {
-          try {
-            recognition.start();
-            setIsListening(true);
-            
-            if (micTimeout) {
-              clearTimeout(micTimeout);
-              setMicTimeout(null);
-            }
-          } catch (e) {
-            console.error('Error starting recognition:', e);
-            alert('Could not start speech recognition. Please try again.');
-            setIsListening(false);
-          }
-        }, 100); // Small delay to ensure previous session is fully terminated
+        // Clear any existing timeout
+        if (micTimeout) {
+          clearTimeout(micTimeout);
+          setMicTimeout(null);
+        }
       } catch (error) {
         console.error('Error starting recognition:', error);
         alert('There was an error starting the speech recognition. Please try again.');
