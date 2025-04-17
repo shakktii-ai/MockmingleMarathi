@@ -199,8 +199,8 @@ const QuestionForm = () => {
 
   // Set up speech recognition with a simple, reliable approach
   useEffect(() => {
-    // Initialize a very basic speech recognition setup
-    const setupSimpleSpeechRecognition = () => {
+    // Initialize speech recognition setup with proper reset handling
+    const setupSpeechRecognition = () => {
       if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
         alert('Speech recognition is not supported in this browser.');
         return null;
@@ -210,118 +210,66 @@ const QuestionForm = () => {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognitionInstance = new SpeechRecognition();
       
-      // Basic configuration - keep it simple but with continuous listening
+      // Configure recognition
       recognitionInstance.lang = 'en-US';
-      recognitionInstance.continuous = true; // Enable continuous listening to handle pauses
-      recognitionInstance.interimResults = true; // Enable interim results for better user experience
+      recognitionInstance.continuous = true; // Keep listening continuously
+      recognitionInstance.interimResults = true; // Get partial results
       
-      // Keep track of entire transcript to avoid repetition
-      let fullTranscript = '';
-      let lastProcessedIndex = 0;
+      // Reset state when recognition starts
+      recognitionInstance.onstart = () => {
+        console.log('Speech recognition started');
+        setRecordedText(''); // Reset recorded text
+        setIsListening(true);
+      };
       
-      // Function to clean up transcript and remove repetitions
-      function cleanTranscript(text) {
-        if (!text || text === 'Listening...') return '';
-        
-        // First, normalize spaces and remove excess whitespace
-        let cleaned = text.replace(/\s+/g, ' ').trim();
-        
-        // Split into words
-        const words = cleaned.split(' ');
-        const uniqueSequence = [];
-        
-        // Remove immediate repetitions (e.g., "hi hi my")
-        for (let i = 0; i < words.length; i++) {
-          // Skip if this word is the same as the previous one
-          if (i > 0 && words[i].toLowerCase() === words[i-1].toLowerCase()) {
-            continue;
-          }
-          
-          // Skip common repetitive patterns
-          // If we already have "my name" and current word is "my", skip it
-          if (i > 0 && i < words.length - 1 && 
-              uniqueSequence.length >= 2 &&
-              words[i].toLowerCase() === uniqueSequence[uniqueSequence.length-2].toLowerCase() &&
-              words[i+1].toLowerCase() === uniqueSequence[uniqueSequence.length-1].toLowerCase()) {
-            i++; // Skip both this word and the next one
-            continue;
-          }
-          
-          uniqueSequence.push(words[i]);
-        }
-        
-        // Rejoin the words
-        return uniqueSequence.join(' ');
-      }
-      
-      // Handle results with anti-repetition processing
-      recognitionInstance.onresult = function(event) {
+      // Handle speech results
+      recognitionInstance.onresult = (event) => {
         if (event.results && event.results.length > 0) {
-          // Process all results sequentially to avoid repetition
-          let transcript = '';
+          const transcript = Array.from(event.results)
+            .map(result => result[0].transcript)
+            .join('');
           
-          // Only process new results
-          for (let i = lastProcessedIndex; i < event.results.length; i++) {
-            if (event.results[i].isFinal) {
-              // This is a final result - add to our transcript
-              transcript += ' ' + event.results[i][0].transcript;
-              lastProcessedIndex = i + 1; // Mark this as processed
-              
-              // Update the full transcript with this new part
-              if (transcript.trim()) {
-                fullTranscript = cleanTranscript(fullTranscript + transcript);
-                
-                // Set the full transcript as the current text
-                setRecordedText(fullTranscript);
-              }
-            }
-          }
+          // Clean the transcript
+          const cleanText = transcript
+            .replace(/\s+/g, ' ') // Normalize spaces
+            .trim();
+          
+          setRecordedText(cleanText);
         }
       };
       
-      // Handle end of recognition with more aggressive restart
-      recognitionInstance.onend = function() {
+      // Handle end of recognition
+      recognitionInstance.onend = () => {
         console.log('Speech recognition service disconnected');
+        setIsListening(false);
         
-        // If we're still supposed to be listening, restart it immediately
-        if (isListening) {
-          console.log('Restarting speech recognition to handle pauses...');
-          // Restart more quickly to maintain continuous experience
+        // Reset state for next question
+        if (!isAnswerSubmitted) {
+          // If answer wasn't submitted, reset recognition
+          setIsListening(false);
+          setRecordedText('');
+        }
+      };
+      
+      // Handle errors
+      recognitionInstance.onerror = (event) => {
+        console.error('Speech recognition error:', event);
+        setIsListening(false);
+        
+        // Reset recognition on error
+        if (event.error === 'no-speech') {
+          console.log('No speech detected, waiting for speech...');
+          return;
+        }
+        
+        // Try to restart recognition after a short delay
+        setTimeout(() => {
           try {
             recognitionInstance.start();
-            console.log('Successfully restarted speech recognition');
           } catch (e) {
-            console.error('Error restarting speech recognition:', e);
-            
-            // Try again after a short delay if first attempt fails
-            setTimeout(() => {
-              try {
-                recognitionInstance.start();
-                console.log('Successfully restarted speech recognition after delay');
-              } catch (retryError) {
-                console.error('Failed to restart speech recognition after retry:', retryError);
-                setIsListening(false);
-              }
-            }, 100);
+            console.error('Failed to restart recognition:', e);
           }
-        } else {
-          setIsListening(false);
-        }
-      };
-      
-      // Basic error handling
-      recognitionInstance.onerror = function(event) {
-        console.error('Speech recognition error:', event);
-        if (event.error === 'no-speech') {
-          console.log('No speech detected, continuing to listen...');
-          // Don't stop listening for no-speech errors
-          return;
-        }
-        if (event.error === 'aborted') {
-          console.log('Recognition aborted - normal behavior');
-          return;
-        }
-        setIsListening(false);
+        }, 500);
       };
       
       return recognitionInstance;
@@ -333,15 +281,16 @@ const QuestionForm = () => {
         recognition.onresult = null;
         recognition.onerror = null;
         recognition.onend = null;
+        recognition.onstart = null;
         recognition.stop();
         recognition.abort();
       } catch (e) {
-        // Ignore errors during cleanup
+        console.error('Error cleaning up recognition:', e);
       }
     }
     
     // Create new recognition instance
-    const newRecognition = setupSimpleSpeechRecognition();
+    const newRecognition = setupSpeechRecognition();
     setRecognition(newRecognition);
     
     return () => {
@@ -351,14 +300,15 @@ const QuestionForm = () => {
           recognition.onresult = null;
           recognition.onerror = null;
           recognition.onend = null;
+          recognition.onstart = null;
           recognition.stop();
           recognition.abort();
         } catch (e) {
-          // Ignore errors during cleanup
+          console.error('Error cleaning up recognition on unmount:', e);
         }
       }
     };
-  }, []);
+  }, [isAnswerSubmitted]);
 
   // Helper function to speak a feedback response before moving on
   const speakFeedbackAndMoveOn = () => {
@@ -379,13 +329,41 @@ const QuestionForm = () => {
     });
   };
   
+  const submitAnswer = async (questionId, answer) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAnswer`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          _id: userId,
+          email: user?.email,
+          questionId: questionId,
+          answer: answer,
+        }),
+      });
+
+      if (res.ok) {
+        console.log('Answer submitted successfully');
+      } else {
+        const errorData = await res.json();
+        console.error('Error saving answer:', errorData);
+        alert(`Error saving data: ${errorData.message}`);
+      }
+    } catch (error) {
+      console.error('Network or other error:', error);
+      alert('Network or other error occurred');
+    }
+  };
+
   const handleMicClick = useCallback(() => {
-    // Handle simple speech recognition start/stop
+    // Handle speech recognition start/stop
     if (!recognition) {
       alert('Speech recognition not available');
       return;
     }
-    
+
     if (isListening) {
       // STOP RECORDING
       console.log('Stopping speech recognition');
@@ -397,71 +375,38 @@ const QuestionForm = () => {
       } catch (e) {
         console.error('Error stopping recognition:', e);
       }
-      
+
       // Process the recorded answer
-      setTimeout(() => {
-        // IMPORTANT: Always clear the question timer when processing an answer
-        if (questionTimerRef.current) {
-          console.log('🔄 CLEARING TIMER on answer submission');
-          clearTimeout(questionTimerRef.current);
-          questionTimerRef.current = null;
-        }
+      if (recordedText.trim()) {
+        // Store the answer
+        const currentAnswers = [...answers];
+        currentAnswers[currentQuestionIndex] = recordedText;
+        setAnswers(currentAnswers);
         
-        if (!questions.length || currentQuestionIndex >= questions.length) {
-          console.error('No questions available');
-          setLoading(false);
-          return;
-        }
+        // Reset recorded text
+        setRecordedText('');
         
-        const currentQuestion = questions[currentQuestionIndex];
-        if (!currentQuestion) {
-          console.error('Current question is undefined');
-          setLoading(false);
-          return;
-        }
+        // Mark answer as submitted
+        setIsAnswerSubmitted(true);
         
-        // Process the answer
-        const answer = recordedText.trim();
-        console.log('Final answer:', answer);
+        // Speak feedback and move to next question
+        speakFeedbackAndMoveOn();
+      } else {
+        // Handle case where mic was stopped without speaking
+        const noAnswerText = "No answer provided - user stopped mic";
+        submitAnswer(questions[currentQuestionIndex]._id, noAnswerText);
+        setLoading(false);
         
-        if (answer && answer !== 'Listening...') {
-          // Set answer as submitted to prevent auto-progression
-          setIsAnswerSubmitted(true);
-          
-          setAnswers(prevAnswers => [
-            ...prevAnswers,
-            { questionId: currentQuestion._id, answer: answer }
-          ]);
-          submitAnswer(currentQuestion._id, answer);
-          setLoading(false);
-          speakFeedbackAndMoveOn();
+        // Move to next question
+        if (currentQuestionIndex >= questions.length - 1) {
+          console.log('This was the last question - showing completion modal');
+          setIsModalVisible(true);
         } else {
-          // User turned on mic but stopped without speaking
-          console.log('User stopped mic without speaking');
-          const noSpeechMessage = "I couldn't hear your answer. Moving to the next question.";
-          speakResponse(noSpeechMessage);
-          setTimeout(() => {
-            if (currentQuestion && currentQuestion._id) {
-              // Store the answer
-              const noAnswerText = "No answer provided - user stopped mic";
-              submitAnswer(currentQuestion._id, noAnswerText);
-            }
-            
-            setLoading(false);
-            
-            // Check if this is the last question
-            if (currentQuestionIndex >= questions.length - 1) {
-              console.log('This was the last question - showing completion modal');
-              setIsModalVisible(true);
-            } else {
-              // Move to the next question directly instead of using handleNext() to avoid potential issues
-              setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-              setRecordedText('');
-              setIsAnswerSubmitted(false);
-            }
-          }, 3000);
+          setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+          setRecordedText('');
+          setIsAnswerSubmitted(false);
         }
-      }, 500);
+      }
     } else {
       // START RECORDING
       console.log('Starting speech recognition');
@@ -521,7 +466,6 @@ const QuestionForm = () => {
                 console.log('This was the last question - showing completion modal');
                 setIsModalVisible(true);
               } else {
-                // Move to the next question
                 setCurrentQuestionIndex(prevIndex => prevIndex + 1);
                 setRecordedText('');
                 setIsAnswerSubmitted(false);
@@ -558,35 +502,7 @@ const QuestionForm = () => {
           alert('Microphone access is required for speech recognition.');
         });
     }
-  }, [recognition, isListening, questions, currentQuestionIndex, recordedText]);
-
-  const submitAnswer = async (questionId, answer) => {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAnswer`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          _id: userId,
-          email: user?.email,
-          questionId: questionId,
-          answer: answer,
-        }),
-      });
-
-      if (res.ok) {
-        console.log('Answer submitted successfully');
-      } else {
-        const errorData = await res.json();
-        console.error('Error saving answer:', errorData);
-        alert(`Error saving data: ${errorData.message}`);
-      }
-    } catch (error) {
-      console.error('Network or other error:', error);
-      alert('Network or other error occurred');
-    }
-  };
+  }, [recognition, isListening, questions, currentQuestionIndex, recordedText, speakFeedbackAndMoveOn]);
 
   /**
    * Speech Synthesis System
