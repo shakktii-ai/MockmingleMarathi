@@ -1005,6 +1005,9 @@ After fixing, please refresh the page.`);
     return timerId;
   }
   
+  // Close the useEffect hook properly with dependency array
+  }, [currentQuestionIndex]);
+  
   // SIMPLIFIED function to move to next question
   const moveToNextQuestion = () => {
     console.log('⏱️ MOVING TO NEXT QUESTION from', currentQuestionIndex);
@@ -1934,7 +1937,7 @@ After fixing, please refresh the page.`);
         </div>
       )}
     </div>
-  )})
+  );
 };
 
 export default QuestionForm;
