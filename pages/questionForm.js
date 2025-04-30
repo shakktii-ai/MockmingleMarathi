@@ -8,6 +8,28 @@ const QuestionForm = () => {
   const router = useRouter();
   const [questions, setQuestions] = useState([]);
   const [email, setEmail] = useState('');
+  
+  // Function to handle microphone permission request
+  const requestMicPermission = async () => {
+    try {
+      // Try to get microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      window.microphoneStream = stream; // Store for later use
+      setMicPermission('granted');
+      setShowPermissionModal(false);
+      
+      // Reload the page to reinitialize with permissions
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to get microphone permission:', error);
+      alert('Microphone access is required for this application. Please enable it in your browser settings.');
+    }
+  };
+  
+  // Refresh function for mic issues
+  const handleRefreshPage = () => {
+    window.location.reload();
+  };
   const [user, setUser] = useState(null);
   const [userEmail, setUserEmail] = useState('');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -24,6 +46,9 @@ const QuestionForm = () => {
   const [micTimeout, setMicTimeout] = useState(null);
   const [silenceTimeout, setSilenceTimeout] = useState(null);
   const [answers, setAnswers] = useState([]);
+  const [micPermission, setMicPermission] = useState(null); // 'granted', 'denied', or null
+  const [micWorking, setMicWorking] = useState(null); // true, false, or null
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
   // Use a ref instead of state to avoid re-renders
   const isSpeakingRef = useRef(false);
   const questionSpokenRef = useRef(false);
@@ -48,12 +73,18 @@ const QuestionForm = () => {
       setIsIphone(true);
     }
     
+    // States moved to component level
+
     // Request microphone permissions and test if it's working
     const requestPermissions = async () => {
       try {
         // Request microphone permission first
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        console.log("Microphone access granted.");
+        console.log("✅ Microphone access granted.");
+        setMicPermission('granted');
+        
+        // Store the mic stream in a ref for later use
+        window.microphoneStream = stream;
         
         // Test if the microphone is actually working by analyzing audio levels
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -64,31 +95,61 @@ const QuestionForm = () => {
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
         
-        // Check audio levels for 2 seconds to make sure mic is really working
+        // Check audio levels for 3 seconds to make sure mic is really working
         let checkCount = 0;
+        let audioDetectedCount = 0;
         const checkMicInterval = setInterval(() => {
           analyser.getByteFrequencyData(dataArray);
           // Check if there's any audio signal
           const audioDetected = dataArray.some(value => value > 20); // Threshold for audio detection
           
           if (audioDetected) {
-            console.log("Microphone is working and detecting audio.");
+            audioDetectedCount++;
+          }
+          
+          if (audioDetectedCount >= 3) {
+            console.log("✅ Microphone is working and detecting audio.");
+            setMicWorking(true);
             clearInterval(checkMicInterval);
-          } else if (checkCount > 10) {
-            // If no sound detected after 10 checks (about 2 seconds)
-            console.warn("No audio detected from microphone. It might be muted or not working properly.");
+          } else if (checkCount > 15) { // 3 seconds
+            // If minimal sound detected after checks
+            if (audioDetectedCount > 0) {
+              console.log("⚠️ Microphone is detecting minimal audio. It may be working but at low volume.");
+              setMicWorking(true); // Still consider it working
+            } else {
+              console.warn("⚠️ No audio detected from microphone. It might be muted or not working properly.");
+              setMicWorking(false);
+              // Show guidance without blocking
+              const shouldShowHelp = confirm("No audio detected from your microphone. Would you like to see troubleshooting tips?");
+              if (shouldShowHelp) {
+                showMicrophoneTroubleshooting();
+              }
+            }
             clearInterval(checkMicInterval);
           }
           checkCount++;
         }, 200);
         
       } catch (err) {
-        console.error("Microphone access denied or not available:", err);
-        alert("This application requires microphone access to function properly. Please enable microphone access and reload the page.");
+        console.error("❌ Microphone access denied or not available:", err);
+        setMicPermission('denied');
+        setShowPermissionModal(true);
       }
     };
 
     requestPermissions();
+    
+    // Function to show microphone troubleshooting guidance
+    const showMicrophoneTroubleshooting = () => {
+      alert(`Microphone Troubleshooting Tips:\n\n
+1. Make sure your microphone is not muted in your system settings\n
+2. Check if your browser has permission to access the microphone\n
+3. Try using another browser like Chrome or Edge\n
+4. If using headphones with a mic, try unplugging and using the built-in mic\n
+5. Check Windows Sound settings to ensure the right microphone is selected as default\n
+6. Speak louder or move closer to the microphone\n\n
+After fixing, please refresh the page.`);
+    };
 
     const checkStorage = () => {
       const storedNotification = localStorage.getItem("store");
@@ -267,7 +328,7 @@ const QuestionForm = () => {
         
         // If user is still supposed to be listening, automatically restart recognition
         // This is the key fix to prevent microphone cutoff during speaking
-        if (isListening && !isAnswerSubmitted) {
+        if (isListening && !isAnswerSubmitted && !window.stopRecognitionRequested) {
           console.log('Auto-restarting speech recognition to maintain continuous listening');
           try {
             // Preserve current transcript during auto-restart
@@ -290,20 +351,66 @@ const QuestionForm = () => {
         }
       };
       
-      // Handle errors
+      // Enhanced error handling specifically for speech recognition
       recognitionInstance.onerror = (event) => {
         console.error('Speech recognition error:', event);
         
-        // Only stop listening on critical errors, not for 'no-speech'
-        if (event.error !== 'no-speech') {
-          setIsListening(false);
+        // Special handling by error type
+        switch(event.error) {
+          case 'no-speech':
+            // This is common and expected - user didn't speak yet
+            console.log('No speech detected yet, continuing to listen...');
+            
+            // Visually indicate we're still listening (flash the mic icon)
+            const micIcon = document.querySelector('.mic-icon');
+            if (micIcon) {
+              micIcon.classList.add('pulse');
+              setTimeout(() => micIcon.classList.remove('pulse'), 1000);
+            }
+            
+            // Don't stop listening on no-speech errors
+            break;
+            
+          case 'not-allowed':
+          case 'audio-capture':
+            // Permission or mic hardware errors - show the permission modal
+            console.error('Microphone permission issue:', event.error);
+            setMicPermission('denied');
+            setShowPermissionModal(true);
+            setIsListening(false);
+            break;
+            
+          case 'network':
+            // Network issues
+            console.error('Network error affecting speech recognition');
+            alert('Network issue detected. Check your internet connection and try again.');
+            setIsListening(false);
+            break;
+            
+          case 'aborted':
+            // User or system aborted - often normal
+            console.log('Speech recognition aborted');
+            // Don't alert the user for aborted events
+            break;
+            
+          default:
+            // Other errors
+            console.error('Other speech recognition error:', event.error);
+            // Only stop for serious errors
+            if (event.error !== 'no-speech') {
+              setIsListening(false);
+            }
         }
         
-        // Auto-restart recognition after errors, maintaining text continuity
-        if (isListening && !isAnswerSubmitted) {
+        // Auto-restart recognition for non-critical errors
+        if (isListening && !isAnswerSubmitted && 
+            event.error !== 'not-allowed' && 
+            event.error !== 'audio-capture' && 
+            event.error !== 'network') {
           setTimeout(() => {
             try {
               recognitionInstance.start();
+              console.log('Restarted speech recognition after', event.error);
             } catch (e) {
               console.error('Failed to restart recognition after error:', e);
               setIsListening(false);
@@ -478,6 +585,12 @@ const QuestionForm = () => {
         return;
       }
       
+      // Check if microphone permission is denied - show the modal
+      if (micPermission === 'denied') {
+        setShowPermissionModal(true);
+        return;
+      }
+
       // Clear previous text
       setRecordedText('Listening...');
       setIsListening(true);
@@ -1579,16 +1692,63 @@ const QuestionForm = () => {
     } catch (error) {
       console.error('Error updating interview completion count:', error);
       // Still navigate to the report page even if there's an error
-      router.push('/oldreport');
+      router.push('/report');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-900 to-black bg-cover bg-center flex flex-col items-center justify-start pt-8" style={{ backgroundImage: "url('/BG.jpg')" }}>
+    <div className="min-h-screen bg-black flex flex-col items-center justify-start pt-10 pb-20 overflow-x-hidden">
       <Head>
         <title>SHAKKTII AI - Interactive Interview</title>
         <meta name="description" content="AI-powered interview platform by SHAKKTII AI" />
+        <style jsx global>{`
+          /* Pulse animation for microphone */
+          @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          .pulse {
+            animation: pulse 1s infinite;
+          }
+        `}</style>
       </Head>
+      
+      {/* Microphone Permission Modal */}
+      {showPermissionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-[#29064b] p-6 rounded-xl shadow-2xl max-w-md w-full mx-4">
+            <h2 className="text-2xl font-bold text-[#e600ff] mb-4">Microphone Access Required</h2>
+            <p className="text-white mb-6">
+              This interview application needs access to your microphone to function properly. 
+              Please grant microphone permission to continue.
+            </p>
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-[#e600ff] mb-2">Troubleshooting Tips:</h3>
+              <ul className="text-white list-disc pl-5 space-y-1">
+                <li>Check if your microphone is properly connected</li>
+                <li>Make sure it's not muted in your system settings</li>
+                <li>Try using Google Chrome or Microsoft Edge browser</li>
+                <li>Check your browser permissions settings</li>
+              </ul>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={requestMicPermission}
+                className="bg-[#e600ff] hover:bg-[#ca00e3] text-white font-bold py-3 px-4 rounded-lg flex-1 transition-colors"
+              >
+                Grant Microphone Access
+              </button>
+              <button
+                onClick={handleRefreshPage}
+                className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg flex-1 transition-colors"
+              >
+                Refresh Page
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {questions.length > 0 ? (
         <div className="w-full max-w-3xl px-4 mb-6">

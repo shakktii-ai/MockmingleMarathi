@@ -72,7 +72,13 @@ const handler = async (req, res) => {
     // Add the purchased interviews to the user's account
     user.no_of_interviews += parseInt(interviewCount, 10);
     
-    // Save the updated user
+    // Ensure collageName is set if it's missing but required
+    if (user.collageName === undefined || user.collageName === null) {
+      // You can set a default value if the user doesn't have a college name
+      user.collageName = user.collageName || 'Not Specified';
+    }
+    
+    // Save the updated user with validation
     await user.save();
 
     return res.status(200).json({ 
