@@ -387,6 +387,13 @@ const QuestionForm = () => {
         currentAnswers[currentQuestionIndex] = recordedText;
         setAnswers(currentAnswers);
         
+        // Submit the answer to the server
+        if (questions[currentQuestionIndex] && questions[currentQuestionIndex]._id) {
+          submitAnswer(questions[currentQuestionIndex]._id, recordedText);
+        } else {
+          console.error('Question ID not found for submission');
+        }
+        
         // Reset recorded text
         setRecordedText('');
         
