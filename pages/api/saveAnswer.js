@@ -144,56 +144,100 @@
 // }
 
 // export default handler;
+// import JobRole from '../../models/JobRole';
+// // import { ObjectId } from 'mongodb'; // Import ObjectId for comparison
+
+// // Save answer API
+// export async function handler(req, res) {
+//   if (req.method === 'PUT') {
+//     const {_id, email, questionId, answer } = req.body;
+
+//     // Validate request body
+//     if (!email || !questionId || answer === undefined) {
+//       return res.status(400).json({ message: 'All fields are required' });
+//     }
+
+//     try {
+//       // Find the job role by email
+//       const jobRole = await JobRole.findOne({ email,_id });
+
+//       // If job role not found
+//       if (!jobRole) {
+//         return res.status(404).json({ message: 'Job role not found' });
+//       }
+
+//       // Log jobRole and questionId for debugging
+//       // console.log('Job role found:', jobRole);
+//       // console.log('Question ID to find:', questionId);
+
+//       // Find the specific question by its _id (convert to string or ObjectId if necessary)
+//       const question = jobRole.questions.find(q => q._id.toString() === String(questionId));
+
+//       // If question not found, log the available questions and provide more detailed message
+//       if (!question) {
+//         console.log('Available question IDs:', jobRole.questions.map(q => q._id.toString()));
+//         return res.status(404).json({ message: `Question with ID ${questionId} not found. Available questions: ${jobRole.questions.map(q => q._id.toString()).join(', ')}` });
+//       }
+
+//       // Update the answer of the found question
+//       question.answer = answer;
+
+//       // Save the updated job role
+//       await jobRole.save();
+
+//       return res.status(200).json({ message: 'Answer saved successfully' });
+//     } catch (error) {
+//       // Log error and return server error response
+//       console.error(error);
+//       return res.status(500).json({ message: 'Internal server error' });
+//     }
+//   } else {
+//     // If the method is not PUT, return Method Not Allowed
+//     return res.status(405).json({ message: 'Method Not Allowed' });
+//   }
+// }
+
+// export default handler;
+
+
 import JobRole from '../../models/JobRole';
-import { ObjectId } from 'mongodb'; // Import ObjectId for comparison
 
-// Save answer API
 export async function handler(req, res) {
-  if (req.method === 'PUT') {
-    const {_id, email, questionId, answer } = req.body;
-
-    // Validate request body
-    if (!email || !questionId || answer === undefined) {
-      return res.status(400).json({ message: 'All fields are required' });
-    }
-
-    try {
-      // Find the job role by email
-      const jobRole = await JobRole.findOne({ email,_id });
-
-      // If job role not found
-      if (!jobRole) {
-        return res.status(404).json({ message: 'Job role not found' });
-      }
-
-      // Log jobRole and questionId for debugging
-      // console.log('Job role found:', jobRole);
-      // console.log('Question ID to find:', questionId);
-
-      // Find the specific question by its _id (convert to string or ObjectId if necessary)
-      const question = jobRole.questions.find(q => q._id.toString() === String(questionId));
-
-      // If question not found, log the available questions and provide more detailed message
-      if (!question) {
-        console.log('Available question IDs:', jobRole.questions.map(q => q._id.toString()));
-        return res.status(404).json({ message: `Question with ID ${questionId} not found. Available questions: ${jobRole.questions.map(q => q._id.toString()).join(', ')}` });
-      }
-
-      // Update the answer of the found question
-      question.answer = answer;
-
-      // Save the updated job role
-      await jobRole.save();
-
-      return res.status(200).json({ message: 'Answer saved successfully' });
-    } catch (error) {
-      // Log error and return server error response
-      console.error(error);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-  } else {
-    // If the method is not PUT, return Method Not Allowed
+  if (req.method !== 'PUT') {
     return res.status(405).json({ message: 'Method Not Allowed' });
+  }
+
+  const { _id, email, questionId, answer } = req.body;
+
+  if (!email || !questionId || answer === undefined) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  try {
+    const jobRole = await JobRole.findOne({ email, _id });
+
+    if (!jobRole) {
+      return res.status(404).json({ message: 'Job role not found' });
+    }
+
+    const question = jobRole.questions.find(
+      (q) => q._id.toString() === String(questionId)
+    );
+
+    if (!question) {
+      return res.status(404).json({
+        message: `Question with ID ${questionId} not found.`,
+        availableQuestions: jobRole.questions.map((q) => q._id.toString()),
+      });
+    }
+
+    question.answer = answer;
+    await jobRole.save();
+
+    return res.status(200).json({ message: 'Answer saved successfully' });
+  } catch (error) {
+    console.error('Server error:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 }
 
