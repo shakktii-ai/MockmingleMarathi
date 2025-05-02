@@ -495,16 +495,28 @@ After fixing, please refresh the page.`);
   
   const submitAnswer = async (questionId, answer) => {
     try {
+      // Get the authentication token from localStorage
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.error('Authentication token not found. User may need to log in again.');
+        // Optional: Redirect to login or show a message
+      }
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAnswer`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           _id: userId,
           email: user?.email,
           questionId: questionId,
           answer: answer,
+          // Include additional fields that might be expected by the external API
+          user_email: user?.email, // In case the API expects this field name
+          question_id: questionId, // Alternative field name
         }),
       });
 
@@ -891,16 +903,7 @@ After fixing, please refresh the page.`);
   };
   
   // Initialize speech manager
-  useEffect(() => {
-  // Global question timer - using ref defined at component top level
-
-  // EXTREMELY SIMPLIFIED TIMER SYSTEM
-  // This system only cares about:
-  // 1. When a question is spoken → Start 20-second timer
-  // 2. If mic is turned on → Cancel timer
-  // 3. If timer expires → Go to next question
-  
-  // Direct timer function with no state checks
+  // Direct timer function with no state checks - moved to component level for proper scoping
   const startQuestionTimer = () => {
     console.log('⏱️ STARTING 20-SECOND TIMER for question', currentQuestionIndex + 1);
     
@@ -1006,7 +1009,19 @@ After fixing, please refresh the page.`);
     return timerId;
   }
   
-  // Close the useEffect hook properly with dependency array
+  // Initialize the timer system with useEffect
+  useEffect(() => {
+    // This effect handles the timer initialization and cleanup
+    console.log('Timer system initialized for question', currentQuestionIndex + 1);
+    
+    // Return cleanup function to clear timers when component unmounts or dependencies change
+    return () => {
+      if (questionTimerRef.current) {
+        clearTimeout(questionTimerRef.current);
+        questionTimerRef.current = null;
+        console.log('Cleaned up timer for question', currentQuestionIndex);
+      }
+    };
   }, [currentQuestionIndex]);
   
   // SIMPLIFIED function to move to next question
