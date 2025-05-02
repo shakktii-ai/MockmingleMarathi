@@ -493,84 +493,45 @@ After fixing, please refresh the page.`);
     }
   };
   
-  // const submitAnswer = async (questionId, answer) => {
-  //   try {
-  //     // Get the authentication token from localStorage
-  //     const token = localStorage.getItem('token');
-      
-  //     if (!token) {
-  //       console.error('Authentication token not found. User may need to log in again.');
-  //       // Optional: Redirect to login or show a message
-  //     }
-
-  //     const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAnswer`, {
-  //       method: 'PUT',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         // 'Authorization': `Bearer ${token}`,
-  //       },
-  //       body: JSON.stringify({
-  //         _id: userId,
-  //         email: user?.email,
-  //         questionId: questionId,
-  //         answer: answer,
-  //         // Include additional fields that might be expected by the external API
-  //         user_email: user?.email, // In case the API expects this field name
-  //         question_id: questionId, // Alternative field name
-  //       }),
-  //     });
-
-  //     if (res.ok) {
-  //       console.log('Answer submitted successfully');
-  //     } else {
-  //       const errorData = await res.json();
-  //       console.error('Error saving answer:', errorData);
-  //       alert(`Error saving data: ${errorData.message}`);
-  //     }
-  //   } catch (error) {
-  //     console.error('Network or other error:', error);
-  //     alert('Network or other error occurred');
-  //   }
-  // };
   const submitAnswer = async (questionId, answer) => {
     try {
+      // Get the authentication token from localStorage
       const token = localStorage.getItem('token');
-  
+      
       if (!token) {
-        console.error('Token not found');
-        alert('You must be logged in to submit answers.');
-        return;
+        console.error('Authentication token not found. User may need to log in again.');
+        // Optional: Redirect to login or show a message
       }
-  
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAnswer`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          // 'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           _id: userId,
           email: user?.email,
-          questionId,
-          answer,
+          questionId: questionId,
+          answer: answer,
+          // Include additional fields that might be expected by the external API
+          user_email: user?.email, // In case the API expects this field name
+          question_id: questionId, // Alternative field name
         }),
       });
-  
-      const data = await res.json();
-  
+
       if (res.ok) {
         console.log('Answer submitted successfully');
       } else {
-        console.error('Error saving answer:', data);
-        alert(`Error: ${data.message}`);
+        const errorData = await res.json();
+        console.error('Error saving answer:', errorData);
+        alert(`Error saving data: ${errorData.message}`);
       }
     } catch (error) {
-      console.error('Network error:', error);
-      alert('Network or unexpected error occurred.');
+      console.error('Network or other error:', error);
+      alert('Network or other error occurred');
     }
   };
-  
-
 
   const handleMicClick = useCallback(() => {
     // Handle speech recognition start/stop
