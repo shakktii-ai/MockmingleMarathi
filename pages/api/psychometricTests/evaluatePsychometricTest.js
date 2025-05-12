@@ -3,6 +3,12 @@ import PsychometricTest from "@/models/PsychometricTest";
 import PsychometricResponse from "@/models/PsychometricResponse";
 import User from "@/models/User";
 
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 300,
+};
+
 // Function to safely parse JSON with fallback
 function safeJsonParse(jsonString, fallback = null) {
   try {

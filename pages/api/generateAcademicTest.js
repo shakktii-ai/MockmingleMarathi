@@ -1,5 +1,13 @@
 import connectDb from "@/middleware/dbConnect";
 import AcademicTest from "@/models/AcademicTest";
+
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 300,
+};
+
+
 // Import the question cache utility
 const { getCachedQuestions, cacheQuestions } = require("@/utils/academicTestCache");
 

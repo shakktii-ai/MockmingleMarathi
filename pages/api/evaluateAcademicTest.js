@@ -2,6 +2,12 @@ import connectDb from "@/middleware/dbConnect";
 import AcademicTest from "@/models/AcademicTest";
 import AcademicTestResponse from "@/models/AcademicTestResponse";
 
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 300,
+};
+
 async function evaluateWithClaude(testData, userAnswers) {
   console.log(`Evaluating test responses for ${testData.subject} (${testData.stream})...`);
   try {

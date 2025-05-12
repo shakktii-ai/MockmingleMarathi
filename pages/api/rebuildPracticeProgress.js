@@ -3,6 +3,12 @@ import PracticeResponse from "@/models/PracticeResponse";
 import PracticeProgress from "@/models/PracticeProgress";
 import mongoose from 'mongoose';
 
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 300,
+};
+
 async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });

@@ -2,6 +2,12 @@ import connectDb from "@/middleware/dbConnect";
 import PsychometricTest from "@/models/PsychometricTest";
 import PsychometricResponse from "@/models/PsychometricResponse";
 
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 300,
+};
+
 async function handler(req, res) {
   // Only allow GET requests
   if (req.method !== 'GET') {

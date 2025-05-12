@@ -2,6 +2,13 @@ import connectDb from "@/middleware/dbConnect";
 import PsychometricTest from "@/models/PsychometricTest";
 import User from "@/models/User";
 
+
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 300,
+};
+
 // Function to generate psychometric test questions with Claude AI
 async function generateQuestionsWithClaude(profileType = 'employee') {
   try {

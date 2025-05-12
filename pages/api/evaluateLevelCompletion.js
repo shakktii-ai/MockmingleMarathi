@@ -3,6 +3,11 @@ import PracticeProgress from "@/models/PracticeProgress";
 import PracticeResponse from "@/models/PracticeResponse";
 import jwt from 'jsonwebtoken';
 
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 300,
+};
 // Claude API integration function
 const evaluateWithClaude = async (responses, skillArea, difficulty, level) => {
   try {

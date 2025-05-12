@@ -3,6 +3,12 @@ import PracticeProgress from "@/models/PracticeProgress";
 import PracticeResponse from "@/models/PracticeResponse";
 import jwt from 'jsonwebtoken';
 
+
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 300,
+};
+
 async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method Not Allowed' });
