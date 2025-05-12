@@ -100,16 +100,36 @@ function generateBasicEvaluation(testData, userAnswers) {
     
     // Simple string matching for MCQ or exact answers
     let isCorrect = false;
+    let isPartial = false;
     let score = 0;
+    let feedback = '';
     
     if (testData.testFormat === 'MCQ') {
-      isCorrect = userAnswer.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase();
-      score = isCorrect ? 100 : 0;
-    } else {
-      // For written/speaking, check if key words from the correct answer appear in user answer
+      // For MCQ, check exact match first
+      if (userAnswer.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase()) {
+        isCorrect = true;
+        score = 100;
+        feedback = "Correct answer! Well done.";
+      } else {
+        // Check if it's partially correct (contains part of the answer)
+        const correctLower = q.correctAnswer.trim().toLowerCase();
+        const userLower = userAnswer.trim().toLowerCase();
+        
+        if (correctLower.includes(userLower) || userLower.includes(correctLower)) {
+          isPartial = true;
+          score = 50;
+          feedback = "Partially correct. Your answer contains some correct elements.";
+        } else {
+          score = 0;
+          feedback = `Incorrect. The correct answer is: ${q.correctAnswer}`;
+        }
+      }
+    } else if (testData.testFormat === 'Written') {
+      // For written answers, use more sophisticated matching
       const correctKeywords = q.correctAnswer.toLowerCase().split(/\s+/).filter(w => w.length > 3);
       let matchedKeywords = 0;
       
+      // Count matched keywords
       correctKeywords.forEach(keyword => {
         if (userAnswer.toLowerCase().includes(keyword)) {
           matchedKeywords++;
@@ -118,14 +138,52 @@ function generateBasicEvaluation(testData, userAnswers) {
       
       const matchRatio = correctKeywords.length > 0 ? matchedKeywords / correctKeywords.length : 0;
       score = Math.round(matchRatio * 100);
-      isCorrect = score >= 70;
+      
+      if (score >= 80) {
+        isCorrect = true;
+        feedback = "Excellent answer! You've covered all the key points.";
+      } else if (score >= 50) {
+        isPartial = true;
+        feedback = "Good attempt. You've covered some important points, but missed others.";
+      } else if (score >= 30) {
+        isPartial = true;
+        feedback = "Partially correct, but your answer is missing several key elements.";
+      } else {
+        feedback = "Your answer doesn't contain enough key elements from the expected response.";
+      }
+    } else if (testData.testFormat === 'Speaking') {
+      // For speaking, be more lenient with matching
+      const correctWords = q.correctAnswer.toLowerCase().split(/\s+/);
+      const userWords = userAnswer.toLowerCase().split(/\s+/);
+      
+      // Count words that appear in both answers
+      let matchedWords = 0;
+      correctWords.forEach(word => {
+        if (word.length > 2 && userWords.includes(word)) {
+          matchedWords++;
+        }
+      });
+      
+      const matchRatio = correctWords.length > 0 ? matchedWords / correctWords.length : 0;
+      score = Math.round(matchRatio * 100);
+      
+      if (score >= 70) {
+        isCorrect = true;
+        feedback = "Great speaking response! Your answer matches what we were looking for.";
+      } else if (score >= 40) {
+        isPartial = true;
+        feedback = "Good attempt. Your spoken response contains some of the key elements we were looking for.";
+      } else {
+        feedback = "Your spoken response didn't contain enough of the key elements we were looking for.";
+      }
     }
     
     return {
       questionIndex: index,
-      isCorrect,
-      score,
-      feedback: isCorrect ? "Correct answer!" : "Your answer doesn't match the expected response."
+      isCorrect: isCorrect,
+      isPartial: isPartial,
+      score: score,
+      feedback: feedback
     };
   });
   
@@ -139,11 +197,23 @@ function generateBasicEvaluation(testData, userAnswers) {
   else if (overallScore >= 50) stars = 1;
   else stars = 0;
   
+  // Generate appropriate feedback based on score
+  let feedbackMessage;
+  if (stars === 3) {
+    feedbackMessage = `Excellent work! You scored ${Math.round(overallScore)}% on this test.`;
+  } else if (stars === 2) {
+    feedbackMessage = `Good job! You scored ${Math.round(overallScore)}% on this test. Keep practicing to improve further.`;
+  } else if (stars === 1) {
+    feedbackMessage = `You scored ${Math.round(overallScore)}% on this test. With more practice, you can improve your understanding of this subject.`;
+  } else {
+    feedbackMessage = `You scored ${Math.round(overallScore)}% on this test. Don't worry - review the material and try again to improve your score.`;
+  }
+  
   return {
     answers,
     overallScore,
     stars,
-    feedback: `You scored ${Math.round(overallScore)}% on this test (${stars} stars).`
+    feedback: feedbackMessage
   };
 }
 

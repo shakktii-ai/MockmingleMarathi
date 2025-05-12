@@ -947,13 +947,17 @@ function ReadingWritingPractice() {
               <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h3 className="text-lg font-semibold mb-2">Instructions:</h3>
                 <p className="text-gray-700 mb-4">
-                  {questions[currentIndex]?.instructions || "Loading..."}
+                  {questions[currentIndex]?.instructions || "Read the passage and answer the question."}
+                </p>
+                <h3 className="text-lg font-semibold mb-2">Question:</h3>
+                <p className="text-gray-700 mb-4 font-medium">
+                  {questions[currentIndex]?.question || questions[currentIndex]?.questionText || "Loading question..."}
                 </p>
                 
                 <div className="bg-gray-100 p-4 rounded-lg mb-4">
                   <div className="prose max-w-none">
                     <p className="text-gray-800 whitespace-pre-line">
-                      {questions[currentIndex]?.content || "Loading..."}
+                      {questions[currentIndex]?.content || questions[currentIndex]?.passage || questions[currentIndex]?.text || "Loading..."}
                     </p>
                   </div>
                   
