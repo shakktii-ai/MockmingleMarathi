@@ -1765,6 +1765,15 @@ export default function Home({ Logout, user }) {
               </li>
             </Link>
             
+            <Link href={'/academicTest'}>
+              <li className="hover:text-pink-400 cursor-pointer transition-colors font-medium">
+                <span className="relative inline-flex">
+                  Academic Test
+                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">New</span>
+                </span>
+              </li>
+            </Link>
+            
             <Link href={'/oldreport'}>
               <li className="relative hover:text-pink-400 cursor-pointer transition-colors font-medium" onClick={handleReportClick}>
                 Reports
@@ -1803,6 +1812,14 @@ export default function Home({ Logout, user }) {
                             <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
                           </svg>
                           My Progress
+                        </li>
+                      </Link>
+                      <Link href={'/academicTest'}>
+                        <li className="hover:text-blue-700 text-sm font-medium p-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                          </svg>
+                          Academic Test
                         </li>
                       </Link>
                       <li onClick={Logout} className="hover:text-red-700 text-sm font-medium p-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2">
@@ -1936,6 +1953,25 @@ export default function Home({ Logout, user }) {
                       </svg>
                     </button>
                   </Link>
+                  
+                  <Link href={'/practices'}>
+                    <button className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white py-3 px-8 rounded-full text-lg font-semibold hover:from-indigo-600 hover:to-blue-700 transition duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group">
+                      PRACTICE TESTS
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                        <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </Link>
+                  
+                  <Link href={'/academicTest'}>
+                    <button className="bg-gradient-to-r from-green-500 to-teal-600 text-white py-3 px-8 rounded-full text-lg font-semibold hover:from-green-600 hover:to-teal-700 transition duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group">
+                      ACADEMIC TEST
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                      </svg>
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -1962,18 +1998,19 @@ export default function Home({ Logout, user }) {
             Are You Interview-Ready? Test Yourself with <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">Shakkti AI</span>
           </h1>
           
-          {/* New Feature Section */}
-          <div className="mb-24 bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-2xl shadow-lg">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="md:w-1/2">
-                <div className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium mb-4">
-                  NEW FEATURE
+          {/* Feature Sections */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-24">
+            {/* Progress Tracking Feature */}
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-2xl shadow-lg">
+              <div className="flex flex-col items-center md:items-start gap-6">
+                <div className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  INTERVIEW ANALYTICS
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Track Your Interview Progress</h2>
-                <p className="text-gray-600 mb-6">
-                  Our new progress tracking system helps you visualize your improvement over time. See detailed charts of your performance across different skills and compare interview results to identify areas of growth.
+                <h2 className="text-2xl font-bold text-gray-800 text-center md:text-left">Track Your Interview Progress</h2>
+                <p className="text-gray-600">
+                  Our progress tracking system helps you visualize your improvement over time. See detailed charts of your performance across different skills and identify areas of growth.
                 </p>
-                <ul className="space-y-3 mb-6">
+                <ul className="space-y-2">
                   {['Skill-specific analytics', 'Performance comparison', 'Growth visualization', 'Interview history'].map((feature, index) => (
                     <li key={index} className="flex items-center gap-2">
                       <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1984,13 +2021,66 @@ export default function Home({ Logout, user }) {
                   ))}
                 </ul>
                 <Link href="/progress">
-                  <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition duration-300 shadow-md">
+                  <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition duration-300 shadow-md mt-2">
                     View My Progress
                   </button>
                 </Link>
               </div>
-              <div className="md:w-1/2">
-                <img src="/analytics.svg" alt="Progress Analytics" className="w-full rounded-lg shadow-lg" />
+            </div>
+
+            {/* Practice Tests Feature */}
+            <div className="bg-gradient-to-br from-indigo-50 to-cyan-50 p-8 rounded-2xl shadow-lg">
+              <div className="flex flex-col items-center md:items-start gap-6">
+                <div className="inline-block bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                  NEW FEATURE
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 text-center md:text-left">Practice Tests & Assessments</h2>
+                <p className="text-gray-600">
+                  Enhance your language and interview skills with our specialized practice tests. Get personalized AI feedback to improve your speaking, listening, reading, and writing abilities.
+                </p>
+                <ul className="space-y-2">
+                  {['Personality assessment', 'Speaking practice', 'Listening comprehension', 'Reading & writing tests'].map((feature, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <svg className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/practices">
+                  <button className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white py-2 px-6 rounded-lg font-medium hover:from-indigo-600 hover:to-blue-700 transition duration-300 shadow-md mt-2">
+                    Start Practice Tests
+                  </button>
+                </Link>
+              </div>
+            </div>
+            
+            {/* Academic Test Feature - NEW */}
+            <div className="bg-gradient-to-br from-green-50 to-teal-50 p-8 rounded-2xl shadow-lg">
+              <div className="flex flex-col items-center md:items-start gap-6">
+                <div className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                  JUST LAUNCHED
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 text-center md:text-left">Personalized Academic Tests</h2>
+                <p className="text-gray-600">
+                  Take tailored academic tests designed specifically for your stream, department, and subject. Receive instant AI-powered evaluation and detailed feedback to improve your academic performance.
+                </p>
+                <ul className="space-y-2">
+                  {['Subject-specific questions', 'Multiple test formats (MCQ, Written, Speaking)', 'Difficulty adaptation', '3-star rating system'].map((feature, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/academicTest">
+                  <button className="bg-gradient-to-r from-green-500 to-teal-600 text-white py-2 px-6 rounded-lg font-medium hover:from-green-600 hover:to-teal-700 transition duration-300 shadow-md mt-2">
+                    Take Academic Test
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
