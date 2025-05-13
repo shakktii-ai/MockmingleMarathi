@@ -422,6 +422,11 @@ function ReadingWritingPractice() {
     setUserResponse(e.target.value);
   };
 
+  // Function to count words in a string
+  const countWords = (text) => {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
   const submitResponse = async () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -434,6 +439,12 @@ function ReadingWritingPractice() {
       
     if (!responseToSubmit.trim()) {
       alert("Please provide a response before submitting.");
+      return;
+    }
+    
+    // Check minimum word count for writing practice
+    if (mode === 'writing' && !isMultipleChoice() && countWords(responseToSubmit) < 50) {
+      alert("Your response must be at least 50 words. Please write more.");
       return;
     }
     
@@ -725,6 +736,10 @@ function ReadingWritingPractice() {
 
   // Determine if the current question is multiple choice or text input
   const isMultipleChoice = () => {
+    // For writing practice, always use text input regardless of options
+    if (mode === 'writing') return false;
+    
+    // For reading practice, check if options exist
     const currentQuestion = questions[currentIndex];
     return currentQuestion && Array.isArray(currentQuestion.options) && currentQuestion.options.length > 0;
   };
@@ -1151,35 +1166,55 @@ function ReadingWritingPractice() {
                   {questions[currentIndex]?.instructions || "Read the passage and answer the question."}
                 </p>
                 
-                {/* STEP 2: READING CONTENT/STORY */}
-                <div className="bg-gray-100 p-4 rounded-lg mb-6">
-                  <h3 className="text-lg font-semibold mb-2">Passage:</h3>
-                  <div className="prose max-w-none">
-                    <p className="text-gray-800 whitespace-pre-line">
-                      {questions[currentIndex]?.content || questions[currentIndex]?.passage || questions[currentIndex]?.text || "Loading passage..."}
-                    </p>
+                {/* STEP 2: READING CONTENT/STORY OR WRITING PROMPT */}
+                {mode === 'reading' ? (
+                  <div className="bg-gray-100 p-4 rounded-lg mb-6">
+                    <h3 className="text-lg font-semibold mb-2">Passage:</h3>
+                    <div className="prose max-w-none">
+                      <p className="text-gray-800 whitespace-pre-line">
+                        {questions[currentIndex]?.content || questions[currentIndex]?.passage || questions[currentIndex]?.text || "Loading passage..."}
+                      </p>
+                    </div>
+                    
+                    {questions[currentIndex]?.imageUrl && (
+                      <div className="mt-4 flex justify-center">
+                        <img 
+                          src={questions[currentIndex].imageUrl} 
+                          alt="Content image" 
+                          className="max-h-48 rounded-lg shadow-sm"
+                          onError={(e) => {
+                            e.target.src = "/default-card.png";
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
-                  
-                  {questions[currentIndex]?.imageUrl && (
-                    <div className="mt-4 flex justify-center">
+                ) : (
+                  /* For writing practice, we don't show a passage section */
+                  questions[currentIndex]?.imageUrl && (
+                    <div className="bg-gray-100 p-4 rounded-lg mb-6 flex justify-center">
                       <img 
                         src={questions[currentIndex].imageUrl} 
-                        alt="Content image" 
-                        className="max-h-48 rounded-lg shadow-sm"
+                        alt="Writing prompt image" 
+                        className="max-h-64 rounded-lg shadow-sm"
                         onError={(e) => {
                           e.target.src = "/default-card.png";
                         }}
                       />
                     </div>
-                  )}
-                </div>
+                  )
+                )}
                 
-                {/* STEP 3: QUESTION */}
-                <h3 className="text-lg font-semibold mb-3">Question:</h3>
+                {/* STEP 3: QUESTION OR WRITING PROMPT */}
+                <h3 className="text-lg font-semibold mb-3">{mode === 'reading' ? 'Question:' : 'Writing Prompt:'}</h3>
                 <p className="text-gray-700 mb-5 font-medium">
-                  {questions[currentIndex]?.questionText || 
-                   (questions[currentIndex]?.content && !questions[currentIndex]?.questionText ? 
-                     "What happened in the story?" : "Loading question...")}
+                  {mode === 'reading' ?
+                    (questions[currentIndex]?.questionText || 
+                     (questions[currentIndex]?.content && !questions[currentIndex]?.questionText ? 
+                       "What happened in the story?" : "Loading question...")) :
+                    (questions[currentIndex]?.content || questions[currentIndex]?.passage || questions[currentIndex]?.text || 
+                     questions[currentIndex]?.questionText || "Write a short paragraph describing your favorite hobby or activity.")
+                  }
                 </p>
                 
                 {/* STEP 4: MULTIPLE CHOICE OPTIONS */}
@@ -1220,9 +1255,26 @@ function ReadingWritingPractice() {
                       onChange={handleTextResponseChange}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       rows={6}
-                      placeholder={mode === 'reading' ? "Type your answer here..." : "Write your response here..."}
+                      placeholder={mode === 'reading' ? "Type your answer here..." : "Write your response here (minimum 50 words)..."}
                       disabled={!!feedback}
                     />
+                    {mode === 'writing' && (
+                      <div className="mt-2 flex justify-between items-center">
+                        <div className="text-sm text-gray-600">
+                          Word count: <span className={`font-medium ${countWords(userResponse) >= 50 ? 'text-green-600' : 'text-red-600'}`}>
+                            {countWords(userResponse)}
+                          </span> / 50 minimum
+                        </div>
+                        {countWords(userResponse) >= 50 && (
+                          <div className="text-sm text-green-600 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            Minimum word count reached
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
                 
@@ -1230,9 +1282,21 @@ function ReadingWritingPractice() {
                   <div className="flex justify-center">
                     <button
                       onClick={submitResponse}
-                      disabled={(!isMultipleChoice() && !userResponse.trim()) || (isMultipleChoice() && selectedOptions.length === 0)}
+                      disabled={
+                        // For multiple choice, require at least one option selected
+                        (isMultipleChoice() && selectedOptions.length === 0) ||
+                        // For text input in reading practice, require non-empty response
+                        (!isMultipleChoice() && mode === 'reading' && !userResponse.trim()) ||
+                        // For writing practice, require at least 50 words
+                        (!isMultipleChoice() && mode === 'writing' && countWords(userResponse) < 50)
+                      }
                       className={`px-4 py-2 rounded-lg font-medium ${
-                        (!isMultipleChoice() && !userResponse.trim()) || (isMultipleChoice() && selectedOptions.length === 0)
+                        // For multiple choice, require at least one option selected
+                        (isMultipleChoice() && selectedOptions.length === 0) ||
+                        // For text input in reading practice, require non-empty response
+                        (!isMultipleChoice() && mode === 'reading' && !userResponse.trim()) ||
+                        // For writing practice, require at least 50 words
+                        (!isMultipleChoice() && mode === 'writing' && countWords(userResponse) < 50)
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           : 'bg-purple-600 text-white hover:bg-purple-700'
                       }`}
