@@ -62,6 +62,26 @@ const handler = async (req, res) => {
                 });
             }
             
+            // Validate password strength
+            const passwordValidations = {
+                minLength: password.length >= 8,
+                hasUppercase: /[A-Z]/.test(password),
+                hasLowercase: /[a-z]/.test(password),
+                hasNumber: /[0-9]/.test(password),
+                hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+            };
+            
+            const criteriaCount = Object.values(passwordValidations).filter(Boolean).length;
+            if (criteriaCount < 3) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Weak password",
+                    field: "password",
+                    message: "Password must meet at least 3 of the following criteria: 8+ characters, uppercase letter, lowercase letter, number, and special character",
+                    validations: passwordValidations
+                });
+            }
+            
             // Check if email already exists
             const existingUser = await User.findOne({ email });
             if (existingUser) {

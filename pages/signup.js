@@ -25,13 +25,79 @@ const SignUp = () => {
     const [formErrors, setFormErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [generalError, setGeneralError] = useState("");
+    
+    // Password strength validation states
+    const [passwordStrength, setPasswordStrength] = useState(0); // 0: none, 1: weak, 2: medium, 3: strong
+    const [passwordValidation, setPasswordValidation] = useState({
+        minLength: false,
+        hasUppercase: false,
+        hasLowercase: false,
+        hasNumber: false,
+        hasSpecial: false
+    });
 
+    const validatePassword = (password) => {
+        // Password validation criteria
+        const validations = {
+            minLength: password.length >= 8,
+            hasUppercase: /[A-Z]/.test(password),
+            hasLowercase: /[a-z]/.test(password),
+            hasNumber: /[0-9]/.test(password),
+            hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+        
+        // Update validation state
+        setPasswordValidation(validations);
+        
+        // Calculate password strength
+        const criteriaCount = Object.values(validations).filter(Boolean).length;
+        if (password === '') {
+            setPasswordStrength(0); // Empty
+        } else if (criteriaCount <= 2) {
+            setPasswordStrength(1); // Weak
+        } else if (criteriaCount <= 4) {
+            setPasswordStrength(2); // Medium
+        } else {
+            setPasswordStrength(3); // Strong
+        }
+        
+        // Clear any previous password error if valid
+        if (criteriaCount >= 3) {
+            setFormErrors(prev => {
+                const newErrors = {...prev};
+                delete newErrors.password;
+                return newErrors;
+            });
+        }
+        
+        return criteriaCount >= 3; // Password is valid if it meets at least 3 criteria
+    };
+    
     const handlePasswordChange = (e) => {
-        setPassword(e.target.value);
+        const newPassword = e.target.value;
+        setPassword(newPassword);
+        validatePassword(newPassword);
+        
+        // If confirm password is filled, check match
+        if (confirmPassword) {
+            if (newPassword !== confirmPassword) {
+                setPasswordError("Passwords do not match!");
+            } else {
+                setPasswordError("");
+            }
+        }
     };
 
     const handleConfirmPasswordChange = (e) => {
-        setConfirmPassword(e.target.value);
+        const value = e.target.value;
+        setConfirmPassword(value);
+        
+        // Check if passwords match
+        if (value && password !== value) {
+            setPasswordError("Passwords do not match!");
+        } else {
+            setPasswordError("");
+        }
     };
 
     const handlePasswordToggle = (e, fieldId) => {
@@ -154,6 +220,16 @@ const handleSubmit = async (e) => {
     // Password match validation
     if (password !== confirmPassword) {
         setPasswordError("Passwords do not match!");
+        return;
+    }
+    
+    // Password strength validation
+    const isPasswordValid = validatePassword(password);
+    if (!isPasswordValid) {
+        setFormErrors(prev => ({
+            ...prev,
+            password: "Password doesn't meet the minimum security requirements"
+        }));
         return;
     }
 
@@ -292,14 +368,28 @@ const handleSubmit = async (e) => {
         )}
         
         <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-4">
-            <input
-                type="file"
-                name="profileImg"
-                accept="image/*"
-                onChange={handleChange}
-                placeholder="fullName"
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-            />
+            <div className="flex flex-col col-span-3 items-center mb-4">
+                <label htmlFor="profile-upload" className="mb-2 text-white font-medium">Profile Photo</label>
+                <div className="relative w-32 h-32 mb-2 rounded-full overflow-hidden bg-gray-200 bg-opacity-30 flex items-center justify-center border-2 border-dashed border-white border-opacity-40">
+                    {profileImg ? (
+                        <img src={profileImg} alt="Profile Preview" className="w-full h-full object-cover" />
+                    ) : (
+                        <span className="text-white text-4xl">👤</span>
+                    )}
+                </div>
+                <label htmlFor="profile-upload" className="cursor-pointer bg-pink-500 hover:bg-pink-600 text-white py-2 px-4 rounded-md text-sm transition duration-300">
+                    {profileImg ? "Change Photo" : "Upload Photo"}
+                </label>
+                <input
+                    id="profile-upload"
+                    type="file"
+                    name="profileImg"
+                    accept="image/*"
+                    onChange={handleChange}
+                    className="hidden"
+                />
+                <p className="text-gray-300 text-xs mt-1">Max size: 10MB (will be compressed)</p>
+            </div>
             <div className="flex flex-col">
                 <input
                     type="text"
@@ -397,6 +487,46 @@ const handleSubmit = async (e) => {
                     👁️
                 </span>
                 {formErrors.password && <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>}
+                
+                {/* Password strength indicator */}
+                {password && (
+                    <div className="mt-1">
+                        <div className="flex justify-between items-center mb-1">
+                            <span className={`text-xs ${passwordStrength === 0 ? 'text-gray-400' : 
+                                            passwordStrength === 1 ? 'text-red-400' : 
+                                            passwordStrength === 2 ? 'text-yellow-400' : 'text-green-400'}`}>
+                                {passwordStrength === 0 ? 'Enter password' : 
+                                passwordStrength === 1 ? 'Weak' : 
+                                passwordStrength === 2 ? 'Medium' : 'Strong'}
+                            </span>
+                        </div>
+                        <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+                            <div className={`h-full ${passwordStrength === 0 ? 'w-0' : 
+                                        passwordStrength === 1 ? 'w-1/3 bg-red-400' : 
+                                        passwordStrength === 2 ? 'w-2/3 bg-yellow-400' : 'w-full bg-green-400'}`}>
+                            </div>
+                        </div>
+                        
+                        {/* Password requirements */}
+                        <ul className="text-xs space-y-1 mt-2 text-gray-300">
+                            <li className={passwordValidation.minLength ? 'text-green-400' : ''}>
+                                {passwordValidation.minLength ? '✓' : '○'} At least 8 characters
+                            </li>
+                            <li className={passwordValidation.hasUppercase ? 'text-green-400' : ''}>
+                                {passwordValidation.hasUppercase ? '✓' : '○'} At least one uppercase letter
+                            </li>
+                            <li className={passwordValidation.hasLowercase ? 'text-green-400' : ''}>
+                                {passwordValidation.hasLowercase ? '✓' : '○'} At least one lowercase letter
+                            </li>
+                            <li className={passwordValidation.hasNumber ? 'text-green-400' : ''}>
+                                {passwordValidation.hasNumber ? '✓' : '○'} At least one number
+                            </li>
+                            <li className={passwordValidation.hasSpecial ? 'text-green-400' : ''}>
+                                {passwordValidation.hasSpecial ? '✓' : '○'} At least one special character
+                            </li>
+                        </ul>
+                    </div>
+                )}
             </div>
 
             <div className="flex flex-col relative">
