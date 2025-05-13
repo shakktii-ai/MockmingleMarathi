@@ -167,78 +167,147 @@ function Oldreport() {
   const downloadDetailedReport = () => {
     if (!fullReportData) return;
     
-    // Create new PDF document with higher quality settings
-    const doc = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      compress: true
-    });
-    
-    const reportDate = fullReportData.createdAt ? new Date(fullReportData.createdAt).toLocaleString() : "Unknown Date";
-    let marginX = 15;
-    let marginY = 20;
-    let pageHeight = doc.internal.pageSize.height;
-    let pageWidth = doc.internal.pageSize.width;
-    let contentWidth = pageWidth - (marginX * 2);
-
-    // Title
-    doc.setFontSize(20);
-    doc.text("Detailed Interview Analysis", doc.internal.pageSize.width / 2, marginY, { align: "center" });
-
-    // Report Role and Date
-    marginY += 15;
-    doc.setFontSize(14);
-    doc.text(`Role: ${fullReportData.role || 'N/A'}`, marginX, marginY);
-    marginY += 10;
-    doc.text(`Date: ${reportDate}`, marginX, marginY);
-    marginY += 15;
-
-    // Extract and format the full report content
-    const formatReportContentForPDF = (rawContent) => {
-      if (!rawContent) return '';
+    try {
+      // Create new PDF document with higher quality settings
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+      });
       
-      // First extract the complete text content
-      let cleanReport = rawContent
-        // Remove markdown formatting
-        .replace(/\*\*/g, '')
-        .replace(/##/g, '')
-        .replace(/###/g, '')
-        // Convert markdown links to readable text
-        .replace(/\[(.*?)\]\((.*?)\)/g, '$1 ($2)')
-        // Fix spacing issues
-        .replace(/\n\s*\n/g, '\n')
-        // Ensure bullet points are properly formatted
-        .replace(/^\s*-\s*/gm, '- ')
-        // Fix numbered list formatting
-        .replace(/^(\d+)\.(?!\d)/gm, '$1. ');
-      
-      return cleanReport;
-    };
-    
-    // Process the full report content
-    const cleanReport = formatReportContentForPDF(fullReportData.reportAnalysis);
+      const reportDate = fullReportData.createdAt ? new Date(fullReportData.createdAt).toLocaleString() : "Unknown Date";
+      let marginX = 15;
+      let marginY = 20;
+      let pageHeight = doc.internal.pageSize.height;
+      let pageWidth = doc.internal.pageSize.width;
+      let contentWidth = pageWidth - (marginX * 2);
 
-    // Split the detailed analysis by sections for better formatting
-    const sections = cleanReport.split('\n').filter(line => line.trim() !== '');
+      // Set up document metadata
+      doc.setProperties({
+        title: `SHAKKTII AI Report - ${fullReportData.role || 'Interview Analysis'}`,
+        subject: 'Interview Analysis Report',
+        author: 'SHAKKTII AI',
+        keywords: 'interview, analysis, AI assessment',
+        creator: 'SHAKKTII AI Platform'
+      });
 
-    doc.setFontSize(12);
-    
-    // Keep track of list numbering
-    let inList = false;
-    let listNumber = 0;
-    
-    sections.forEach(section => {
-      // Handle section headers (lines that end with a colon)
-      const isHeader = section.match(/^[A-Za-z][^:]+:$/) || 
-                      section.match(/Assessment and Recommendations$/) ||
-                      section.match(/Key Recommendations:$/);
+      // Add a branded header
+      doc.setFillColor(30, 20, 70); // Dark purple background
+      doc.rect(0, 0, pageWidth, 15, 'F');
+      doc.setTextColor(255, 255, 255); // White text for header
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text("SHAKKTII AI INTERVIEW ANALYSIS", pageWidth / 2, 10, { align: "center" });
+      doc.setTextColor(0, 0, 0); // Reset text color to black
       
-      // Handle numbered lists
-      const isNumberedItem = section.match(/^\d+\.\s/);
+      // Title
+      doc.setFontSize(20);
+      doc.text("Detailed Interview Analysis", pageWidth / 2, marginY, { align: "center" });
+
+      // Report Role and Date
+      marginY += 15;
+      doc.setFontSize(14);
+      doc.text(`Role: ${fullReportData.role || 'N/A'}`, marginX, marginY);
+      marginY += 10;
+      doc.text(`Date: ${reportDate}`, marginX, marginY);
+      marginY += 15;
+
+      // Extract and format the full report content
+      const formatReportContentForPDF = (rawContent) => {
+        if (!rawContent) return '';
+        
+        // Standardize line endings
+        let cleanReport = rawContent.replace(/\r\n/g, '\n');
+        
+        // First extract the complete text content
+        cleanReport = cleanReport
+          // Handle markdown headers with proper spacing
+          .replace(/^\s*#{1,6}\s+(.+)$/gm, '$1') // Keep header text but remove # symbols
+          
+          // Handle bold and italic formatting for visual clarity
+          .replace(/\*\*\*(.+?)\*\*\*/g, '$1') // Bold and italic
+          .replace(/\*\*(.+?)\*\*/g, '$1')     // Bold
+          .replace(/\*(.+?)\*/g, '$1')         // Italic
+          
+          // Convert markdown links to readable text
+          .replace(/\[(.*?)\]\((.*?)\)/g, '$1 ($2)')
+          
+          // Ensure bullet points are properly formatted with consistent spacing
+          .replace(/^\s*-\s*/gm, '- ')
+          
+          // Fix numbered list formatting
+          .replace(/^\s*(\d+)\.(?!\d)/gm, '$1. ')
+          
+          // Handle nested bullet points by converting them to a standard format
+          .replace(/^\s{2,}(-|\d+\.)\s/gm, '    • '); // Convert nested lists to indented bullets
+        
+        return cleanReport;
+      };
       
-      // Handle bullet points
-      const isBulletPoint = section.trim().startsWith('-');
+      // Process the full report content
+      const cleanReport = formatReportContentForPDF(fullReportData.reportAnalysis);
+
+      // Split the detailed analysis by sections for better formatting
+      // We keep empty lines as they may indicate paragraph breaks
+      const sections = cleanReport.split('\n');
+
+      doc.setFontSize(12);
+      
+      // Keep track of list structure
+      let inList = false;
+      let listNumber = 0;
+      let listDepth = 0;
+      let isInParagraph = false;
+      
+      // Function to check if we need a page break
+      const checkPageBreak = (requiredSpace) => {
+        if (marginY + requiredSpace > pageHeight - 20) {
+          doc.addPage();
+          // Reset the margin
+          marginY = 25;
+          
+          // Add header to new page
+          doc.setFillColor(30, 20, 70); // Dark purple background
+          doc.rect(0, 0, pageWidth, 15, 'F');
+          doc.setTextColor(255, 255, 255); // White text for header
+          doc.setFontSize(12);
+          doc.setFont(undefined, 'bold');
+          doc.text("SHAKKTII AI INTERVIEW ANALYSIS", pageWidth / 2, 10, { align: "center" });
+          doc.setTextColor(0, 0, 0); // Reset text color to black
+          doc.setFont(undefined, 'normal');
+          return true;
+        }
+        return false;
+      };
+      
+      sections.forEach((section, index) => {
+        // Skip processing if the section is empty but not if it's a paragraph break
+        if (section.trim() === '') {
+          if (isInParagraph) {
+            marginY += 4; // Add a small space for paragraph breaks
+            isInParagraph = false;
+          }
+          return;
+        }
+        
+        isInParagraph = true;
+        
+        // Identify section headers (lines that end with a colon or look like headers)
+        const isHeader = 
+          section.match(/^[A-Za-z][^:]{3,}:$/) || // Ends with colon 
+          section.match(/^(?:Assessment|Analysis|Summary|Recommendations|Strengths|Weaknesses|Feedback|Overall Score)(?:\s|:)/) ||
+          section.match(/^Key\s+(?:Points|Findings|Recommendations)(?:\s|:)/);
+        
+        // Handle numbered lists
+        const isNumberedItem = section.match(/^\d+\.\s/);
+        
+        // Handle bullet points
+        const isBulletPoint = section.trim().startsWith('-');
+        
+        // Handle score indicators
+        const isScoreItem = section.match(/\b(?:score|rating|points):\s*\d+(?:\/\d+)?\b/i) ||
+                          section.match(/\b\d+(?:\/\d+)\s*(?:score|points|rating)\b/i);
       
       // Format headers differently
       if (isHeader) {
@@ -369,6 +438,10 @@ function Oldreport() {
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating PDF report. Please try again.');
+    }
+    } catch (outerError) {
+      console.error('Error processing report content:', outerError);
+      alert('Error preparing the PDF report. Please try again later.');
     }
   };
   
@@ -509,63 +582,75 @@ function Oldreport() {
             
             {/* Modal Content with improved typography and spacing */}
             <div className="p-8">
-              <div className="bg-gray-900 bg-opacity-70 rounded-xl p-7 whitespace-pre-wrap shadow-inner border border-gray-700 border-opacity-50">
-                {fullReportData?.reportAnalysis.split('\n').map((paragraph, i) => {
-                  // Check if this is a header line (contains **: or **)  
-                  if (paragraph.includes('**:') || paragraph.includes(':**') || paragraph.match(/\*\*[^*]+\*\*/)) {
-                    return (
-                      <div key={i}>
-                        <h4 className="text-xl font-bold text-blue-300 mt-6 mb-3">
-                          {paragraph.replace(/\*\*/g, '')}
-                        </h4>
-                        {/* Extract score if present in header */}
-                        {paragraph.match(/(\d+)\/(10|50)/) ? (
-                          (() => {
-                            const scoreMatch = paragraph.match(/(\d+)\/(10|50)/);
-                            const scoreValue = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
-                            const maxValue = scoreMatch ? parseInt(scoreMatch[2], 10) : 10;
-                            const percentage = (scoreValue / maxValue) * 100;
-                            
-                            return (
-                              <div className="w-full h-2 bg-gray-700 rounded-full mb-5">
-                                <div 
-                                  className="h-2 bg-blue-500 rounded-full" 
-                                  style={{ width: `${percentage}%` }}
-                                ></div>
-                              </div>
-                            );
-                          })()
-                        ) : (
-                          <div className="w-full h-0.5 bg-blue-800 mb-4"></div>
-                        )}
-                      </div>
-                    );
-                  }
-                  // Check if line contains a score
-                  else if (paragraph.match(/(\d+\/10|\d+\/50)/)) {
-                    const scoreMatch = paragraph.match(/(\d+)\/(10|50)/);
-                    const scoreValue = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
-                    const maxValue = scoreMatch ? parseInt(scoreMatch[2], 10) : 10;
-                    const percentage = (scoreValue / maxValue) * 100;
-                    
-                    return (
-                      <div key={i} className="mb-6">
-                        <p className="text-blue-100 font-medium mb-2">{paragraph}</p>
-                        {/* Horizontal score bar matching the heading style */}
-                        <div className="w-full bg-gray-700 rounded-full h-2 mb-4">
-                          <div 
-                            className="bg-blue-500 h-2 rounded-full" 
-                            style={{ 
-                              width: `${percentage}%`
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                    );
-                  }
-                  // Normal paragraph
-                  return <p key={i} className="mb-4 leading-relaxed">{paragraph}</p>;
-                })}
+              <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+                <h3 className="text-xl font-bold text-indigo-800 mb-4">Detailed Analysis</h3>
+                
+                {fullReportData ? (
+                  <div className="prose max-w-none text-gray-800">
+                    {fullReportData.reportAnalysis.split('\n').map((line, index) => {
+                      // Check if line is a header (starts with ** or contains **: )**
+                      if (line.includes('**:') || line.includes(':**') || line.match(/\*\*[^*]+\*\*/)) {
+                        const headerText = line.replace(/\*\*/g, '');
+                        return <h4 key={index} className="text-lg font-bold mt-4 mb-2 text-indigo-800">{headerText}</h4>;
+                      }
+                      
+                      // Check if line is a bullet point
+                      if (line.trim().startsWith('-')) {
+                        const bulletText = line.trim().substring(1).trim();
+                        return <li key={index} className="ml-6 mb-1">{bulletText}</li>;
+                      }
+                      
+                      // Check if line is a numbered list item
+                      if (line.match(/^\s*\d+\.\s+/)) {
+                        const numberText = line.replace(/^\s*\d+\.\s+/, '');
+                        return <li key={index} className="ml-8 mb-1 list-decimal">{numberText}</li>;
+                      }
+                      
+                      // Check if line contains a score
+                      if (line.match(/(\d+\/(10|50))/)) {
+                        const scoreMatch = line.match(/(\d+)\/(10|50)/);
+                        const scoreValue = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
+                        const maxValue = scoreMatch ? parseInt(scoreMatch[2], 10) : 10;
+                        const percentage = (scoreValue / maxValue) * 100;
+                        
+                        return (
+                          <div key={index} className="mb-3">
+                            <p className="font-medium text-indigo-700 mb-1">{line}</p>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="bg-indigo-600 h-2 rounded-full" 
+                                style={{ width: `${percentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      
+                      // Check if it's an empty line
+                      if (line.trim() === '') {
+                        return <div key={index} className="h-2"></div>;
+                      }
+                      
+                      // Default paragraph formatting
+                      return <p key={index} className="mb-2">{line}</p>;
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-gray-600">No report analysis available</p>
+                )}
+              </div>
+              
+              {/* Download PDF section */}
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={downloadDetailedReport}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  Download Detailed Report
+                </button>
               </div>
               
               <div className="flex justify-between mt-8">

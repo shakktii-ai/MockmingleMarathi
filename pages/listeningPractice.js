@@ -197,34 +197,86 @@ function ListeningPractice() {
 
   // Play audio for the current question
   const playAudio = () => {
-    // In a real implementation, this would play actual audio files
-    // For demo purposes, we'll use text-to-speech as a placeholder
-    const currentQuestion = questions[currentIndex];
-    const textToSpeak = currentQuestion.content.replace('[Audio:', '').replace(']', '');
-    
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.lang = 'en-US';
-    utterance.rate = 1.0;
-    
-    // Try to select a good voice
-    const voices = window.speechSynthesis.getVoices();
-    const preferredVoices = voices.filter(voice => 
-      voice.name.includes('Google') || 
-      voice.name.includes('Microsoft') || 
-      voice.name.includes('Female')
-    );
-    
-    if (preferredVoices.length > 0) {
-      utterance.voice = preferredVoices[0];
+    if (!questions || !questions[currentIndex]) {
+      console.error('No current question available to play audio');
+      return;
     }
     
-    window.speechSynthesis.speak(utterance);
-    setAudioPlayed(true);
-    
-    // Start the timer after audio plays
-    utterance.onend = () => {
+    try {
+      // In a real implementation, this would play actual audio files
+      // For demo purposes, we'll use text-to-speech as a placeholder
+      const currentQuestion = questions[currentIndex];
+      
+      // Make sure we have content to speak
+      if (!currentQuestion.content) {
+        console.error('Question has no content to speak');
+        alert('Error: Question content is missing. Please try another question.');
+        return;
+      }
+      
+      // Clean up content text for speaking
+      const textToSpeak = currentQuestion.content
+        .replace(/\[Audio:\s*|\]/g, '') // Remove [Audio:] tags if present
+        .replace(/\n/g, ' ')           // Replace newlines with spaces
+        .trim();                       // Trim any extra whitespace
+      
+      console.log('Speaking text:', textToSpeak);
+      
+      // Create and configure the speech synthesis utterance
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      utterance.lang = 'en-US';
+      utterance.rate = 1.0;
+      
+      // Force voices to load if they haven't already
+      speechSynthesis.getVoices();
+      
+      // Set up a timeout to ensure we get voices
+      setTimeout(() => {
+        // Try to select a good voice
+        const voices = window.speechSynthesis.getVoices();
+        console.log('Available voices:', voices.length);
+        
+        const preferredVoices = voices.filter(voice => 
+          voice.name.includes('Google') || 
+          voice.name.includes('Microsoft') || 
+          voice.name.includes('Female')
+        );
+        
+        if (preferredVoices.length > 0) {
+          utterance.voice = preferredVoices[0];
+          console.log('Using voice:', preferredVoices[0].name);
+        } else if (voices.length > 0) {
+          // Fallback to any available voice
+          utterance.voice = voices[0];
+          console.log('Using fallback voice:', voices[0].name);
+        }
+        
+        // Set up events before speaking
+        utterance.onstart = () => {
+          console.log('Speech started');
+        };
+        
+        utterance.onend = () => {
+          console.log('Speech ended');
+          startTimer();
+        };
+        
+        utterance.onerror = (event) => {
+          console.error('Speech synthesis error:', event);
+          // Start timer even if speech fails
+          startTimer();
+        };
+        
+        // Actually speak the text
+        window.speechSynthesis.speak(utterance);
+        setAudioPlayed(true);
+      }, 100); // Short delay to make sure voices are loaded
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      alert('There was an error playing the audio. Please try again.');
+      // Still start the timer even if speech fails
       startTimer();
-    };
+    }
   };
 
   // Start timer for the current question
@@ -762,8 +814,46 @@ function ListeningPractice() {
                 <h2 className="text-xl font-bold text-gray-800 mb-2">
                   {questions[currentIndex]?.instructions || "Listen to the audio and answer:"}
                 </h2>
-                <div className="p-4 bg-pink-50 rounded-lg text-pink-900">
-                  {questions[currentIndex]?.content || ""}
+                
+                {/* Audio content section */}
+                <div className="p-4 bg-pink-50 rounded-lg text-pink-900 mb-4">
+                  {questions[currentIndex]?.content ? (
+                    <div>
+                      {questions[currentIndex].content
+                        .split('\n')
+                        .map((line, i) => {
+                          // Process any audio tags in the line
+                          const audioMatch = line.match(/\[Audio:\s*([^\]]*)\]/g);
+                          if (audioMatch) {
+                            const cleanLine = line.replace(/\[Audio:\s*([^\]]*)\]/g, '');
+                            return (
+                              <p key={i} className={i > 0 ? 'mt-2' : ''}>
+                                {cleanLine}
+                                {audioMatch.map((match, j) => {
+                                  const audioContent = match.replace(/\[Audio:\s*|\]/g, '');
+                                  return (
+                                    <em key={`audio-${j}`} className="ml-2 text-gray-600">
+                                      (Audio: {audioContent})
+                                    </em>
+                                  );
+                                })}
+                              </p>
+                            );
+                          }
+                          return (
+                            <p key={i} className={i > 0 ? 'mt-2' : ''}>
+                              {line}
+                            </p>
+                          );
+                        })}
+                    </div>
+                  ) : "No content available"}
+                </div>
+                
+                {/* Question text - Added to display the actual question */}
+                <div className="p-4 bg-indigo-50 rounded-lg text-indigo-900 border border-indigo-100">
+                  <h3 className="font-bold mb-2">Question:</h3>
+                  <p>{questions[currentIndex]?.questionText || questions[currentIndex]?.question || "What is the main topic of the audio?"}</p>
                 </div>
                 
                 {/* Audio player section */}
