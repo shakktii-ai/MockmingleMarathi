@@ -77,7 +77,7 @@ export default function Login() {
 
                 setTimeout(() => {
                     router.push({
-                        pathname: '/Dashboard', 
+                        pathname: '/dashboard', 
                         query: { user: response.user },
                     });
                 }, 1000);
