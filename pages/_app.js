@@ -75,7 +75,8 @@ export default function App({ Component, pageProps }) {
   };
 
   const isAdminRoute = router.pathname.startsWith("/admin");
-const isDashboardRoute = router.pathname.startsWith("/");
+  const isHomeRoute = router.pathname === "/";
+
   return (
     <>
       {isAdminRoute ? (
@@ -86,7 +87,7 @@ const isDashboardRoute = router.pathname.startsWith("/");
       ) : (
         <>
         
-        {isDashboardRoute && <Navbar user={user} Logout={logout} />}
+        {isHomeRoute && <Navbar user={user} Logout={logout} />}
       
           <Component {...pageProps} user={user} Logout={logout} />
         </>

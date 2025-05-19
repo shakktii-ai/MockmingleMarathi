@@ -12,97 +12,24 @@ export default function dashboard({ Logout, user }) {
   const [firstName, setFirstName] = useState(null); // State to store the first name
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // State to control mobile menu
   const router = useRouter(); // Next.js router to navigate to /role
-  const recognition = useRef(null); // Reference to the speech recognition instance
-  const [isRecognizing, setIsRecognizing] = useState(false); // To track whether recognition is ongoing
-  const [isIphone, setIsIphone] = useState(false); // State to track if the device is iPhone
-  const [userr, setUserr] = useState(null);
 
-  const speak = (text) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US'; // Set language to English
-    window.speechSynthesis.speak(utterance);
-  };
+
 
   useEffect(() => {
-    // Detect if the device is iPhone
-    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      setIsIphone(true);
-    }
-
-    // Delay speech synthesis for 1 second after page load
-    const timeoutId = setTimeout(() => {
-      const userFromStorage = JSON.parse(localStorage.getItem('user'));
-      setUserr(userFromStorage); // Set the user state from localStorage
-
-      if (userFromStorage) {
-        const firstName = userFromStorage?.fullName?.split(' ')[0]; // Extract first name from user
-        setFirstName(firstName); // Set first name in the state
-
-        // Speak the instructions once user data is loaded
-        speak(`Hey ${firstName}, welcome back! Just say 'I'm ready' when you're all set!`);
-      }
-    }, 1000); // Delay by 1 second after page load
-
-    return () => clearTimeout(timeoutId); // Cleanup timeout on component unmount
-  }, [isIphone]);
-
-  useEffect(() => {
-    // Initialize Speech Recognition API
-    const initSpeechRecognition = () => {
-      if (window.SpeechRecognition || window.webkitSpeechRecognition) {
-        recognition.current = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.current.lang = "en-US";
-        recognition.current.continuous = true; // Continuous recognition
-        recognition.current.interimResults = false;
-
-        recognition.current.onstart = () => {
-          console.log("Speech recognition started.");
-          setIsRecognizing(true); // Set the recognizing flag to true
-        };
-
-        recognition.current.onend = () => {
-          console.log("Speech recognition ended.");
-          setIsRecognizing(false); // Set the recognizing flag to false
-
-          // Restart recognition only if it's fully ended and not already recognizing
-          if (recognition.current && !isRecognizing && recognition.current.state === "inactive") {
-            console.log("Speech recognition restarted."); // Debug log
-            recognition.current.start(); // Restart recognition
+          if (!localStorage.getItem("token")) {
+            router.push("/login");
+          } else {
+            const userFromStorage = JSON.parse(localStorage.getItem('user'));
+          
+            
           }
-        };
+        }, []);
 
-        recognition.current.onresult = (event) => {
-          const transcript = event.results[0][0].transcript.toLowerCase();
-          console.log("Transcript: ", transcript);
+ 
 
-          // If the user says "I am ready", navigate to /role
-          if (transcript.includes("i am ready")) {
-            router.push("/role"); // Redirect to /role when "I am ready" is spoken
-          }
-        };
+ 
 
-        // Start listening when the page loads if it's not already started
-        if (recognition.current && !isRecognizing) {
-          recognition.current.start();
-        }
-      } else {
-        console.error("Speech recognition is not supported in this browser.");
-      }
-    };
-
-    initSpeechRecognition();
-
-    // Check if there’s a notification stored in localStorage when the component mounts
-    const checkStorage = () => {
-      const storedNotification = localStorage.getItem("store");
-      if (storedNotification) {
-        setNotification(true);
-      }
-    };
-
-    checkStorage();
-  }, [router, isRecognizing]);
-
+ 
   const toggleDropdown = () => setDropdown(prev => !prev);
   const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
 
@@ -289,12 +216,7 @@ export default function dashboard({ Logout, user }) {
             <img src="/Logo.png" alt="Logo" className="w-16 h-16 object-contain" />
           </div>
 
-          {isIphone && firstName && (
-            <div onClick={() => speak(`Hey ${firstName}, welcome back! Just say 'I'm ready' when you're all set!`)}>
-              <h1 className="text-4xl font-bold mt-4 text-pink-400">Job</h1>
-              <h2 className="text-3xl font-bold text-pink-400">Interview</h2>
-            </div>
-          )}
+          
 
           {/* Hero Section */}
           <div className="relative mb-10 flex flex-col md:flex-row items-center justify-center text-white max-w-7xl mx-auto">
