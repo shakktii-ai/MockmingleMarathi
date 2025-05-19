@@ -1656,7 +1656,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="min-h-screen bg-black px-4 bg-cover flex flex-col items-center justify-center">
+      <div className="min-h-screen  bg-black px-4 bg-cover flex flex-col items-center justify-center overflow-x-hidden sm:overflow-x-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-screen border-black justify-center">
 
           {/* Image section */}
@@ -1684,7 +1684,7 @@ export default function Home() {
       </div>
 
 
-      <div className="mt-16 w-full rounded-t-[6.188rem] shadow-[0_0_5px_5px_rgba(0,0,0,0.10)] bg-gradient-to-t from-[#76626A] via-[#AE98B3] to-[#D9C0CB] px-4 sm:px-10 py-10">
+      <div className="overflow-x-hidden mt-16 w-full rounded-t-[6.188rem] shadow-[0_0_5px_5px_rgba(0,0,0,0.10)] bg-gradient-to-t from-[#76626A] via-[#AE98B3] to-[#D9C0CB] px-4 sm:px-10 py-10">
         {/* Heading */}
         <h1
           className="text-2xl lg:text-4xl font-bold text-left py-4 text-black"
@@ -1957,7 +1957,7 @@ export default function Home() {
       ))}
     </div>
         </div>
-        <footer className="bg-black h-[17rem] overflow-y-hidden">
+        <footer className="bg-black h-[17rem] overflow-y-hidden overflow-x-hidden">
 
           <div className="grid grid-cols-2 ">
             <div>
