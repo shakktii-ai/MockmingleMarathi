@@ -15,6 +15,7 @@
     "bcryptjs": "^2.4.3",
     "chart.js": "^4.4.9",
     "classnames": "^2.5.1",
+    "cloudinary": "^2.6.1",
     "cookie": "^1.0.2",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
