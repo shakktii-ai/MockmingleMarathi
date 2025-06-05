@@ -3,44 +3,25 @@ import User from "../../models/User";
 import connectDb from "@/middleware/dbConnect";
 import multer from 'multer';
 import { runMiddleware } from "@/middleware/runMiddleware";
-import fs from 'fs';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
 import { promisify } from 'util';
-import mongoose from 'mongoose';
+import { Readable } from 'stream';
 
-// Convert fs methods to use promises
-const writeFile = promisify(fs.writeFile);
-const unlink = promisify(fs.unlink);
-const mkdir = promisify(fs.mkdir);
-
-// Ensure uploads directory exists
-const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: async function (req, file, cb) {
-        try {
-            if (!fs.existsSync(uploadsDir)) {
-                await mkdir(uploadsDir, { recursive: true });
-            }
-            cb(null, uploadsDir);
-        } catch (error) {
-            console.error('Error creating uploads directory:', error);
-            cb(error);
-        }
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname).toLowerCase();
-        cb(null, 'profile-' + uniqueSuffix + ext);
-    }
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+// Configure multer for memory storage (no disk writing)
+const storage = multer.memoryStorage();
 
 // File filter to allow only images
 const fileFilter = (req, file, cb) => {
     try {
         const filetypes = /jpe?g|png|gif/;
-        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const extname = filetypes.test(file.originalname.toLowerCase());
         const mimetype = filetypes.test(file.mimetype);
 
         if (mimetype && extname) {
@@ -54,7 +35,7 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-// Initialize multer with error handling
+// Initialize multer with memory storage
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
@@ -63,6 +44,25 @@ const upload = multer({
         files: 1
     }
 });
+
+// Helper function to upload buffer to Cloudinary
+const uploadToCloudinary = (buffer) => {
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: 'user-profiles' },
+            (error, result) => {
+                if (error) return reject(error);
+                resolve(result);
+            }
+        );
+
+        const bufferStream = new Readable();
+        bufferStream.push(buffer);
+        bufferStream.push(null);
+        
+        bufferStream.pipe(uploadStream);
+    });
+};
 
 var CryptoJS = require("crypto-js");
 
@@ -78,11 +78,13 @@ const handler = async (req, res) => {
         return res.status(405).json({ success: false, message: 'Method not allowed' });
     }
 
+    let profileImageUrl = '';
+
     try {
-        // First, handle the file upload if present
+        // Handle file upload if present
         await new Promise((resolve, reject) => {
             const uploadSingle = upload.single('profileImg');
-            uploadSingle(req, res, (err) => {
+            uploadSingle(req, res, async (err) => {
                 if (err) {
                     console.error('File upload error:', err);
                     return reject({
@@ -90,6 +92,21 @@ const handler = async (req, res) => {
                         message: err.message || 'Error uploading file',
                     });
                 }
+                
+                // If file was uploaded, upload to Cloudinary
+                if (req.file) {
+                    try {
+                        const result = await uploadToCloudinary(req.file.buffer);
+                        profileImageUrl = result.secure_url;
+                    } catch (uploadError) {
+                        console.error('Cloudinary upload error:', uploadError);
+                        return reject({
+                            status: 500,
+                            message: 'Error uploading image to cloud storage',
+                        });
+                    }
+                }
+                
                 resolve();
             });
         });
@@ -99,7 +116,11 @@ const handler = async (req, res) => {
         try {
             formData = req.body.data ? JSON.parse(req.body.data) : req.body;
         } catch (e) {
-            formData = req.body;
+            console.error('Error parsing form data:', e);
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Invalid form data format' 
+            });
         }
 
         const { fullName, email, mobileNo, address, collageName, education, password, confirmPassword, DOB } = formData;
@@ -213,33 +234,17 @@ const handler = async (req, res) => {
                 message: 'Please enter a valid date of birth (YYYY-MM-DD)'
             });
         }
-
-        // Validate mobile number format (10 digits)
-        const mobileRegex = /^\d{10}$/;
-        if (!mobileRegex.test(mobileNo)) {
-            if (req.file) {
-                try {
-                    await unlink(req.file.path);
-                } catch (error) {
-                    console.error('Error cleaning up file after validation error:', error);
-                }
-            }
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Please enter a valid 10-digit mobile number'
-            });
-        }
-
         const user = new User({
-            fullName,
-            email,
-            mobileNo,
-            address,
-            collageName,
-            education,
-            DOB,
-            password,
-            profileImg: profileImgPath,
+            fullName: fullName,
+            email: email,
+            mobileNo: mobileNo,
+            address: address,
+            collageName: collageName,
+            education: education,
+            password: CryptoJS.AES.encrypt(password, process.env.SECRET_KEY).toString(),
+            DOB: DOB,
+            profileImg: profileImageUrl, // Use the Cloudinary URL
+            verified: false,
             no_of_interviews: 1,
             no_of_interviews_completed: 0,
             createdAt: new Date()
