@@ -99,7 +99,7 @@ function PracticeProgress() {
   return (
     <>
       <Head>
-        <title>SHAKKTII AI - Practice Progress</title>
+        <title>SHAKKTII AI - प्रॅक्टिस प्रोग्रेस</title>
       </Head>
       <div className="min-h-screen bg-gray-100" style={{ backgroundImage: "url('/BG.jpg')", backgroundSize: 'cover' }}>
         <div className="container mx-auto px-4 py-16">
@@ -111,12 +111,12 @@ function PracticeProgress() {
                 className="flex items-center text-purple-600 hover:text-purple-800 transition-colors"
               >
                 <img src="/2.svg" alt="Back" className="w-8 h-8 mr-2" />
-                <span className="text-lg font-medium">Back to Practices</span>
+                <span className="text-lg font-medium">सरावांकडे परत जा</span>
               </button>
             </div>
             <div className="flex items-center">
               <div className="mr-4 text-right">
-                <p className="text-sm text-gray-600">Progress for</p>
+                <p className="text-sm text-gray-600">प्रोग्रेस</p>
                 <p className="font-semibold text-lg text-purple-900">{userName}</p>
               </div>
               <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
@@ -127,9 +127,9 @@ function PracticeProgress() {
 
           {/* Title */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-purple-900">Practice Progress Report</h1>
+            <h1 className="text-4xl font-bold text-purple-900">प्रॅक्टिस प्रोग्रेस रिपोर्ट</h1>
             <p className="text-lg text-gray-700 mt-2">
-              Track your improvement across different practice areas
+              तुमच्या सुधारणा विविध प्रॅक्टिस क्षेत्रांमध्ये ट्रॅक करा.
             </p>
           </div>
 
@@ -158,28 +158,28 @@ function PracticeProgress() {
             <>
               {/* Overall Stats */}
               <div className="bg-white rounded-xl shadow-lg p-6 mb-10">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Overall Progress</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">ओव्हरऑल प्रोग्रेस</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 flex flex-col items-center">
-                    <span className="text-sm text-gray-600">Sessions Completed</span>
+                    <span className="text-sm text-gray-600">सेशन्स पूर्ण झाले</span>
                     <span className="text-3xl font-bold text-purple-900">{overallStats.totalSessionsCompleted}</span>
                   </div>
                   
                   <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 flex flex-col items-center">
-                    <span className="text-sm text-gray-600">Questions Attempted</span>
+                    <span className="text-sm text-gray-600">प्रश्नांची उत्तरे दिली</span>
                     <span className="text-3xl font-bold text-purple-900">{overallStats.totalQuestionsAttempted}</span>
                   </div>
                   
                   <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 flex flex-col items-center">
-                    <span className="text-sm text-gray-600">Average Score</span>
+                    <span className="text-sm text-gray-600">सरासरी गुण</span>
                     <span className="text-3xl font-bold text-purple-900">
                       {overallStats.averageScore.toFixed(1)} / 3
                     </span>
                   </div>
                   
                   <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 flex flex-col items-center">
-                    <span className="text-sm text-gray-600">Total Time Practicing</span>
+                    <span className="text-sm text-gray-600">एकूण सरावाचा वेळ</span>
                     <span className="text-3xl font-bold text-purple-900">{overallStats.formattedTimeSpent}</span>
                   </div>
                 </div>
@@ -187,7 +187,7 @@ function PracticeProgress() {
                 {/* Skill Breakdown Bar Chart */}
                 {Object.keys(overallStats.skillBreakdown).length > 0 && (
                   <div className="mt-8">
-                    <h3 className="text-lg font-semibold text-gray-700 mb-4">Skill Breakdown</h3>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-4">स्किल ब्रेकडाउन</h3>
                     <div className="space-y-4">
                       {Object.entries(overallStats.skillBreakdown).map(([skill, data]) => (
                         <div key={skill} className="space-y-1">
@@ -220,7 +220,7 @@ function PracticeProgress() {
                         <div className="flex justify-between items-start mb-4">
                           <div>
                             <h3 className="text-xl font-bold text-gray-800">{progress.skillArea}</h3>
-                            <p className="text-sm text-gray-600">{progress.difficulty} Level</p>
+                            <p className="text-sm text-gray-600">{progress.difficulty} लेव्हल</p>
                           </div>
                           <div className="w-16 h-16">
                             <CircularProgressbar
@@ -241,26 +241,26 @@ function PracticeProgress() {
                         
                         <div className="grid grid-cols-2 gap-3 text-sm mb-4">
                           <div className="bg-gray-50 p-2 rounded">
-                            <p className="text-gray-500">Sessions</p>
+                            <p className="text-gray-500">सेशन्स</p>
                             <p className="font-medium">{progress.sessionsCompleted}</p>
                           </div>
                           <div className="bg-gray-50 p-2 rounded">
-                            <p className="text-gray-500">Questions</p>
+                            <p className="text-gray-500">प्रश्न</p>
                             <p className="font-medium">{progress.questionsAttempted}</p>
                           </div>
                           <div className="bg-gray-50 p-2 rounded">
-                            <p className="text-gray-500">Time Spent</p>
+                            <p className="text-gray-500">लागलेला वेळ</p>
                             <p className="font-medium">{progress.formattedTimeSpent}</p>
                           </div>
                           <div className="bg-gray-50 p-2 rounded">
-                            <p className="text-gray-500">Last Practice</p>
+                            <p className="text-gray-500">अखेरचा सराव</p>
                             <p className="font-medium">{formatDate(progress.lastUpdated).split(',')[0]}</p>
                           </div>
                         </div>
                         
                         {progress.strengths.length > 0 && (
                           <div className="mb-3">
-                            <h4 className="text-sm font-medium text-gray-700 mb-1">Your Strengths:</h4>
+                            <h4 className="text-sm font-medium text-gray-700 mb-1">तुमची क्षमता:</h4>
                             <div className="flex flex-wrap gap-1">
                               {progress.strengths.map((strength, i) => (
                                 <span 
@@ -276,7 +276,7 @@ function PracticeProgress() {
                         
                         {progress.areasToImprove.length > 0 && (
                           <div>
-                            <h4 className="text-sm font-medium text-gray-700 mb-1">Areas to Improve:</h4>
+                            <h4 className="text-sm font-medium text-gray-700 mb-1">सुधारणा आवश्यक क्षेत्रे:</h4>
                             <div className="flex flex-wrap gap-1">
                               {progress.areasToImprove.map((area, i) => (
                                 <span 
@@ -301,7 +301,7 @@ function PracticeProgress() {
                             }}
                             className={`px-4 py-2 rounded-lg text-white text-sm font-medium bg-gradient-to-r ${getSkillColor(progress.skillArea)} hover:opacity-90`}
                           >
-                            Continue Practicing
+                            सराव सुरू ठेवा
                           </button>
                         </div>
                       </div>
@@ -310,22 +310,22 @@ function PracticeProgress() {
                 </div>
               ) : (
                 <div className="bg-white rounded-xl shadow-lg p-8 text-center mb-10">
-                  <h3 className="text-xl font-bold text-gray-800 mb-3">No practice data yet</h3>
+                  <h3 className="text-xl font-bold text-gray-800 mb-3">सरावाचा डेटा अद्याप उपलब्ध नाही</h3>
                   <p className="text-gray-600 mb-6">
-                    Start practicing to see your progress here. Select a practice type and difficulty level to begin.
+                    इथे तुमची प्रोग्रेस पाहण्यासाठी सराव सुरू करा. सुरूवात करण्यासाठी सरावाचा प्रकार आणि डिफिकल्टी लेव्हल निवडा.
                   </p>
                   <button
                     onClick={() => router.push('/practices')}
                     className="bg-gradient-to-r from-pink-500 to-purple-600 text-white py-2 px-6 rounded-lg font-medium hover:from-pink-600 hover:to-purple-700"
                   >
-                    Start Practicing
+                    सराव सुरू ठेवा
                   </button>
                 </div>
               )}
               
               {/* Recent Activity */}
               <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Recent Activity</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">रीसेंट अ‍ॅक्टिव्हिटी</h2>
                 
                 {recentActivity.length > 0 ? (
                   <div className="divide-y divide-gray-200">
@@ -377,9 +377,8 @@ function PracticeProgress() {
                 ) : (
                   <div className="text-center py-6">
                     <p className="text-gray-600">
-                      No recent activity to display. Start practicing to see your activity here.
-                    </p>
-                  </div>
+                     सध्या कोणतीही अ‍ॅक्टिव्हिटी उपलब्ध नाही. तुमच्या प्रोग्रेसचे परीक्षण करण्यासाठी कृपया सराव सुरू करा.
+                    </p>                  </div>
                 )}
               </div>
             </>

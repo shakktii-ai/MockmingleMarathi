@@ -1,6 +1,7 @@
 
 import mongoose from 'mongoose';
 import Report from '@/models/Report';  // Assuming Report is a Mongoose model for storing reports
+import { cloneUniformsGroups } from 'three/src/renderers/shaders/UniformsUtils';
 
 // API handler to store and retrieve reports
 export default async function handler(req, res) {
@@ -11,19 +12,20 @@ export default async function handler(req, res) {
 
   // Handle POST request (for storing new report)
   if (req.method === 'POST') {
-    const { role, email, collageName, reportAnalysis } = req.body;
-
+    const { standards,subject, email, collageName, reportAnalysis } = req.body;
+       console.log(res.body);
     // Validate required fields
-    if (!role || !email || !collageName || !reportAnalysis) {
+    if (!standards || !subject || !email || !collageName || !reportAnalysis) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
     try {
       // Create a new report in the Report model
       const newReport = new Report({
-        role,
-        collageName,
+        standards,
+        subject,
         email,
+        collageName,
         reportAnalysis,
       });
 

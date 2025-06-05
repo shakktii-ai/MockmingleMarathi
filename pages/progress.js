@@ -271,7 +271,7 @@ export default function Progress() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-2xl font-semibold">Loading reports...</div>
+        <div className="text-2xl font-semibold">रिपोर्ट्स लोड होत आहेत</div>
       </div>
     );
   }
@@ -279,13 +279,13 @@ export default function Progress() {
   const chartData = prepareChartData();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h1 className="text-3xl font-bold text-center text-gray-800">My Interview Progress</h1>
+          <h1 className="text-3xl font-bold text-center text-gray-800">मुलाखतीचा प्रोग्रेस अहवाल</h1>
           {userEmail && (
             <p className="text-center text-gray-600 mt-2">
-              Showing progress for: <span className="font-semibold">{userEmail}</span>
+             प्रोग्रेस दाखवत आहे: <span className="font-semibold">{userEmail}</span>
             </p>
           )}
         </div>
@@ -294,13 +294,13 @@ export default function Progress() {
         <div className="bg-white p-6 rounded-lg shadow-lg col-span-2 transition-all duration-300 hover:shadow-xl">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h2 className="text-xl font-semibold text-gray-800">Detailed Score Progress</h2>
-              <p className="text-sm text-gray-500 mt-1">Track your improvement in each skill area over time</p>
+              <h2 className="text-xl font-semibold text-gray-800">गुणांचा सखोल अभ्यास</h2>
+              <p className="text-sm text-gray-500 mt-1">तुमच्या कौशल्यांतील बदल आणि सुधारणा ट्रॅक करा</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {reports.length > 0 && (
                 <div className="bg-gray-50 border border-gray-200 px-3 py-1 rounded-lg text-xs font-medium flex items-center shadow-sm">
-                  <span className="text-gray-700">Latest Interview:</span> 
+                  <span className="text-gray-700">लेटेस्ट मुलाखती:</span> 
                   <span className="text-gray-900 ml-1">{new Date(reports[reports.length - (reports.length - 1)].date).toLocaleDateString()}</span>
                 </div>
               )}
@@ -311,7 +311,7 @@ export default function Progress() {
                 </div>
               )}
               <div className="bg-blue-50 border border-blue-100 px-3 py-1 rounded-lg text-xs font-medium text-blue-700 shadow-sm">
-                Total: {reports.length} Interviews
+                एकूण: {reports.length} मुलाखती
               </div>
             </div>
           </div>
@@ -402,17 +402,17 @@ export default function Progress() {
         <div className="bg-white p-6 rounded-lg shadow-lg col-span-2 md:col-span-1 transition-all duration-300 hover:shadow-xl">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-800">Performance Analysis</h2>
+              <h2 className="text-xl font-semibold text-gray-800">परफॉर्मन्स अ‍ॅनालिसिस</h2>
               <div className="flex items-center gap-3">
                 <select 
                   className="form-select rounded-md border-gray-300 shadow-sm text-sm py-1"
                   value={selectedInterview}
                   onChange={(e) => setSelectedInterview(e.target.value)}
                 >
-                  <option value="latest">Latest Interview</option>
+                  <option value="latest">लेटेस्ट मुलाखती</option>
                   {sortedReports.map((report, index) => (
                     <option key={report.date} value={index}>
-                      Interview {index + 1} ({new Date(report.date).toLocaleDateString()})
+                      Iमुलाखती {index + 1} ({new Date(report.date).toLocaleDateString()})
                     </option>
                   ))}
                 </select>
@@ -477,9 +477,9 @@ export default function Progress() {
 
         <div className="bg-white p-6 rounded-lg shadow-lg col-span-2 md:col-span-1 transition-all duration-300 hover:shadow-xl">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">Score by Job Role</h2>
+            <h2 className="text-xl font-semibold text-gray-800">	जॉब रोलनुसार गुण</h2>
             <div className="text-sm text-gray-500">
-              {reports.length} total interviews
+              {reports.length}  एकूण मुलाखती
             </div>
           </div>
           <div className="h-80"> {/* Added fixed height container */}
@@ -533,8 +533,8 @@ export default function Progress() {
         <div className="bg-white p-6 rounded-lg shadow-lg col-span-2 transition-all duration-300 hover:shadow-xl">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h2 className="text-xl font-semibold text-gray-800">Compare Interviews</h2>
-              <p className="text-sm text-gray-500 mt-1">Select two interview dates to compare scores</p>
+              <h2 className="text-xl font-semibold text-gray-800">मुलाखतींची तुलना करा</h2>
+              <p className="text-sm text-gray-500 mt-1">गुणांची तुलना करण्यासाठी दोन मुलाखत तारखा निवडा</p>
             </div>
             {showComparison && (
               <button
@@ -551,7 +551,7 @@ export default function Progress() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">First Interview:</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">पहिली मुलाखत:</label>
               <select 
                 className="w-full form-select rounded-md border-gray-300 shadow-sm"
                 value={comparisonDates.first !== null ? comparisonDates.first : ''}
@@ -560,17 +560,17 @@ export default function Progress() {
                   setComparisonDates(prev => ({ ...prev, first: value }));
                 }}
               >
-                <option value="">Select interview date...</option>
+                <option value="">मुलाखतीची तारीख निवडा...</option>
                 {sortedReports.map((report, index) => (
                   <option key={`first-${report.date}`} value={index}>
-                    Interview {index + 1} ({new Date(report.date).toLocaleDateString()})
+                    मुलाखत {index + 1} ({new Date(report.date).toLocaleDateString()})
                   </option>
                 ))}
               </select>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Second Interview:</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">दुसरी मुलाखत:</label>
               <select 
                 className="w-full form-select rounded-md border-gray-300 shadow-sm"
                 value={comparisonDates.second !== null ? comparisonDates.second : ''}
@@ -579,10 +579,10 @@ export default function Progress() {
                   setComparisonDates(prev => ({ ...prev, second: value }));
                 }}
               >
-                <option value="">Select interview date...</option>
+                <option value="">मुलाखतीची तारीख निवडा...</option>
                 {sortedReports.map((report, index) => (
                   <option key={`second-${report.date}`} value={index}>
-                    Interview {index + 1} ({new Date(report.date).toLocaleDateString()})
+                    मुलाखत {index + 1} ({new Date(report.date).toLocaleDateString()})
                   </option>
                 ))}
               </select>
@@ -598,7 +598,7 @@ export default function Progress() {
                 disabled={comparisonDates.first === null || comparisonDates.second === null}
                 className={`w-full px-4 py-2 rounded-md text-white font-medium ${comparisonDates.first !== null && comparisonDates.second !== null ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'} transition-colors`}
               >
-                Compare Interviews
+                मुलाखतींची तुलना करा
               </button>
             </div>
           </div>
@@ -606,7 +606,7 @@ export default function Progress() {
           {showComparison && comparisonDates.first !== null && comparisonDates.second !== null && (
             <div className="mt-6 border-t pt-6">
               <h3 className="text-lg font-medium text-gray-800 mb-4">
-                Comparing Interview {comparisonDates.first + 1} vs Interview {comparisonDates.second + 1}
+                मुलाखत {comparisonDates.first + 1} आणि मुलाखत {comparisonDates.second + 1} यांची तुलना
               </h3>
               
               <div className="grid grid-cols-5 gap-4 mb-6">
@@ -622,16 +622,16 @@ export default function Progress() {
                         {dataset.label}
                       </div>
                       <div className="flex justify-between items-center text-sm">
-                        <div className="text-gray-600">Interview {comparisonDates.first + 1}:</div>
+                        <div className="text-gray-600">मुलाखत {comparisonDates.first + 1}:</div>
                         <div className="font-bold">{firstScore}/10</div>
                       </div>
                       <div className="flex justify-between items-center text-sm">
-                        <div className="text-gray-600">Interview {comparisonDates.second + 1}:</div>
+                        <div className="text-gray-600">मुलाखत {comparisonDates.second + 1}:</div>
                         <div className="font-bold">{secondScore}/10</div>
                       </div>
                       <div className="mt-2 pt-2 border-t border-gray-200">
                         <div className="flex justify-between items-center">
-                          <div className="text-xs text-gray-500">Change:</div>
+                          <div className="text-xs text-gray-500">अपडेट:</div>
                           <div className={`font-bold text-sm ${difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {difference > 0 ? '+' : ''}{difference.toFixed(1)} 
                             ({difference >= 0 ? '+' : ''}{percentChange}%)
@@ -644,16 +644,16 @@ export default function Progress() {
               </div>
               
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="text-md font-medium text-gray-700 mb-3">Overall Progress</h4>
+                <h4 className="text-md font-medium text-gray-700 mb-3">एकूण प्रोग्रेस</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <div className="text-sm text-gray-600 mb-1">Interview {comparisonDates.first + 1} Overall Score:</div>
+                    <div className="text-sm text-gray-600 mb-1">मुलाखत {comparisonDates.first + 1} एकूण गुण:</div>
                     <div className="text-2xl font-bold">
                       {sortedReports[comparisonDates.first]?.scores?.overall || 0}/50
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-600 mb-1">Interview {comparisonDates.second + 1} Overall Score:</div>
+                    <div className="text-sm text-gray-600 mb-1">मुलाखत {comparisonDates.second + 1} एकूण गुण:</div>
                     <div className="text-2xl font-bold">
                       {sortedReports[comparisonDates.second]?.scores?.overall || 0}/50
                     </div>
@@ -665,29 +665,29 @@ export default function Progress() {
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow-lg col-span-2 transition-all duration-300 hover:shadow-xl">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Detailed Analysis</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">सविस्तर विश्लेषण</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg transition-all duration-300 hover:shadow-md">
-              <div className="text-lg font-semibold text-gray-700">Total Interviews</div>
+              <div className="text-lg font-semibold text-gray-700">एकूण मुलाखती</div>
               <div className="text-3xl text-blue-600 font-bold mt-2">{reports.length}</div>
-              <div className="text-sm text-gray-500 mt-1">Completed Sessions</div>
+              <div className="text-sm text-gray-500 mt-1">पूर्ण झालेले सेशन्स</div>
             </div>
             <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg transition-all duration-300 hover:shadow-md">
-              <div className="text-lg font-semibold text-gray-700">Overall Score</div>
+              <div className="text-lg font-semibold text-gray-700">एकूण गुण</div>
               <div className="text-3xl text-green-600 font-bold mt-2">
                 {reports.length > 0 ? ((reports.reduce((acc, curr) => acc + (curr.scores?.overall || 0), 0) / reports.length)).toFixed(1) : '0.0'}/50
               </div>
-              <div className="text-sm text-gray-500 mt-1">Average Performance</div>
+              <div className="text-sm text-gray-500 mt-1">सरासरी परफॉर्मन्स</div>
             </div>
             <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg transition-all duration-300 hover:shadow-md">
-              <div className="text-lg font-semibold text-gray-700">Unique Roles</div>
+              <div className="text-lg font-semibold text-gray-700">युनिक रोल्स</div>
               <div className="text-3xl text-purple-600 font-bold mt-2">
                 {new Set(reports.map(r => r.role)).size}
               </div>
-              <div className="text-sm text-gray-500 mt-1">Different Positions</div>
+              <div className="text-sm text-gray-500 mt-1">वेगवेगळ्या पोझिशन्स</div>
             </div>
             <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg transition-all duration-300 hover:shadow-md">
-              <div className="text-lg font-semibold text-gray-700">Best Performance</div>
+              <div className="text-lg font-semibold text-gray-700">सर्वोत्तम परफॉर्मन्स</div>
               <div className="text-3xl text-orange-600 font-bold mt-2">
                 {reports.length > 0 ? (() => {
                   // Extract all scores properly and find the maximum
@@ -697,12 +697,12 @@ export default function Progress() {
                     return typeof score === 'number' && !isNaN(score) ? score : 0;
                   });
                   
-                  console.log('All scores for max calculation:', scores); // Debug all scores
+                  console.log('सर्व गुण जास्तीत जास्त गणनेसाठी:', scores); // Debug all scores
                   const maxScore = Math.max(...scores);
                   return maxScore;
                 })() : 0}/50
               </div>
-              <div className="text-sm text-gray-500 mt-1">Highest Score</div>
+              <div className="text-sm text-gray-500 mt-1">सर्वाधिक गुण</div>
             </div>
           </div>
         </div>

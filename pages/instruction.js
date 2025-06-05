@@ -13,63 +13,63 @@ function Instruction() {
     const slides = [
         {
             id: 1,
-            title: "Understand the job role",
+            title: "नोकरीची भूमिका समजून घ्या",
             img: '/Shawn.png',
-            content: "1. Understanding the job role means researching its key responsibilities, required skills, and expectations. This helps you tailor your resume, answer interview questions confidently, and demonstrate how your abilities align with the position.",
+            content: "1. नोकरीची भूमिका समजून घेणे म्हणजे त्या पदाच्या मुख्य जबाबदाऱ्या, आवश्यक कौशल्ये आणि अपेक्षा यांचा अभ्यास करणे होय. यामुळे तुम्हाला तुमचा रेज्युमे योग्य प्रकारे तयार करता येतो, मुलाखतीतील प्रश्नांना आत्मविश्वासाने उत्तर देता येतात आणि तुमच्या क्षमतेचा त्या पदाशी कसा संबंध आहे हे प्रभावीपणे दाखवता येते.",
         },
         {
             id: 2,
             img: '/Job_Discrioption.png',
-            title: "Understand the Job Description",
-            content: "2. Carefully read and analyze the job description to grasp the key qualifications, duties, and expectations. Prepare examples of how your skills and experiences match the job requirements",
+            title: "पदाचे तपशील समजून घ्या",
+            content: "2. नोकरीचे वर्णन काळजीपूर्वक वाचा आणि त्यातील मुख्य पात्रता, जबाबदाऱ्या, आणि अपेक्षा समजून घ्या. तुमच्या कौशल्यां आणि अनुभवांचा नोकरीच्या गरजांशी कसा सुसंगत आहे याची उदाहरणे तयार ठेवा.",
         },
         {
             id: 3,
             img: '/collages_background..png',
-            title: "Understand the collage's background",
-            content: "3. Understanding the collage's background means learning about its history, mission, values, products, services, and industry position. This helps you align your answers in interviews and show genuine interest in the organization",
+            title: "कॉलेजची पार्श्वभूमी समजून घ्या",
+            content: "3. कॉलेजची पार्श्वभूमी समजून घेणे म्हणजे त्याचा इतिहास, ध्येय, मूल्ये, उत्पादने, सेवा आणि उद्योगातील स्थान याबद्दल जाणून घेणे होय. यामुळे तुम्ही मुलाखतीत तुमची उत्तरे योग्य प्रकारे सादर करू शकता आणि संस्थेत खरी रुची दर्शवू शकता.",
         },
         {
             id: 4,
             img: '/Self_Introduction.png',
-            title: "Practice Your Self Introduction",
-            content: "4. Introduce yourself briefly, highlight key skills, experience, and achievements, and connect them to the job role",
+            title: "तुमची स्वतःची ओळख मांडण्याचा सराव करा",
+            content: "4. स्वतःची थोडक्यात ओळख द्या, महत्वाची कौशल्ये, अनुभव आणि यशे नमूद करा, आणि ते नोकरीच्या भूमिकेशी जोडा.",
         },
         {
             id: 5,
             img: '/Resume.png',
-            title: "Update Your Resume and Carry 1/2 copies",
-            content: "5. Ensure your resume and other application materials are updated, tailored to the job, and neatly organized. Bring multiple copies of your resume and any other requested documents",
+            title: "तुमचा रेज्युमे अपडेट करा आणि १-२ प्रती सोबत ठेवा",
+            content: "5. तुमचा रेज्युमे आणि इतर अर्जाच्या कागदपत्रे अद्ययावत, नोकरीच्या अनुरूप आणि नीटनेटके असतील याची खात्री करा. तुमचा रेज्युमे आणि इतर मागवलेली दस्तऐवजच्या अनेक प्रती सोबत आणा.",
         },
         {
             id: 6,
             img: '/Yourself_Professionally.png',
-            title: "Present Yourself Professionally",
-            content: "6. Dress appropriately for the industry and collage culture. Pay attention to grooming and personal hygiene to make a positive impression",
+            title: "प्रोफेशनलपणे स्वतःला सादर करा",
+            content: "6. इंडस्ट्री आणि कॉलेज संस्कृतीनुसार योग्य ड्रेसिंग करा. ग्रूमिंग आणि स्वच्छतेकडे लक्ष द्या, सकारात्मक प्रभावासाठी.",
         },
         {
             id: 7,
             img: '/Essential_Documents.png',
-            title: "Gather and Organize Essential Documents",
-            content: "7. Collect and neatly organize all necessary documents, such as certificates, references, and identification. Use a folder or portfolio to keep everything tidy and easily accessible",
+            title: "आवश्यक दस्तऐवज जमा करून नीटनेटके ठेवा",
+            content: "7.सर्व आवश्यक कागदपत्रे जसे की प्रमाणपत्रे, शिफारसी, आणि ओळखपत्र गोळा करा आणि नीटनेटके ठेवाः फोल्डर किंवा पोर्टफोलिओचा वापर करा जेणेकरून सर्व काही व्यवस्थित आणि सहज उपलब्ध राहील.",
         },
         {
             id: 8,
             img: '/collage_News.png',
-            title: "Stay Up-to-Date on collage News",
-            content: "8. Research the collage's recent news, achievements, and initiatives. This demonstrates your interest in the collage and can provide valuable conversation topics",
+            title: "कॉलेजच्या बातम्यांवर अपडेट रहा",
+            content: "8. कॉलेजच्या अलीकडील बातम्या, यश आणि उपक्रमांचा अभ्यास करा. यामुळे कॉलेजबद्दल तुमची रुची दिसून येते आणि मुलाखतीसाठी उपयुक्त चर्चा विषय मिळू शकतात.",
         },
         {
             id: 9,
             img: '/Thoughtful_Questions.png',
-            title: " Prepare Thoughtful Questions",
-            content: '9. Develop a list of insightful questions to ask the interviewer, such as "What are the biggest challenges facing the team?" or "Can you tell me more about the collage culture?',
+            title: " तपशिलवार प्रश्न तयार करा",
+            content: '9. मुलाखत घेतल्यावर विचारण्यासाठी विचारपूर्वक प्रश्नांची यादी तयार करा, जसे की “संघाला सर्वात मोठे आव्हाने कोणती आहेत?” किंवा “कॉलेजच्या संस्कृतीबद्दल थोडक्यात सांगू शकता का?”',
         },
         {
             id: 10,
             img: '/Rest_Preparation.png',
-            title: " Get Adequate Rest and Preparation",
-            content: '10. Ensure you get sufficient sleep and time to prepare before the interview. This will help you feel confident, focused, and ready to make a positive impression',
+            title: " योग्य विश्रांती घ्या आणि तयारी करा",
+            content: '10. मुलाखतीपूर्वी तुम्हाला पुरेशी झोप आणि तयारीसाठी वेळ मिळावा याची खात्री करा. यामुळे तुम्हाला आत्मविश्वास, एकाग्रता आणि सकारात्मक छाप देण्यासाठी तयारी होईल.',
         },
     ];
 
@@ -105,15 +105,15 @@ function Instruction() {
     };
 
     // Test speaker by reading a sentence
-    const testSpeaker = async () => {
-        setTestMessage('Testing speaker... Please listen carefully');
-        await speak('This is a speaker test. If you can hear this clearly, your speaker is working.');
-        setTestMessage('Speaker test complete. Click next to test microphone.');
+     const testSpeaker = async () => {
+        setTestMessage('स्पीकर तपासणी चालू आहे... कृपया काळजीपूर्वक ऐका');
+        await speak('हा स्पीकर चाचणी संदेश आहे. जर तुम्हाला हा स्पष्टपणे ऐकू येत असेल, तर तुमचा स्पीकर व्यवस्थित कार्यरत आहे.');
+        setTestMessage('स्पीकर तपासणी पूर्ण झाली आहे. मायक्रोफोन तपासण्यासाठी कृपया पुढील बटणावर क्लिक करा.');
     };
 
     // Test microphone by having user read a sentence
     const testMicrophone = async () => {
-        setTestMessage('Testing microphone... Please repeat after me: "The quick brown fox jumps over the lazy dog."');
+        setTestMessage('मायक्रोफोन तपासणी सुरू आहे. कृपया खालील वाक्य नीट उच्चारावे: "The quick brown fox jumps over the lazy dog."');
         
         // Initialize speech recognition
         recognitionRef.current = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -121,26 +121,26 @@ function Instruction() {
         recognitionRef.current.interimResults = false;
         
         // Speak the test sentence
-        await speak('Please repeat after me: The quick brown fox jumps over the lazy dog.');
+        await speak('कृपया माझ्या नंतर पुनः उच्चार करा: The quick brown fox jumps over the lazy dog.');
         
         // Start listening for user response
         recognitionRef.current.start();
-        setTestMessage('Listening... Please say: "The quick brown fox jumps over the lazy dog."');
+        setTestMessage('आम्ही तुमचा आवाज ऐकत आहोत, कृपया बोला: "The quick brown fox jumps over the lazy dog."');
         
         return new Promise(resolve => {
             recognitionRef.current.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
                 if (transcript.toLowerCase().includes('quick brown fox')) {
-                    setTestMessage('Microphone test successful!');
+                    setTestMessage('मायक्रोफोन तपासणी यशस्वीरीत्या पूर्ण झाली आहे');
                     resolve(true);
                 } else {
-                    setTestMessage('Please try again. Say: "The quick brown fox jumps over the lazy dog."');
+                    setTestMessage('कृपया पुन्हा प्रयत्न करा. खालील वाक्य माझ्या नंतर बोला: "The quick brown fox jumps over the lazy dog."');
                     resolve(false);
                 }
             };
             
             recognitionRef.current.onerror = () => {
-                setTestMessage('Microphone access denied. Please enable microphone permissions.');
+                setTestMessage('मायक्रोफोन एक्सेस डिनायड आहे. कृपया मायक्रोफोनसाठी परवानगी ऑन करा.');
                 resolve(false);
             };
         });
@@ -155,7 +155,7 @@ function Instruction() {
             const micWorking = await testMicrophone();
             if (micWorking) {
                 setTestPhase('done');
-                setTestMessage('Device tests complete! You can now begin the interview.');
+                setTestMessage('डिव्हाइस टेस्ट पूर्ण झाल्या आहेत! आता तुम्ही मुलाखत सुरू करू शकता.');
                 setIsButtonEnabled(true);
             }
         }
@@ -258,12 +258,12 @@ function Instruction() {
         
             if (!finalRes.ok) {
                 const errorData = await finalRes.json();
-                throw new Error(errorData?.error || "Failed to save collage data.");
+                throw new Error(errorData?.error || "कॉलेजची माहिती जतन करण्यात अयशस्वी झाले.");
             }
         
             const finalResponse = await finalRes.json();
             if (finalResponse.success) {
-                console.log("collage data updated/created successfully");
+                console.log("कॉलेज डेटा यशस्वीपणे अपडेट/तयार केला गेला आहे.");
             }
         } catch (error) {
             console.error("Error:", error.message);
@@ -282,7 +282,7 @@ function Instruction() {
             </div>
             <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
                 <div className="relative  max-w-xl   bg-opacity-80 rounded-xl shadow-lg sm:max-w-md md:max-w-lg">
-                    <div className="m-10 mb-20 rounded-lg text-sm text-center bg-gradient-to-r from-pink-800 to-purple-900 p-2">DEVICE TEST</div>
+                    <div className="m-10 mb-20 rounded-lg text-sm text-center bg-gradient-to-r from-pink-800 to-purple-900 p-2">डिव्हाइस टेस्ट</div>
                     <div className="bg-white h-44 rounded-xl shadow-lg p-6 w-96 relative">
                         {/* Header Badge */}
                         {slides.map((slide, index) => (
@@ -316,7 +316,7 @@ function Instruction() {
                                 onClick={handleNextTest}
                                 className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-md text-white"
                             >
-                                {testPhase === 'speaker' ? 'Next' : 'Test Microphone'}
+                                {testPhase === 'speaker' ? 'पुढे जा' : 'माईक टेस्ट करा'}
                             </button>
                         )}
                     </div>
@@ -327,7 +327,7 @@ function Instruction() {
                             disabled={!isButtonEnabled} 
                             className={`${isButtonEnabled ? 'bg-gradient-to-r from-pink-800 to-purple-900' : 'bg-gradient-to-r from-pink-200 to-purple-300 cursor-not-allowed'} px-4 py-2  rounded-md text-white`}
                         >
-                            I am ready to begin
+                            मी तयार आहे, सुरू करूया!
                         </button>
                     </div>
                 </div>

@@ -147,7 +147,7 @@
 import JobRole from '../../models/JobRole';
 import connectDb from '@/middleware/dbConnect';
 // import { ObjectId } from 'mongodb'; // Import ObjectId for comparison
-
+import Standard from '../../models/Standard';
 // Save answer API
 export async function handler(req, res) {
   if (req.method === 'PUT') {
@@ -161,7 +161,7 @@ export async function handler(req, res) {
 
     try {
       // Find the job role by email
-      const jobRole = await JobRole.findOne({ email,_id });
+      const jobRole = await Standard.findOne({ email,_id });
 
       // If job role not found
       if (!jobRole) {

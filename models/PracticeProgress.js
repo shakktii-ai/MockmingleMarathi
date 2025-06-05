@@ -17,7 +17,7 @@ const PracticeProgressSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     skillArea: { type: String, required: true, enum: ["Speaking", "Listening", "Reading", "Writing", "Personality"] },
-    difficulty: { type: String, required: true, enum: ["Beginner", "Moderate", "Expert"] },
+    difficulty: { type: String, required: true, enum: ["बिगिनर", "मॉडरेट", "एक्स्पर्ट"] },
     // Overall progress metrics
     sessionsCompleted: { type: Number, default: 0 },
     questionsAttempted: { type: Number, default: 0 },

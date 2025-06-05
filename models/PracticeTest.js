@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 const PracticeTestSchema = new mongoose.Schema(
   {
     cardId: { type: String, required: true },
-    skillArea: { type: String, required: true, enum: ["Speaking", "Listening", "Reading", "Writing", "Personality"] },
-    difficulty: { type: String, required: true, enum: ["Beginner", "Moderate", "Expert"] },
+    skillArea: { type: String, required: true, enum: ["Speaking", "Listening", "Reading", "लेखन सराव", "Personality"] },
+    difficulty: { type: String, required: true, enum: ["बिगिनर", "मॉडरेट", "एक्स्पर्ट"] },
     instructions: { type: String, required: true },
     content: { type: String, required: true },
     expectedResponse: { type: String },

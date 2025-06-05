@@ -1,579 +1,457 @@
 // pages/signup.js
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import axios from 'axios';
 
 const SignUp = () => {
-    const router = useRouter()
- 
-    const [fullName, setFullName] = useState("");
-    const [email, setEmail] = useState("");
-    const [mobileNo, setMobileNo] = useState("");
-    const [address, setAddress] = useState("");
-    const [collageName, setCollageName] = useState("SPPU");
-    const [education, setEducation] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [DOB, setDOB] = useState("");
-    const [profileImg, setProfileImg] = useState("");
-    
-    // Form validation states
-    const [passwordError, setPasswordError] = useState("");
-    const [formErrors, setFormErrors] = useState({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [generalError, setGeneralError] = useState("");
-    
-    // Password strength validation states
-    const [passwordStrength, setPasswordStrength] = useState(0); // 0: none, 1: weak, 2: medium, 3: strong
-    const [passwordValidation, setPasswordValidation] = useState({
-        minLength: false,
-        hasUppercase: false,
-        hasLowercase: false,
-        hasNumber: false,
-        hasSpecial: false
+    const router = useRouter();
+    const fileInputRef = useRef(null);
+
+    // Form state
+    const [formData, setFormData] = useState({
+        fullName: '',
+        email: '',
+        mobileNo: '',
+        address: '',
+        collageName: 'SPPU',
+        education: '',
+        DOB: '',
+        password: '',
+        confirmPassword: '',
+        profileImg: null
     });
-
-    const validatePassword = (password) => {
-        // Password validation criteria
-        const validations = {
-            minLength: password.length >= 8,
-            hasUppercase: /[A-Z]/.test(password),
-            hasLowercase: /[a-z]/.test(password),
-            hasNumber: /[0-9]/.test(password),
-            hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
-        };
-        
-        // Update validation state
-        setPasswordValidation(validations);
-        
-        // Calculate password strength
-        const criteriaCount = Object.values(validations).filter(Boolean).length;
-        if (password === '') {
-            setPasswordStrength(0); // Empty
-        } else if (criteriaCount <= 2) {
-            setPasswordStrength(1); // Weak
-        } else if (criteriaCount <= 4) {
-            setPasswordStrength(2); // Medium
-        } else {
-            setPasswordStrength(3); // Strong
-        }
-        
-        // Clear any previous password error if valid
-        if (criteriaCount >= 3) {
-            setFormErrors(prev => {
-                const newErrors = {...prev};
-                delete newErrors.password;
-                return newErrors;
-            });
-        }
-        
-        return criteriaCount >= 3; // Password is valid if it meets at least 3 criteria
-    };
     
-    const handlePasswordChange = (e) => {
-        const newPassword = e.target.value;
-        setPassword(newPassword);
-        validatePassword(newPassword);
-        
-        // If confirm password is filled, check match
-        if (confirmPassword) {
-            if (newPassword !== confirmPassword) {
-                setPasswordError("Passwords do not match!");
-            } else {
-                setPasswordError("");
-            }
-        }
-    };
+    const [formErrors, setFormErrors] = useState({});
+    const [generalError, setGeneralError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleConfirmPasswordChange = (e) => {
-        const value = e.target.value;
-        setConfirmPassword(value);
-        
-        // Check if passwords match
-        if (value && password !== value) {
-            setPasswordError("Passwords do not match!");
-        } else {
-            setPasswordError("");
-        }
-    };
-
-    const handlePasswordToggle = (e, fieldId) => {
-        const field = document.getElementById(fieldId);
-        const type = field.type === "password" ? "text" : "password";
-        field.type = type;
-        e.target.textContent = type === "password" ? "👁️" : "🙈";
-    };
-
-    
-    // Compress image before uploading
-    const compressImage = (file, maxWidth = 800, maxHeight = 800, quality = 0.7) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = (event) => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    // Create a canvas and get its context
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
-                    // Calculate new dimensions while maintaining aspect ratio
-                    if (width > height) {
-                        if (width > maxWidth) {
-                            height = Math.round((height * maxWidth) / width);
-                            width = maxWidth;
-                        }
-                    } else {
-                        if (height > maxHeight) {
-                            width = Math.round((width * maxHeight) / height);
-                            height = maxHeight;
-                        }
-                    }
-
-                    // Set canvas dimensions and draw the image
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // Convert to base64 format
-                    const dataUrl = canvas.toDataURL('image/jpeg', quality);
-                    resolve(dataUrl);
-                };
-                img.onerror = error => {
-                    reject(error);
-                };
-            };
-            reader.onerror = error => reject(error);
-        });
-    };
-    
+    // Handle input changes
     const handleChange = (e) => {
-        if (e.target.name == 'fullName') {
-            setFullName(e.target.value)
-        }
-        else if (e.target.name == 'email') {
-            setEmail(e.target.value)
-        }
-        else if (e.target.name == 'collageName') {
-            setCollageName(e.target.value)
-        }
-        else if (e.target.name == 'password') {
-            setPassword(e.target.value)
-        }
-        else if (e.target.name == 'mobileNo') {
-            setMobileNo(e.target.value)
-        }
-        else if (e.target.name == 'address') {
-            setAddress(e.target.value)
-        }
-        else if (e.target.name == 'education') {
-            setEducation(e.target.value)
-        } else if (e.target.name == 'DOB') {
-            setDOB(e.target.value)
-        } else if (e.target.name == "profileImg") {
-            const file = e.target.files[0];
-            if (file) {
-                // Check file size and type before compressing
-                if (file.size > 10 * 1024 * 1024) { // Greater than 10MB
-                    toast.error("Image too large. Please select an image smaller than 10MB", {
-                        position: "top-center"
-                    });
-                    return;
-                }
-                
-                if (!file.type.startsWith('image/')) {
-                    toast.error("Please select a valid image file", {
-                        position: "top-center"
-                    });
-                    return;
-                }
-                
-                // Compress the image
-                compressImage(file)
-                    .then(compressedImageData => {
-                        setProfileImg(compressedImageData);
-                    })
-                    .catch(error => {
-                        console.error("Error compressing image:", error);
-                        toast.error("Error processing image. Please try another image.", {
-                            position: "top-center"
-                        });
-                    });
+        const { name, value, files } = e.target;
+        
+        if (name === 'profileImg') {
+            if (files && files[0]) {
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: files[0]
+                }));
             }
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
         }
-    }
 
-const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Reset previous errors
-    setFormErrors({});
-    setGeneralError("");
-    setPasswordError("");
-    
-    // Password match validation
-    if (password !== confirmPassword) {
-        setPasswordError("Passwords do not match!");
-        return;
-    }
-    
-    // Password strength validation
-    const isPasswordValid = validatePassword(password);
-    if (!isPasswordValid) {
-        setFormErrors(prev => ({
-            ...prev,
-            password: "Password doesn't meet the minimum security requirements"
-        }));
-        return;
-    }
+        // Clear error when user types
+        if (formErrors[name]) {
+            setFormErrors(prev => ({
+                ...prev,
+                [name]: ''
+            }));
+        }
+    };
 
-    // Set submitting state to true to show loading/disable the button
-    setIsSubmitting(true);
-
-    const data = { profileImg, fullName, email, DOB, password, mobileNo, address, education, collageName };
-
-    try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/signup`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        const responseData = await res.json();
-
-        // Handle successful response
-        if (res.ok && responseData.success) {
-            // Clear all form fields
-            setProfileImg('');
-            setMobileNo('');
-            setConfirmPassword('');
-            setAddress('');
-            setEducation('');
-            setCollageName('SPPU');
-            setDOB('');
-            setEmail('');
-            setFullName('');
-            setPassword('');
-
-            toast.success('Your account has been created! Redirecting to login...', {
-                position: "top-center",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
-            
-            // Redirect to login page after 3 seconds
-            setTimeout(() => {
-                router.push('/login');
-            }, 3000);
-            
+    // Handle form submission
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setGeneralError('');
+        
+        // Basic validation
+        const errors = {};
+        if (!formData.fullName.trim()) errors.fullName = 'Full name is required';
+        if (!formData.email.includes('@')) errors.email = 'Please enter a valid email';
+        if (!formData.DOB) errors.DOB = 'Date of birth is required';
+        if (formData.password.length < 6) errors.password = 'Password must be at least 6 characters';
+        if (formData.password !== formData.confirmPassword) errors.confirmPassword = 'Passwords do not match';
+        if (!formData.mobileNo) errors.mobileNo = 'Mobile number is required';
+        if (!formData.address) errors.address = 'Address is required';
+        if (!formData.education) errors.education = 'Education is required';
+        
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
             return;
         }
 
-        // Handle validation errors and other API errors
-        if (responseData.error === "Required fields missing" && responseData.missingFields) {
-            // Create field-specific error messages
-            const errors = {};
-            responseData.missingFields.forEach(field => {
-                const fieldKey = field === "Full Name" ? "fullName" :
-                                field === "Email Address" ? "email" :
-                                field === "Mobile Number" ? "mobileNo" :
-                                field === "College Name" ? "collageName" :
-                                field.toLowerCase().replace(/ /g, '');
-                errors[fieldKey] = `${field} is required`;
-            });
-            setFormErrors(errors);
-            
-            toast.error(responseData.message || "Please fill in all required fields", {
-                position: "top-center",
-            });
-        } 
-        else if (responseData.error === "Invalid email format") {
-            setFormErrors({ email: responseData.message || "Please enter a valid email address" });
-            toast.error(responseData.message, { position: "top-center" });
-        }
-        else if (responseData.error === "Email already registered") {
-            setFormErrors({ email: responseData.message || "This email is already registered" });
-            toast.error(responseData.message, { position: "top-center" });
-        }
-        else if (responseData.error === "Validation failed" && responseData.validationErrors) {
-            setFormErrors(responseData.validationErrors);
-            toast.error(responseData.message || "Please fix the validation errors", { position: "top-center" });
-        }
-        else {
-            // Handle general error
-            setGeneralError(responseData.message || "An unexpected error occurred");
-            toast.error(responseData.message || "Something went wrong. Please try again.", { position: "top-center" });
-        }
-
-    } catch (error) {
-        console.error("Signup error:", error);
-        setGeneralError("Network or server error. Please try again later.");
-        toast.error("Connection error. Please check your internet and try again.", {
-            position: "top-center",
-            autoClose: 5000,
-        });
-    } finally {
-        setIsSubmitting(false);
-    }
-};
-
-
-    return (<> 
-    <ToastContainer
-        position="top-left"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-    />
-       <div className="relative grid grid-cols-1 place-items-center w-full min-h-screen">
-    <img
-        src="/bg.gif"
-        alt="background"
-        className="absolute top-0 left-0 w-full h-full object-cover z-[-1]"
-    />
-    <img
-        src="/Logoo.png"
-        alt="Shakti AI Logo"
-        className="absolute top-4 right-8 w-20 mb-5"
-    />
-
-    <div className="container ml-2 mr-2 w-full max-w-5xl p-4 rounded-lg bg-white bg-opacity-30">
-        <h1 className="text-2xl text-white mb-4">
-            Create an <span className="text-pink-400">Account!</span>
-        </h1>
-         {generalError && (
-            <div className="col-span-3 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
-                <span className="block sm:inline">{generalError}</span>
-            </div>
-        )}
+        setIsSubmitting(true);
         
-        <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-4">
-            <div className="flex flex-col col-span-3 items-center mb-4">
-                <label htmlFor="profile-upload" className="mb-2 text-white font-medium">Profile Photo <span className="text-red-500">*</span></label>
-                <div className="relative w-32 h-32 mb-2 rounded-full overflow-hidden bg-gray-200 bg-opacity-30 flex items-center justify-center border-2 border-dashed border-white border-opacity-40">
-                    {profileImg ? (
-                        <img src={profileImg} alt="Profile Preview" className="w-full h-full object-cover" />
-                    ) : (
-                        <span className="text-white text-4xl">👤</span>
-                    )}
-                </div>
-                <label htmlFor="profile-upload" className="cursor-pointer bg-pink-500 hover:bg-pink-600 text-white py-2 px-4 rounded-md text-sm transition duration-300">
-                    {profileImg ? "Change Photo" : "Upload Photo"}
-                </label>
-                <input
-                    id="profile-upload"
-                    type="file"
-                    name="profileImg"
-                    accept="image/*"
-                    onChange={handleChange}
-                    className="hidden"
+        try {
+            const formDataToSend = new FormData();
+            Object.keys(formData).forEach(key => {
+                if (formData[key] !== null && formData[key] !== undefined) {
+                    formDataToSend.append(key, formData[key]);
+                }
+            });
+
+            const response = await axios.post('/api/signup', formDataToSend, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.data.success) {
+                toast.success('Account created successfully! Redirecting...');
+                setTimeout(() => {
+                    router.push('/login');
+                }, 2000);
+            } else {
+                setGeneralError(response.data.message || 'Something went wrong');
+            }
+        } catch (error) {
+            console.error('Signup error:', error);
+            setGeneralError(error.response?.data?.message || 'An error occurred during signup');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="relative min-h-screen bg-gray-100">
+            {/* Background Image */}
+            <div className="absolute inset-0 z-0">
+                <img 
+                    src="/bg.gif" 
+                    alt="background" 
+                    className="w-full h-full object-cover"
                 />
-                <p className="text-gray-300 text-xs mt-1">Max size: 10MB (will be compressed)</p>
             </div>
-            <div className="flex flex-col">
-                <input
-                    type="text"
-                    name="fullName"
-                    value={fullName}
-                    onChange={handleChange}
-                    placeholder="Full Name *"
-                    required
-                    className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.fullName ? 'border-2 border-red-500' : ''}`}
+            
+            {/* Logo */}
+            <div className="relative z-10">
+                <img
+                    src="/Logoo.png"
+                    alt="Shakti AI Logo"
+                    className="absolute top-4 right-8 w-20"
                 />
-                {formErrors.fullName && <p className="text-red-500 text-sm mt-1">{formErrors.fullName}</p>}
-            </div>
-            <div className="flex flex-col">
-                <input
-                    type="email"
-                    name="email"
-                    value={email}
-                    onChange={handleChange}
-                    placeholder="Email Address *"
-                    required
-                    className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.email ? 'border-2 border-red-500' : ''}`}
-                />
-                {formErrors.email && <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>}
-            </div>
-            <div className="flex flex-col">
-                <input
-                    type="text"
-                    name="mobileNo"
-                    value={mobileNo}
-                    onChange={handleChange}
-                    placeholder="Mobile Number *"
-                    required
-                    className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.mobileNo ? 'border-2 border-red-500' : ''}`}
-                />
-                {formErrors.mobileNo && <p className="text-red-500 text-sm mt-1">{formErrors.mobileNo}</p>}
-            </div>
-            <input
-                type="text"
-                name="address"
-                value={address}
-                onChange={handleChange}
-                placeholder="Address *"
-                required
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-            />
-            <input
-                type="text"
-                name="DOB"
-                value={DOB}
-                onChange={handleChange}
-                placeholder="DOB *"
-                required
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-            />
-            <div className="flex flex-col">
-                <input
-                    type="text"
-                    name="education"
-                    value={education}
-                    onChange={handleChange}
-                    placeholder="Education *"
-                    required
-                    className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.education ? 'border-2 border-red-500' : ''}`}
-                />
-                {formErrors.education && <p className="text-red-500 text-sm mt-1">{formErrors.education}</p>}
-            </div>
-            <div className="flex flex-col">
-                <input
-                    type="text"
-                    name="collageName"
-                    value={collageName}
-                    onChange={handleChange}
-                    placeholder="College Name *"
-                    required
-                    className={`p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.collageName ? 'border-2 border-red-500' : ''}`}
-                />
-                {formErrors.collageName && <p className="text-red-500 text-sm mt-1">{formErrors.collageName}</p>}
             </div>
 
-            <div className="flex flex-col relative">
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    placeholder="Password *"
-                    required
-                    className={`w-full p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${formErrors.password ? 'border-2 border-red-500' : ''}`}
-                />
-                <span
-                    className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-white"
-                    onClick={(e) => handlePasswordToggle(e, "password")}
-                >
-                    👁️
-                </span>
-                {formErrors.password && <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>}
-                
-                {/* Password strength indicator */}
-                {password && (
-                    <div className="mt-1">
-                        <div className="flex justify-between items-center mb-1">
-                            <span className={`text-xs ${passwordStrength === 0 ? 'text-gray-400' : 
-                                            passwordStrength === 1 ? 'text-red-400' : 
-                                            passwordStrength === 2 ? 'text-yellow-400' : 'text-green-400'}`}>
-                                {passwordStrength === 0 ? 'Enter password' : 
-                                passwordStrength === 1 ? 'Weak' : 
-                                passwordStrength === 2 ? 'Medium' : 'Strong'}
-                            </span>
+            {/* Main Content */}
+            <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+                <div className="w-full max-w-4xl bg-white bg-opacity-90 rounded-xl shadow-2xl overflow-hidden">
+                    <div className="md:flex">
+                        {/* Left Side - Form */}
+                        <div className="w-full md:w-2/3 p-8">
+                            <h1 className="text-3xl font-bold text-pink-600 mb-8 text-center">
+                                <span className="text-pink-600">खाते</span> तयार करा
+                            </h1>
+                            
+                            {generalError && (
+                                <div className="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
+                                    <p>{generalError}</p>
+                                </div>
+                            )}
+                            
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                {/* Profile Image Upload */}
+                                <div className="flex flex-col items-center mb-6">
+                                    <div className="relative w-32 h-32 mb-4 rounded-full overflow-hidden bg-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                                        {formData.profileImg ? (
+                                            <img 
+                                                src={URL.createObjectURL(formData.profileImg)} 
+                                                alt="Profile Preview" 
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <span className="text-gray-400 text-5xl">👤</span>
+                                        )}
+                                        <input
+                                            id="profile-upload"
+                                            ref={fileInputRef}
+                                            type="file"
+                                            name="profileImg"
+                                            accept="image/*"
+                                            onChange={handleChange}
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="px-4 py-2 bg-pink-500 text-white rounded-full text-sm font-medium hover:bg-pink-600 transition duration-300"
+                                    >
+                                        {formData.profileImg ? "नवीन फोटो निवडा" : "फोटो अपलोड करा"}
+                                    </button>
+                                    <p className="text-gray-500 text-xs mt-2">फाइल साइज: 10MB (फाइल कंप्रेस केली जाईल)</p>
+                                </div>
+
+                                {/* Form Fields */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Full Name */}
+                                    <div>
+                                        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                                            संपूर्ण नाव <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="fullName"
+                                            name="fullName"
+                                            value={formData.fullName}
+                                            onChange={handleChange}
+                                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent ${
+                                                formErrors.fullName ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                            placeholder="आपले नाव प्रविष्ट करा"
+                                        />
+                                        {formErrors.fullName && (
+                                            <p className="mt-1 text-sm text-red-600">{formErrors.fullName}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Email */}
+                                    <div>
+                                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                                            ईमेल <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="email"
+                                            id="email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent ${
+                                                formErrors.email ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                            placeholder="आपला ईमेल पत्ता"
+                                        />
+                                        {formErrors.email && (
+                                            <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Mobile Number */}
+                                    <div>
+                                        <label htmlFor="mobileNo" className="block text-sm font-medium text-gray-700 mb-1">
+                                            मोबाईल नंबर <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            id="mobileNo"
+                                            name="mobileNo"
+                                            value={formData.mobileNo}
+                                            onChange={handleChange}
+                                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent ${
+                                                formErrors.mobileNo ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                            placeholder="आपला मोबाईल नंबर"
+                                        />
+                                        {formErrors.mobileNo && (
+                                            <p className="mt-1 text-sm text-red-600">{formErrors.mobileNo}</p>
+                                        )}
+                                    </div>
+
+                                    {/* College/Institution */}
+                                    <div>
+                                        <label htmlFor="collageName" className="block text-sm font-medium text-gray-700 mb-1">
+                                            महाविद्यालय/संस्था
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="collageName"
+                                            name="collageName"
+                                            value={formData.collageName}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                            placeholder="आपले महाविद्यालय/संस्थेचे नाव"
+                                        />
+                                    </div>
+
+                                    {/* Password */}
+                                    <div>
+                                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                                            पासवर्ड <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="password"
+                                            id="password"
+                                            name="password"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent ${
+                                                formErrors.password ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                            placeholder="किमान ६ वर्णांचा पासवर्ड"
+                                        />
+                                        {formErrors.password && (
+                                            <p className="mt-1 text-sm text-red-600">{formErrors.password}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Confirm Password */}
+                                    <div>
+                                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                                            पासवर्डची पुष्टी करा <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="password"
+                                            id="confirmPassword"
+                                            name="confirmPassword"
+                                            value={formData.confirmPassword}
+                                            onChange={handleChange}
+                                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent ${
+                                                formErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                            placeholder="पासवर्ड पुन्हा टाइप करा"
+                                        />
+                                        {formErrors.confirmPassword && (
+                                            <p className="mt-1 text-sm text-red-600">{formErrors.confirmPassword}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Address */}
+                                <div className="md:col-span-2">
+                                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+                                        पत्ता <span className="text-red-500">*</span>
+                                    </label>
+                                    <textarea
+                                        id="address"
+                                        name="address"
+                                        value={formData.address}
+                                        onChange={handleChange}
+                                        rows="2"
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent ${
+                                            formErrors.address ? 'border-red-500' : 'border-gray-300'
+                                        }`}
+                                        placeholder="तुमचा संपूर्ण पत्ता"
+                                    />
+                                    {formErrors.address && (
+                                        <p className="mt-1 text-sm text-red-600">{formErrors.address}</p>
+                                    )}
+                                </div>
+
+                                {/* Date of Birth */}
+                                <div>
+                                    <label htmlFor="DOB" className="block text-sm font-medium text-gray-700 mb-1">
+                                        जन्मतारीख <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="date"
+                                        id="DOB"
+                                        name="DOB"
+                                        value={formData.DOB}
+                                        onChange={handleChange}
+                                        max={new Date().toISOString().split('T')[0]} // Prevent future dates
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent ${
+                                            formErrors.DOB ? 'border-red-500' : 'border-gray-300'
+                                        }`}
+                                    />
+                                    {formErrors.DOB && (
+                                        <p className="mt-1 text-sm text-red-600">{formErrors.DOB}</p>
+                                    )}
+                                </div>
+
+                                {/* Education */}
+                                <div>
+                                    <label htmlFor="education" className="block text-sm font-medium text-gray-700 mb-1">
+                                        शैक्षणिक पात्रता <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        id="education"
+                                        name="education"
+                                        value={formData.education}
+                                        onChange={handleChange}
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent ${
+                                            formErrors.education ? 'border-red-500' : 'border-gray-300'
+                                        }`}
+                                    >
+                                        <option value="">-- निवडा --</option>
+                                        <option value="10th">१० वी</option>
+                                        <option value="12th">१२ वी</option>
+                                        <option value="diploma">डिप्लोमा</option>
+                                        <option value="bachelor">पदवी</option>
+                                        <option value="master">पदव्युत्तर</option>
+                                        <option value="phd">पीएचडी</option>
+                                        <option value="other">इतर</option>
+                                    </select>
+                                    {formErrors.education && (
+                                        <p className="mt-1 text-sm text-red-600">{formErrors.education}</p>
+                                    )}
+                                </div>
+
+                                {/* Submit Button */}
+                                <div className="pt-4">
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-6 rounded-full font-medium text-lg hover:opacity-90 transition duration-300 disabled:opacity-70 flex items-center justify-center"
+                                    >
+                                        {isSubmitting ? (
+                                            <>
+                                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                प्रक्रिया करत आहे...
+                                            </>
+                                        ) : (
+                                            'साइन अप करा'
+                                        )}
+                                    </button>
+                                </div>
+
+                                {/* Login Link */}
+                                <div className="text-center mt-4">
+                                    <p className="text-gray-600">
+                                        आधीपासून खाते आहे?{' '}
+                                        <Link href="/login" className="text-pink-600 font-medium hover:underline">
+                                            लॉगिन करा
+                                        </Link>
+                                    </p>
+                                </div>
+                            </form>
                         </div>
-                        <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
-                            <div className={`h-full ${passwordStrength === 0 ? 'w-0' : 
-                                        passwordStrength === 1 ? 'w-1/3 bg-red-400' : 
-                                        passwordStrength === 2 ? 'w-2/3 bg-yellow-400' : 'w-full bg-green-400'}`}>
+
+                        {/* Right Side - Image/Illustration */}
+                        <div className="hidden md:block md:w-1/3 bg-gradient-to-b from-pink-400 to-purple-600 p-8 text-white">
+                            <div className="h-full flex flex-col justify-center">
+                                <h2 className="text-2xl font-bold mb-4">शक्ती एआय मध्ये आपले स्वागत आहे</h2>
+                                <p className="mb-6 text-pink-100">
+                                    आपले शैक्षणिक आणि व्यावसायिक वाटचाल सुरू करा. आमच्यासोबत जोडा आणि आपल्या कौशल्यांमध्ये प्रगती करा.
+                                </p>
+                                <div className="space-y-4">
+                                    <div className="flex items-start">
+                                        <svg className="h-6 w-6 text-pink-200 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        <span>वैयक्तिकृत शिक्षण अनुभव</span>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <svg className="h-6 w-6 text-pink-200 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        <span>तज्ञ मार्गदर्शन आणि अभिप्राय</span>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <svg className="h-6 w-6 text-pink-200 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        <span>आपल्या वेगाने शिका</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        
-                        {/* Password requirements */}
-                        <ul className="text-xs space-y-1 mt-2 text-gray-300">
-                            <li className={passwordValidation.minLength ? 'text-green-400' : ''}>
-                                {passwordValidation.minLength ? '✓' : '○'} At least 8 characters
-                            </li>
-                            <li className={passwordValidation.hasUppercase ? 'text-green-400' : ''}>
-                                {passwordValidation.hasUppercase ? '✓' : '○'} At least one uppercase letter
-                            </li>
-                            <li className={passwordValidation.hasLowercase ? 'text-green-400' : ''}>
-                                {passwordValidation.hasLowercase ? '✓' : '○'} At least one lowercase letter
-                            </li>
-                            <li className={passwordValidation.hasNumber ? 'text-green-400' : ''}>
-                                {passwordValidation.hasNumber ? '✓' : '○'} At least one number
-                            </li>
-                            <li className={passwordValidation.hasSpecial ? 'text-green-400' : ''}>
-                                {passwordValidation.hasSpecial ? '✓' : '○'} At least one special character
-                            </li>
-                        </ul>
                     </div>
-                )}
-            </div>
-
-            <div className="flex flex-col relative">
-                <input
-                    type="password"
-                    id="confirm-password"
-                    value={confirmPassword}
-                    onChange={handleConfirmPasswordChange}
-                    placeholder="Confirm Password *"
-                    required
-                    className={`w-full p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 ${passwordError ? 'border-2 border-red-500' : ''}`}
-                />
-                <span
-                    className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-white"
-                    onClick={(e) => handlePasswordToggle(e, "confirm-password")}
-                >
-                    👁️
-                </span>
-                {passwordError && <p className="text-red-500 text-sm mt-1">{passwordError}</p>}
-            </div>
-
-            <div className="col-span-3 flex items-center justify-between mt-4">
-       
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`px-6 py-3 text-white ${isSubmitting ? 'bg-gray-400' : 'bg-pink-400 hover:bg-pink-500'} rounded-md transition duration-300 flex items-center`}
-                >
-                    {isSubmitting ? (
-                        <>
-                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Processing...
-                        </>
-                    ) : 'Sign Up'}
-                </button>
-                    <div className="col-span-3 flex items-center justify-between text-white mt-4">fields marked with  <span className="text-red-500"> * </span> are required</div>
-                <div className="text-white">
-                    Already have an account? <Link href="/login" className="text-pink-400 hover:underline">Login</Link>
                 </div>
             </div>
-        </form>
-    </div>
-</div>
 
-        </>
+            {/* Toast Container */}
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
+        </div>
     );
 };
 

@@ -9,6 +9,15 @@ const QuestionForm = () => {
   const [questions, setQuestions] = useState([]);
   const [email, setEmail] = useState('');
   
+  useEffect(() => {
+    // Disable all speech synthesis globally - runs only on client side
+    if (typeof window !== 'undefined') {
+      window.speechSynthesis.speak = function () {
+        console.warn('[Speech Blocked] Speech synthesis call skipped.');
+      };
+    }
+  }, []);
+
   // Function to handle microphone permission request
   const requestMicPermission = async () => {
     try {
@@ -278,7 +287,7 @@ After fixing, please refresh the page.`);
       const recognitionInstance = new SpeechRecognition();
       
       // Configure recognition
-      recognitionInstance.lang = 'en-US';
+      recognitionInstance.lang = 'mr-IN';
       recognitionInstance.continuous = true; // Keep listening continuously
       recognitionInstance.interimResults = true; // Get partial results
       // Prevent disconnection on short pauses
@@ -735,172 +744,122 @@ After fixing, please refresh the page.`);
   
   // Central speech utility that handles all speech with improved reliability
   const speechManager = {
-    // Speech queue to prevent interruptions
-    queue: [],
-    speaking: false,
-    
-    // Initialize the speech service
-    init() {
-      // Pre-load voices for better selection
-      if (window.speechSynthesis) {
-        window.speechSynthesis.getVoices();
-      }
-    },
-    
-    // Get the best available voice
-    getBestVoice() {
-      const voices = window.speechSynthesis.getVoices();
-      
-      // Try to find a high-quality female voice first
-      const preferredVoice = voices.find(voice => 
-        (voice.name.includes('Female') && voice.name.includes('Google')) ||
-        voice.name.includes('Microsoft Zira') ||
-        voice.name.includes('Samantha')
-      );
-      
-      if (preferredVoice) return preferredVoice;
-      
-      // Fall back to any female voice
-      const femaleVoice = voices.find(voice => 
-        voice.name.includes('Female') || 
-        voice.name.includes('woman') ||
-        voice.name.includes('Girl')
-      );
-      
-      if (femaleVoice) return femaleVoice;
-      
-      // Use the default voice if no preference found
-      return voices[0];
-    },
-    
-    // Speak a question with appropriate parameters
-    speakQuestion(text, onComplete) {
-      const cleanText = text.replace(/(currentQuestion|[,*])/g, "").trim();
-      this.speak(cleanText, {
-        rate: 0.9,
-        pitch: 1.0,
-        onComplete: onComplete,
-        priority: 'high'
-      });
-    },
-    
-    // Speak a response with appropriate parameters
-    speakResponse(text, onComplete) {
-      this.speak(text, {
-        rate: 1.0,
-        pitch: 1.0,
-        onComplete: onComplete,
-        priority: 'medium'
-      });
-    },
-    
-    // Main speech function with advanced options
-    speak(text, options = {}) {
-      if (!text) return;
-      
-      // Default options
-      const settings = {
-        rate: 1.0,
-        pitch: 1.0,
-        volume: 1.0,
-        lang: 'en-US',
-        onComplete: null,
-        onError: null,
-        priority: 'medium', // 'high', 'medium', 'low'
-        ...options
-      };
-      
-      // Don't queue if already speaking and this is low priority
-      if (this.speaking && settings.priority === 'low') {
-        console.log('Already speaking, skipping low priority speech');
-        return;
-      }
-      
-      // Cancel all speech if this is high priority
-      if (settings.priority === 'high') {
-        try {
-          window.speechSynthesis.cancel();
-          this.queue = [];
-          this.speaking = false;
-        } catch (e) {}
-      }
-      
-      // Set speaking indicators
-      setIsSpeaking(true);
-      isSpeakingRef.current = true;
-      this.speaking = true;
-      
+  queue: [],
+  speaking: false,
+
+  init() {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+    }
+  },
+
+  getBestVoice() {
+    const voices = window.speechSynthesis.getVoices();
+
+    let marathiVoice = voices.find(v => v.lang === 'mr-IN');
+    if (marathiVoice) return marathiVoice;
+
+    let hindiVoice = voices.find(v => v.lang === 'hi-IN');
+    if (hindiVoice) return hindiVoice;
+
+    const preferredVoice = voices.find(voice =>
+      (voice.name.includes('Female') && voice.name.includes('Google')) ||
+      voice.name.includes('Microsoft Zira') ||
+      voice.name.includes('Samantha')
+    );
+
+    if (preferredVoice) return preferredVoice;
+
+    const femaleVoice = voices.find(voice =>
+      voice.name.includes('Female') ||
+      voice.name.includes('woman') ||
+      voice.name.includes('Girl')
+    );
+
+    if (femaleVoice) return femaleVoice;
+
+    return voices[0];
+  },
+
+  speakQuestion(text, onComplete) {
+    const cleanText = text.replace(/(currentQuestion|[,*])/g, "").trim();
+    this.speak(cleanText, {
+      rate: 0.9,
+      pitch: 1.0,
+      onComplete: onComplete,
+      priority: 'high'
+    });
+  },
+
+  speakResponse(text, onComplete) {
+    this.speak(text, {
+      rate: 1.0,
+      pitch: 1.0,
+      onComplete: onComplete,
+      priority: 'medium'
+    });
+  },
+
+  speak(text, options = {}) {
+    if (!text) return;
+
+    const settings = {
+      rate: 1.0,
+      pitch: 1.0,
+      volume: 1.0,
+      lang: 'mr-IN',
+      onComplete: null,
+      onError: null,
+      priority: 'medium',
+      ...options
+    };
+
+    if (this.speaking && settings.priority === 'low') {
+      console.log('Already speaking, skipping low priority speech');
+      return;
+    }
+
+    if (settings.priority === 'high') {
       try {
-        // Create utterance with all settings
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = settings.rate;
-        utterance.pitch = settings.pitch;
-        utterance.volume = settings.volume;
-        utterance.lang = settings.lang;
-        
-        // Try to set a good voice
-        const voice = this.getBestVoice();
-        if (voice) {
-          utterance.voice = voice;
-        }
-        
-        // Completion handler
-        utterance.onend = () => {
-          this.speaking = false;
-          setIsSpeaking(false);
-          isSpeakingRef.current = false;
-          
-          if (typeof settings.onComplete === 'function') {
-            settings.onComplete();
-          }
-        };
-        
-        // Error handler
-        utterance.onerror = (err) => {
-          console.error('Speech synthesis error:', err);
-          this.speaking = false;
-          setIsSpeaking(false);
-          isSpeakingRef.current = false;
-          
-          if (typeof settings.onError === 'function') {
-            settings.onError(err);
-          } else if (typeof settings.onComplete === 'function') {
-            // Fall back to completion handler if error handler not provided
-            settings.onComplete();
-          }
-        };
-        
-        // Actually speak the text
-        window.speechSynthesis.speak(utterance);
-        
-        // Failsafe - if speech doesn't complete in 10 seconds, force reset
-        setTimeout(() => {
-          if (this.speaking) {
-            console.log('Speech timeout reached, forcing completion');
-            this.speaking = false;
-            setIsSpeaking(false);
-            isSpeakingRef.current = false;
-            
-            if (typeof settings.onComplete === 'function') {
-              settings.onComplete();
-            }
-          }
-        }, 10000);
-        
-      } catch (e) {
-        console.error('Error in speech synthesis:', e);
+        window.speechSynthesis.cancel();
+        this.queue = [];
+        this.speaking = false;
+      } catch (e) {}
+    }
+
+    setIsSpeaking(true);
+    isSpeakingRef.current = true;
+    this.speaking = true;
+
+    try {
+      // 🔇 Speech is disabled — skipping actual synthesis
+      console.log('[Speech Disabled] Text:', text);
+
+      // Simulate async completion
+      setTimeout(() => {
         this.speaking = false;
         setIsSpeaking(false);
         isSpeakingRef.current = false;
-        
-        if (typeof settings.onError === 'function') {
-          settings.onError(e);
-        } else if (typeof settings.onComplete === 'function') {
+
+        if (typeof settings.onComplete === 'function') {
           settings.onComplete();
         }
+      }, 0);
+    } catch (e) {
+      console.error('Error in speech simulation:', e);
+      this.speaking = false;
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+
+      if (typeof settings.onError === 'function') {
+        settings.onError(e);
+      } else if (typeof settings.onComplete === 'function') {
+        settings.onComplete();
       }
     }
-  };
+  }
+};
+
   
   // Initialize speech manager
   // Direct timer function with no state checks - moved to component level for proper scoping
@@ -965,7 +924,7 @@ After fixing, please refresh the page.`);
           console.log('⏱️ SPEAKING TIMEOUT MESSAGE:', timeoutMessage);
           
           const utterance = new SpeechSynthesisUtterance(timeoutMessage);
-          utterance.lang = 'en-US';
+          utterance.lang = 'mr-IN';
           utterance.volume = 1.0;
           
           // Set female voice if available
@@ -1200,7 +1159,7 @@ After fixing, please refresh the page.`);
       
       // Try to find a female voice in this order
       // 1. English US female voice
-      femaleVoice = voices.find(v => v.name.toLowerCase().includes('female') && v.lang.includes('en-US'));
+      femaleVoice = voices.find(v => v.name.toLowerCase().includes('female') && v.lang.includes('mr-IN'));
       
       // 2. Any female voice
       if (!femaleVoice) femaleVoice = voices.find(v => v.name.toLowerCase().includes('female'));
@@ -1245,7 +1204,7 @@ After fixing, please refresh the page.`);
       
       // Create a simple utterance
       const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.lang = 'en-US';
+      utterance.lang = 'mr-IN';
       utterance.volume = 1.0;
       
       // Set female voice if available
@@ -1317,7 +1276,7 @@ After fixing, please refresh the page.`);
       
       // Create the utterance
       const utterance = new SpeechSynthesisUtterance(cleanedText);
-      utterance.lang = 'en-US';
+      utterance.lang = 'mr-IN';
       utterance.rate = 0.9;
       utterance.volume = 1.0;
       
@@ -1730,7 +1689,7 @@ After fixing, please refresh the page.`);
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-start pt-10 pb-20 overflow-x-hidden">
       <Head>
-        <title>SHAKKTII AI - Interactive Interview</title>
+        <title>SHAKKTII AI - संवादात्मक मुलाखत</title>
         <meta name="description" content="AI-powered interview platform by SHAKKTII AI" />
         <style jsx global>{`
           /* Pulse animation for microphone */
@@ -1749,18 +1708,18 @@ After fixing, please refresh the page.`);
       {showPermissionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-[#29064b] p-6 rounded-xl shadow-2xl max-w-md w-full mx-4">
-            <h2 className="text-2xl font-bold text-[#e600ff] mb-4">Microphone Access Required</h2>
+            <h2 className="text-2xl font-bold text-[#e600ff] mb-4">मायक्रोफोनसाठी परवानगी आवश्यक आहे.</h2>
             <p className="text-white mb-6">
-              This interview application needs access to your microphone to function properly. 
-              Please grant microphone permission to continue.
+             ही मुलाखत अ‍ॅप्लिकेशन योग्यरित्या काम करण्यासाठी तुमच्या मायक्रोफोनचा प्रवेश आवश्यक आहे. कृपया पुढे जाण्यासाठी मायक्रोफोनची परवानगी द्या.
             </p>
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-[#e600ff] mb-2">Troubleshooting Tips:</h3>
+              <h3 className="text-lg font-semibold text-[#e600ff] mb-2">समस्या निवारण टिपा:</h3>
               <ul className="text-white list-disc pl-5 space-y-1">
-                <li>Check if your microphone is properly connected</li>
-                <li>Make sure it's not muted in your system settings</li>
-                <li>Try using Google Chrome or Microsoft Edge browser</li>
-                <li>Check your browser permissions settings</li>
+                <li>तुमचा मायक्रोफोन व्यवस्थित कनेक्ट आहे का ते तपासा</li>
+                <li>सिस्टम सेटिंग्जमध्ये तो म्युट नाही याची खात्री करा</li>
+                <li>Google Chrome किंवा Microsoft Edge ब्राउझर वापरून पहा</li>
+               <li>ब्राउझरच्या परवानगी सेटिंग्ज तपासा</li>
+
               </ul>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -1768,13 +1727,13 @@ After fixing, please refresh the page.`);
                 onClick={requestMicPermission}
                 className="bg-[#e600ff] hover:bg-[#ca00e3] text-white font-bold py-3 px-4 rounded-lg flex-1 transition-colors"
               >
-                Grant Microphone Access
+               मायक्रोफोन वापरण्याची परवानगी द्या
               </button>
               <button
                 onClick={handleRefreshPage}
                 className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg flex-1 transition-colors"
               >
-                Refresh Page
+                पुनः लोड करा
               </button>
             </div>
           </div>
@@ -1787,7 +1746,7 @@ After fixing, please refresh the page.`);
             <div className="flex items-center justify-between mb-2">
               <div className="text-right">
                 <span className="text-xs font-semibold inline-block text-white">
-                  Question {currentQuestionIndex + 1} of {questions.length}
+                  प्रश्न {currentQuestionIndex + 1} पैकी {questions.length}
                 </span>
               </div>
             </div>
@@ -1804,12 +1763,12 @@ After fixing, please refresh the page.`);
           <div className="animate-pulse flex space-x-4 justify-center">
             <div className="h-3 bg-gray-400 rounded w-3/4"></div>
           </div>
-          <p className="text-white mt-2">Loading questions...</p>
+          <p className="text-white mt-2">प्रश्न लोड होत आहेत...</p>
         </div>
       ) : (
         <div className="w-full max-w-3xl px-4 mb-6 text-center">
           <div className="bg-red-600 bg-opacity-70 text-white py-2 px-4 rounded-lg">
-            <p>No questions available. Please try refreshing the page or contact support.</p>
+            <p>प्रश्न उपलब्ध नाहीत. रीफ्रेश करा किंवा सपोर्टशी संपर्क करा.</p>
           </div>
         </div>
       )}
@@ -1821,38 +1780,38 @@ After fixing, please refresh the page.`);
       {questions.length > 0 && (
         <div className="w-full max-w-2xl bg-gray-900 bg-opacity-70 backdrop-blur-lg p-6 rounded-xl shadow-2xl mx-4 mb-8 border border-gray-800">
           <div className="question-container mb-6">
-            <h2 className="text-2xl font-bold text-center text-white mb-2">Question:</h2>
+            <h2 className="text-2xl font-bold text-center text-white mb-2">प्रश्न:</h2>
             <p className="text-xl text-center text-white px-4 py-3 rounded-lg bg-gray-800 bg-opacity-50">
-              {questions[currentQuestionIndex]?.questionText || "Loading question..."}
+              {questions[currentQuestionIndex]?.questionText || "प्रश्न लोड होत आहेत..."}
             </p>
-            {!isIphone && (
+            {/* {!isIphone && (
               <button
                 onClick={() => questions[currentQuestionIndex]?.questionText && speakQuestion(questions[currentQuestionIndex].questionText)}
                 className="mt-3 flex items-center justify-center mx-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full transition-all duration-200"
                 disabled={isSpeaking}
               >
                 <FcSpeaker className="mr-2 text-xl" />
-                <span>Listen Again</span>
+                <span>पुन्हा ऐका</span>
               </button>
-            )}
+            )} */}
           </div>
 
           <div className=" recorded-text-container bg-gray-800 bg-opacity-50 rounded-lg p-4 mb-6 min-h-[100px]">
-            <h3 className="text-lg font-medium text-gray-300 mb-2">Your Answer:</h3>
+            <h3 className="text-lg font-medium text-gray-300 mb-2">तुमचे उत्तर:</h3>
             <p className=" text-white">
               {recordedText && recordedText !== 'Listening...' ? (
                 recordedText
               ) : (
                 isListening ? (
-                  <span className="animate-pulse text-blue-400">Listening...</span>
+                  <span className="animate-pulse text-blue-400">ऐकत आहे...</span>
                 ) : (
-                  "Your spoken answer will appear here..."
+                  "तुमचे बोललेले उत्तर येथे दिसेल..."
                 )
               )}
             </p>
             {isListening && (
               <div className="mt-2 text-xs text-blue-300">
-                Speak clearly into your microphone...
+                कृपया तुमच्या मायक्रोफोनमध्ये स्पष्टपणे बोला...
               </div>
             )}
           </div>
@@ -1867,13 +1826,13 @@ After fixing, please refresh the page.`);
               </div>
             )}
             
-            {isSpeaking && (
+            {/* {isSpeaking && (
               <div className="text-center mb-4">
                 <div className="inline-block px-3 py-1 bg-green-600 text-white text-sm rounded-full animate-pulse">
-                  AI Speaking...
+                  AI बोलत आहे...
                 </div>
               </div>
-            )}
+            )} */}
 
             <button
               className={`mic-button relative inline-flex items-center justify-center p-4 rounded-full text-3xl ${isListening ? 'bg-red-600 hover:bg-red-700' : 'bg-gradient-to-r from-indigo-600 to-pink-500 hover:from-indigo-700 hover:to-pink-600'} text-white shadow-lg transform transition-all duration-300 ${isListening ? 'scale-110 animate-pulse' : ''}`}
@@ -1882,7 +1841,7 @@ After fixing, please refresh the page.`);
             >
               {isListening ? <FaMicrophoneSlash className="w-8 h-8" /> : <FaMicrophone className="w-8 h-8" />}
               <span className="absolute -bottom-8 text-xs text-white font-medium">
-                {isListening ? 'Stop Recording' : 'Start Speaking'}
+                {isListening ? 'रेकॉर्डिंग बंद करा' : 'बोलायला सुरुवात करा'}
               </span>
             </button>
           </div>
@@ -1898,14 +1857,14 @@ After fixing, please refresh the page.`);
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">Interview Complete!</h2>
-              <p className="text-gray-300">Thanks for completing your interview. Your responses have been recorded.</p>
+              <h2 className="text-2xl font-bold mb-2 text-white">मुलाखत पूर्ण झाली!</h2>
+              <p className="text-gray-300">मुलाखत पूर्ण केल्याबद्दल धन्यवाद. तुमची उत्तरे नोंदवली गेली आहेत.</p>
             </div>
             <button
               onClick={handleInterviewComplete}
               className="w-full py-3 bg-gradient-to-r from-indigo-600 to-pink-500 text-white font-semibold rounded-lg shadow-lg hover:from-indigo-700 hover:to-pink-600 focus:outline-none transform transition-all duration-200 hover:scale-105"
             >
-              View Results
+              रिझल्ट पहा
             </button>
           </div>
         </div>
@@ -1920,21 +1879,21 @@ After fixing, please refresh the page.`);
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-white">Exit Interview?</h2>
-              <p className="text-gray-300">Are you sure you want to leave? Your progress will be lost and cannot be recovered.</p>
+              <h2 className="text-2xl font-bold mb-2 text-white">मुलाखत बंद करायची आहे का ?</h2>
+              <p className="text-gray-300">आपण खरोखर बाहेर पडू इच्छिता का? आपली प्रगती गमावली जाईल आणि ती पुनर्प्राप्त करता येणार नाही.</p>
             </div>
             <div className="flex gap-4">
               <button
                 onClick={handleExitConfirmation}
                 className="flex-1 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none transition-all duration-200"
               >
-                Yes, Exit
+                हो, बाहेर जा
               </button>
               <button
                 onClick={handleExitModalClose}
                 className="flex-1 py-3 bg-gray-700 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none transition-all duration-200"
               >
-                No, Stay
+              नाही, इथेच राहा
               </button>
             </div>
           </div>
@@ -1943,15 +1902,15 @@ After fixing, please refresh the page.`);
 
       {loading && !isListening && (
         <div className="fixed bottom-4 left-4 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg">
-          Processing...
+          प्रक्रिया सुरू आहे...
         </div>
       )}
 
-      {isSpeaking && (
+      {/* {isSpeaking && (
         <div className="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-full shadow-lg animate-pulse">
-          AI Speaking...
+          AI संवाद साधत आहे...
         </div>
-      )}
+      )} */}
     </div>
   );
 };

@@ -1161,7 +1161,7 @@ export default function Chart({ chartData, closeChart }) {
         onClick={closeChart}
         className="top-0 right-0 p-2 bg-red-500 text-white rounded"
       >
-        Close
+        बंद करा
       </button>
     </div>
   );

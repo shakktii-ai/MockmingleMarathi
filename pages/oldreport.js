@@ -552,9 +552,9 @@ function Oldreport() {
   // We're no longer using the separate ScoreCard component as we integrated the scorecard display 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-indigo-900 text-white">
+   <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-indigo-900 text-white">
       <Head>
-        <title>Interview Reports | SHAKKTII AI</title>
+        <title>मुलाखत अहवाल | SHAKKTII AI</title>
         <meta name="description" content="View your AI-powered interview performance reports" />
       </Head>
       
@@ -568,7 +568,7 @@ function Oldreport() {
             {/* Modal Header */}
             <div className="sticky top-0 bg-gradient-to-r from-indigo-900 to-purple-900 px-6 py-5 flex justify-between items-center z-10 backdrop-blur">
               <div>
-                <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200">Detailed Report Analysis</h3>
+                <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200">सविस्तर रिपोर्टचे विश्लेषण</h3>
                 <p className="text-sm text-gray-300 mt-1">{fullReportData?.role} - {fullReportData?.date}</p>
               </div>
               <button 
@@ -583,7 +583,7 @@ function Oldreport() {
             {/* Modal Content with improved typography and spacing */}
             <div className="p-8">
               <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
-                <h3 className="text-xl font-bold text-indigo-800 mb-4">Detailed Analysis</h3>
+                <h3 className="text-xl font-bold text-indigo-800 mb-4">तपशीलवार विश्लेषण</h3>
                 
                 {fullReportData ? (
                   <div className="prose max-w-none text-gray-800">
@@ -636,7 +636,7 @@ function Oldreport() {
                     })}
                   </div>
                 ) : (
-                  <p className="text-gray-600">No report analysis available</p>
+                  <p className="text-gray-600">कोणतेही अहवाल विश्लेषण उपलब्ध नाही</p>
                 )}
               </div>
               
@@ -649,7 +649,7 @@ function Oldreport() {
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                   </svg>
-                  Download Detailed Report
+                  तपशीलवार अहवाल डाउनलोड करा
                 </button>
               </div>
               
@@ -661,7 +661,7 @@ function Oldreport() {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <span>Download Detailed Report</span>
+                  <span>तपशीलवार अहवाल डाउनलोड करा</span>
                 </button>
                 
                 <button
@@ -669,7 +669,7 @@ function Oldreport() {
                   className="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-2"
                 >
                   <IoClose className="text-lg" />
-                  <span>Close Report</span>
+                  <span>अहवाल बंद करा</span>
                 </button>
               </div>
             </div>
@@ -686,7 +686,7 @@ function Oldreport() {
             <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-300">SHAKKTII AI</h1>
           </div>
           <div className="text-sm md:text-base text-gray-200">
-            {email && <span className="font-medium">User: {email}</span>}
+            {email && <span className="font-medium">वापरकर्ता: {email}</span>}
           </div>
         </div>
       </div>
@@ -694,7 +694,7 @@ function Oldreport() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-center text-4xl md:text-5xl font-bold mb-6 mt-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-purple-300">
-          Interview Performance History
+          मुलाखतीतली प्रगती आणि परफॉर्मन्स रेकॉर्ड
         </h1>
 
         {/* Reports Section */}
@@ -716,7 +716,7 @@ function Oldreport() {
                       <div className="flex items-center space-x-3">
                         <span className="font-bold text-lg">{report.role}</span>
                         <span className="bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full">
-                          {reportVisibility[index] ? 'Hide Details' : 'Show Details'}
+                          {reportVisibility[index] ? 'तपशील डिस्प्ले बंद करा' : 'तपशील शो करा'}
                         </span>
                       </div>
                       <div className="flex items-center space-x-4">
@@ -733,7 +733,7 @@ function Oldreport() {
                         {/* Report Meta */}
                         <div className="flex flex-wrap justify-between mb-6 pb-4 border-b border-gray-600">
                           <div>
-                            <p className="text-gray-400 text-sm">Role</p>
+                            <p className="text-gray-400 text-sm">पद</p>
                             <p className="font-semibold text-lg">{report.role}</p>
                           </div>
                           {/* <div>
@@ -741,16 +741,16 @@ function Oldreport() {
                             <p className="font-semibold">{report.collageName || 'Not specified'}</p>
                           </div> */}
                           <div>
-                            <p className="text-gray-400 text-sm">Date</p>
+                            <p className="text-gray-400 text-sm">तारीख</p>
                             <p className="font-semibold">{new Date(report.createdAt).toLocaleDateString()}</p>
                           </div>
                         </div>
 
                         {/* Performance Scores */}
-                        <h3 className="text-xl font-bold mb-4 text-blue-300">Performance Scores</h3>
+                        <h3 className="text-xl font-bold mb-4 text-blue-300">परफॉर्मन्स स्कोअर्स</h3>
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                          {['Technical Proficiency', 'Communication', 'Decision-Making', 'Confidence', 'Language Fluency', 'Overall Score'].map((category) => {
+                          {['टेक्निकल स्किल्स', 'कम्युनिकेशन', 'निर्णय क्षमता', 'आत्मविश्वास', 'भाषा प्रावीण्य', 'एकूण गुण'].map((category) => {
                             // Get score and feedback
                             const { score, feedback } = extractScore(report, category);
                             
@@ -843,7 +843,7 @@ function Oldreport() {
                               <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                               <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
                             </svg>
-                            <span className="relative z-10">View Full Report</span>
+                            <span className="relative z-10">संपूर्ण रिपोर्ट पहा</span>
                             <span className="absolute bottom-0 left-0 h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
                           </button>
                         
@@ -855,7 +855,7 @@ function Oldreport() {
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
                             </svg>
-                            <span className="relative z-10">Download PDF Report</span>
+                            <span className="relative z-10">PDF रिपोर्ट डाउनलोड करा</span>
                             <span className="absolute bottom-0 left-0 h-1 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
                           </button>
                         </div>
@@ -866,9 +866,9 @@ function Oldreport() {
               ) : (
                 <div className="text-center py-16 rounded-xl bg-gray-800 bg-opacity-40 backdrop-blur-sm">
                   <div className="text-5xl mb-4">⏳</div>
-                  <h3 className="text-2xl font-semibold mb-2">Your report is being prepared</h3>
-                  <p className="text-gray-300">Interview reports typically take about 5 minutes to generate.</p>
-                  <p className="text-gray-400 mt-4">Please check back soon!</p>
+                  <h3 className="text-2xl font-semibold mb-2">तुमचा रिपोर्ट तयार करत आहे</h3>
+                  <p className="text-gray-300">इंटरव्ह्यू रिपोर्ट तयार होण्यास साधारण ५ मिनिटांचा वेळ लागू शकतो. कृपया थोडा वेळ थांबा.</p>
+                  <p className="text-gray-400 mt-4">कृपया थोडा वेळ द्या, लवकरच माहिती उपलब्ध होईल!</p>
                 </div>
               )}
             </div>

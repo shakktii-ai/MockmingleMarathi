@@ -1,9 +1,13 @@
 import mongoose from 'mongoose';
 
 const ReportsSchema = new mongoose.Schema({
-  role: {
-    type: String,
+  standards: {
+    type: Number,
     required: true,
+  },
+  subject:{
+    type:String,
+    required:true,
   },
   email: {
     type: String,

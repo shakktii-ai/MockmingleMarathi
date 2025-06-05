@@ -280,9 +280,12 @@ function Report() {
   const [user, setUser] = useState('');
   const [email, setEmail] = useState('');
   const [jobRole, setJobRole] = useState('');
+  const [standard,setStandard]=useState('');
+  const [subject,setSubject]=useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [jobRoleId, setJobRoleId] = useState(null);
+  const [standardId,setStandardId]=useState(null);
   const [isEmailFetched, setIsEmailFetched] = useState(false);
 
   useEffect(() => {
@@ -325,16 +328,17 @@ console.log("match Score",scoreMatch);
   };
 
   // Store the score function - Make sure this is declared before it's called
-  const storeScore = async (jobRole, email, overallScore) => {
+  const storeScore = async (standards,subject, email, overallScore) => {
     try {
       const collageName = user?.collageName || "Unknown Collage";
   
       // Log the data before sending it
       const requestData = {
-        role: jobRole,
+        standards,
+        subject,
         email,
         collageName,
-        overallScore,
+         overallScore,
       };
       console.log('Sending request data:', requestData);  // This will help debug
   
@@ -372,7 +376,8 @@ console.log("match Score",scoreMatch);
 
       if (idFromLocalStorage) {
         // If jobRoleId is available, set the jobRoleId
-        setJobRoleId(idFromLocalStorage);
+        // setJobRoleId(idFromLocalStorage);
+        setStandardId(idFromLocalStorage);
       } else {
         // If jobRoleId is missing, set the email and show previous reports
         setEmail(email);
@@ -386,11 +391,12 @@ console.log("match Score",scoreMatch);
   }, []);
 
   useEffect(() => {
-    if (!jobRoleId) return;
+    // if (!jobRoleId) return;
+    if (!standardId) return;
 
     const fetchJobRole = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/getReadyQuestionsAndAnswers?jobRoleId=${jobRoleId}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/getReadyQuestionsAndAnswers?standardId=${standardId}`);
         localStorage.setItem('status', "processing");
         if (!response.ok) {
           throw new Error('Failed to fetch data');
@@ -423,12 +429,12 @@ console.log("match Score",scoreMatch);
 
         console.log("Extracted overall score:", overallScore);
         // Store the extracted overall score
-        await storeScore(data.data.role, data.data.email, overallScore);
+        await storeScore(data.data.standards,data.data.subject, data.data.email, overallScore);
         // Store the report analysis
-        await storeReport(data.data.role, data.data.email, analysisData);
+        await storeReport(data.data.standards,data.data.subject, data.data.email, analysisData);
 
         setEmail(data.data.email);
-        setJobRole(data.data.role);
+        setStandard(data.data.standards);
 
         localStorage.removeItem('status');
         localStorage.setItem('status', "model 5 min");
@@ -441,13 +447,13 @@ console.log("match Score",scoreMatch);
     };
 
     fetchJobRole();
-  }, [jobRoleId]);
+  }, [standardId]);
 
-  const storeReport = async (jobRole, email, reportAnalysis) => {
+  const storeReport = async (standards,subject, email, reportAnalysis) => {
     // Ensure collageName has a default value if it's undefined
     const collageName = user?.collageName || 'Unknown College';
     
-    console.log("Storing report for:", { jobRole, email, reportAnalysis, collageName });
+    console.log("Storing report for:", { standards,subject,email, reportAnalysis});
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAndGetReport`, {
         method: 'POST',
@@ -455,13 +461,14 @@ console.log("match Score",scoreMatch);
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          role: jobRole,
+        standards,
+        subject,
           email,
           collageName,
           reportAnalysis,
         }),
       });
-
+       
       if (!response.ok) {
         throw new Error('Failed to store report');
       }
@@ -485,18 +492,18 @@ console.log("match Score",scoreMatch);
     <div className="min-h-screen bg-cover bg-center relative" style={{ backgroundImage: "url('/BG.jpg')" }}>
       {/* Back Button */}
       <div className="absolute top-5 left-3 text-5xl text-white cursor-pointer flex items-center" onClick={goBack}>
-  <IoIosArrowBack /> <span className="ml-2 text-base">Go Back</span>
+  <IoIosArrowBack /> <span className="ml-2 text-base">मागे जा</span>
 </div>
 
 
       {/* Main Content */}
       <div className="text-white p-6 md:p-12">
         <h1 className="text-center text-4xl md:text-5xl font-bold mb-4">
-          Interview Report
+          मुलाखतीचा अहवाल
         </h1>
 
         <h2 className="text-center text-2xl md:text-3xl font-semibold mb-6">
-          Report update after 5 min
+          अहवाल ५ मिनिटांनी अपडेट होईल.
         </h2>
 
         {/* YouTube iframes */}
@@ -529,6 +536,7 @@ console.log("match Score",scoreMatch);
             className="w-full max-w-4xl rounded-lg shadow-lg"
             allow="clipboard-write self https://read.bookcreator.com"
           ></iframe>
+
         </div>
       </div>
     </div>

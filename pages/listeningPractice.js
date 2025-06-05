@@ -144,7 +144,7 @@ function ListeningPractice() {
 
     setLoading(true);
     try {
-      console.log(`Fetching listening practice questions for ${difficulty} level ${selectedLevel}`);
+      console.log(`${difficulty} लेव्हल  ${selectedLevel} ऐकण्याचा सराव सुरू करण्यासाठी प्रश्न घेतले जात आहेत...`);
       
       // Simple auth approach - include user ID in the request body instead of using token in header
       const userObj = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
@@ -171,15 +171,15 @@ function ListeningPractice() {
         // If unauthorized, redirect to login
         if (response.status === 401) {
           localStorage.removeItem('token');
-          alert("Your session has expired. Please log in again.");
+          alert("session संपला आहे. कृपया पुन्हा लॉगिन करा.");
           router.push("/login");
           return;
         }
-        throw new Error(data.error || 'Failed to fetch questions');
+        throw new Error(data.error || 'प्रश्न मिळवण्यात समस्या आली. कृपया नंतर पुन्हा प्रयत्न करा.');
       }
       
       if (!data.questions || data.questions.length === 0) {
-        throw new Error('No questions received');
+        throw new Error('प्रश्न मिळालेले नाहीत. कृपया नंतर प्रयत्न करा.');
       }
 
       setQuestions(data.questions);
@@ -188,8 +188,8 @@ function ListeningPractice() {
       setResponses([]); // Clear any previous responses
       setShowLevelSelection(false); // Hide level selection
     } catch (error) {
-      console.error("Error fetching questions:", error);
-      alert("Failed to load listening practice questions. Please try again.");
+      console.error("प्रश्न मिळवण्यात समस्या आली. :", error);
+      alert("ऐकण्याच्या सरावाचे प्रश्न लोड करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.");
     } finally {
       setLoading(false);
     }
@@ -198,7 +198,7 @@ function ListeningPractice() {
   // Play audio for the current question
   const playAudio = () => {
     if (!questions || !questions[currentIndex]) {
-      console.error('No current question available to play audio');
+      console.error('ऑडिओ प्ले करण्यासाठी सध्या कोणताही प्रश्न उपलब्ध नाही.');
       return;
     }
     
@@ -209,8 +209,8 @@ function ListeningPractice() {
       
       // Make sure we have content to speak
       if (!currentQuestion.content) {
-        console.error('Question has no content to speak');
-        alert('Error: Question content is missing. Please try another question.');
+        console.error('प्रश्नामध्ये बोलण्यासाठी कोणतीही कन्टेन्ट उपलब्ध नाही');
+        alert('त्रुटी: प्रश्नाचा कन्टेन्ट उपलब्ध नाही. कृपया दुसरा प्रश्न निवडा.');
         return;
       }
       
@@ -220,7 +220,7 @@ function ListeningPractice() {
         .replace(/\n/g, ' ')           // Replace newlines with spaces
         .trim();                       // Trim any extra whitespace
       
-      console.log('Speaking text:', textToSpeak);
+      console.log('स्पीकिंग टेक्स्ट:', textToSpeak);
       
       // Create and configure the speech synthesis utterance
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
@@ -234,7 +234,7 @@ function ListeningPractice() {
       setTimeout(() => {
         // Try to select a good voice
         const voices = window.speechSynthesis.getVoices();
-        console.log('Available voices:', voices.length);
+        console.log('अव्हेलेबल व्हॉइसेस:', voices.length);
         
         const preferredVoices = voices.filter(voice => 
           voice.name.includes('Google') || 
@@ -244,25 +244,25 @@ function ListeningPractice() {
         
         if (preferredVoices.length > 0) {
           utterance.voice = preferredVoices[0];
-          console.log('Using voice:', preferredVoices[0].name);
+          console.log('यूझिंग व्हॉइस:', preferredVoices[0].name);
         } else if (voices.length > 0) {
           // Fallback to any available voice
           utterance.voice = voices[0];
-          console.log('Using fallback voice:', voices[0].name);
+          console.log('फॉलबॅक व्हॉइस वापरला जात आहे:', voices[0].name);
         }
         
         // Set up events before speaking
         utterance.onstart = () => {
-          console.log('Speech started');
+          console.log('स्पीच सुरू झाले आहे');
         };
         
         utterance.onend = () => {
-          console.log('Speech ended');
+          console.log('स्पीच संपले आहे');
           startTimer();
         };
         
         utterance.onerror = (event) => {
-          console.error('Speech synthesis error:', event);
+          console.error('स्पीच सिंथेसिसमध्ये त्रुटी आली आहे:', event);
           // Start timer even if speech fails
           startTimer();
         };
@@ -272,8 +272,8 @@ function ListeningPractice() {
         setAudioPlayed(true);
       }, 100); // Short delay to make sure voices are loaded
     } catch (error) {
-      console.error('Error playing audio:', error);
-      alert('There was an error playing the audio. Please try again.');
+      console.error('ऑडिओ प्ले करण्यात त्रुटी आली आहे:', error);
+      alert('ऑडिओ प्ले करताना त्रुटी आली आहे. कृपया पुन्हा प्रयत्न करा.');
       // Still start the timer even if speech fails
       startTimer();
     }
@@ -323,13 +323,13 @@ function ListeningPractice() {
 
     // For multiple choice questions, check if an option is selected
     if (questions[currentIndex].type === 'multiple-choice' && selectedOptions.length === 0) {
-      alert('Please select an option');
+      alert('कृपया दिलेल्या पर्यायांपैकी एक पर्याय निवडा.');
       return;
     }
 
     // For text input questions, check if there's a response
     if (questions[currentIndex].type === 'text-input' && !userResponse.trim()) {
-      alert('Please enter your response');
+      alert('कृपया तुमचा प्रतिसाद प्रविष्ट करा');
       return;
     }
 
@@ -390,7 +390,7 @@ function ListeningPractice() {
           }
         }
         
-        console.log('Storing response with expected response:', expectedResponse);
+        console.log('अपेक्षित प्रतिसाद जतन करणे:', expectedResponse);
         
         setResponses(prevResponses => [...prevResponses, {
           cardId: questions[currentIndex].cardId,
@@ -402,11 +402,11 @@ function ListeningPractice() {
           completedAt: new Date()
         }]);
       } else {
-        throw new Error('Error submitting answer');
+        throw new Error('उत्तर सबमिट करताना त्रुटी आली आहे.');
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred. Please try again.');
+      console.error('त्रुटी:', error);
+      alert('समस्या उद्भवली आहे, कृपया पुन्हा प्रयत्न करून पहा.');
     } finally {
       setLoading(false);
     }
@@ -448,11 +448,11 @@ function ListeningPractice() {
       
       // Make sure we have responses to evaluate
       if (!responses || responses.length === 0) {
-        console.error('No responses to evaluate!');
+        console.error('मूल्यांकनासाठी कोणतीही प्रतिक्रिया सध्या उपलब्ध नाही.');
         setEvaluationResult({
           evaluation: {
             overallRating: 1,
-            feedback: "No responses were recorded for evaluation. We've assigned a default rating.",
+            feedback: "मूल्यांकनासाठी कोणतीही प्रतिक्रिया नोंदविली गेली नाही. आम्ही डीफॉल्ट रेटिंग दिली आहे.",
             completed: true
           },
           levelProgress: {
@@ -466,7 +466,7 @@ function ListeningPractice() {
         return;
       }
       
-      console.log('Evaluating level:', levelToEvaluate, 'with responses:', responses);
+      console.log( 'प्रतिक्रियांसह:', responses,'लेव्हल मूल्यांकन करत आहे:', levelToEvaluate);
       
       const response = await fetch('/api/evaluateLevelCompletion', {
         method: 'POST',
@@ -506,12 +506,12 @@ function ListeningPractice() {
             });
           }
         } else {
-          console.error('Failed to evaluate level completion');
+          console.error('लेव्हल पूर्णता तपासणी अपूर्ण राहिली आहे.');
           // Force show evaluation with default values even on error
           setEvaluationResult({
             evaluation: {
               overallRating: 1,
-              feedback: "We couldn't fully evaluate your responses, but you've completed the level.",
+              feedback: "आम्ही तुमच्या प्रतिसादांचे पूर्णतः मूल्यांकन करू शकलो नाही, तरीही तुम्ही लेव्हल पूर्ण केले आहे.",
               completed: true
             },
             levelProgress: {
@@ -523,12 +523,12 @@ function ListeningPractice() {
           setShowEvaluation(true);
         }
       } catch (parseError) {
-        console.error('Error parsing API response:', parseError);
+        console.error('API प्रतिसाद पार्स करताना त्रुटी आली:', parseError);
         // Force show evaluation with default values on parse error
         setEvaluationResult({
           evaluation: {
             overallRating: 1,
-            feedback: "We couldn't process your level evaluation, but we've recorded your progress.",
+            feedback: "आम्ही तुमचं लेव्हल मूल्यांकन प्रोसेस करू शकलो नाही, पण तुमचा प्रोग्रेस नोंदवला आहे.",
             completed: true
           },
           levelProgress: {
@@ -540,12 +540,12 @@ function ListeningPractice() {
         setShowEvaluation(true);
       }
     } catch (error) {
-      console.error('Error evaluating level completion:', error);
+      console.error('लेव्हल पूर्णता मूल्यांकन करताना एरर आला  :', error);
       // Even with complete failure, provide a graceful fallback
       setEvaluationResult({
         evaluation: {
           overallRating: 1,
-          feedback: "There was a problem connecting to the server, but we've still recorded your practice session.",
+          feedback: "सर्व्हरशी कनेक्ट होताना अडचण आली, पण आम्ही तुमचा प्रॅक्टिस सेशन तरीही नोंदवला आहे.",
           completed: true
         },
         levelProgress: {
@@ -578,23 +578,23 @@ function ListeningPractice() {
   return (
     <>
       <Head>
-        <title>SHAKKTII AI - Listening Practice</title>
+        <title>SHAKKTII AI - ऐकण्याचा सराव</title>
         <meta name="description" content="Improve your listening skills with AI-powered practice" />
       </Head>
       
       <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-white mb-2">Listening Practice</h1>
-            <p className="text-lg text-pink-200">Enhance your listening skills through interactive exercises</p>
+            <h1 className="text-4xl font-bold text-white mb-2">ऐकण्याचा सराव</h1>
+            <p className="text-lg text-pink-200">संवादात्मक सरावांद्वारे तुमच्या ऐकण्याच्या कौशल्यात वाढ करा.</p>
           </div>
           
           {!testStarted ? (
             <div className="flex flex-col space-y-8 items-center justify-center">
               <div className="w-full">
-                <h2 className="text-xl font-bold text-white mb-4">Select Difficulty:</h2>
+                <h2 className="text-xl font-bold text-white mb-4"> डिफिकल्टी लेव्हल निवडा:</h2>
                 <div className="flex flex-wrap gap-4">
-                  {['Beginner', 'Moderate', 'Expert'].map((level) => (
+                  {['बिगिनर', 'मॉडरेट', 'एक्स्पर्ट'].map((level) => (
                     <button
                       key={level}
                       onClick={() => handleDifficultySelect(level)}
@@ -612,10 +612,10 @@ function ListeningPractice() {
               
               {showLevelSelection && (
                 <div className="w-full bg-white rounded-xl p-4 shadow-md">
-                  <h2 className="text-xl font-bold text-gray-800 mb-4">Select Level:</h2>
+                  <h2 className="text-xl font-bold text-gray-800 mb-4">लेव्हल निवडा:</h2>
                   {selectedLevel && (
                     <div className="text-center mb-3 text-pink-600 font-medium">
-                      Level {selectedLevel} selected. Double-click to start immediately or click Start Practice below.
+                     लेव्हल {selectedLevel} निवडले आहे. लगेच सुरू करण्यासाठी डबल-क्लिक करा किंवा खालील 'स्टार्ट प्रॅक्टिस' वर क्लिक करा.
                     </div>
                   )}
                   {loading ? (
@@ -650,7 +650,7 @@ function ListeningPractice() {
                               selectedLevel === level ? 'ring-4 ring-pink-500 ring-opacity-70 transform scale-105' : ''
                             }`}
                           >
-                            <div className="text-2xl font-bold text-pink-900 mb-2">Level {level}</div>
+                            <div className="text-2xl font-bold text-pink-900 mb-2">लेव्हल  {level}</div>
                             
                             {/* Star display */}
                             <div className="flex space-x-1">
@@ -693,16 +693,16 @@ function ListeningPractice() {
                     : 'bg-gradient-to-r from-pink-800 to-purple-900 text-white hover:opacity-90'
                 }`}
               >
-                {loading ? 'Loading...' : 'Start Practice'}
+                {loading ? 'डेटा लोड केला जात आहे...' : 'सराव सुरू करा'}
               </button>
             </div>
           ) : testCompleted && !showEvaluation ? (
             <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">Practice Completed!</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4"> प्रॅक्टिस पूर्ण झाली!</h1>
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-pink-500 mb-4"></div>
-                  <p className="text-lg text-gray-600">Evaluating your responses with Claude AI...</p>
+                  <p className="text-lg text-gray-600"> तुमच्या उत्तरांचे Claude AI सोबत मूल्यांकन करत आहे...</p>
                 </div>
               ) : (
                 <>
@@ -712,20 +712,20 @@ function ListeningPractice() {
                     }} />
                   </div>
                   <p className="text-lg text-gray-600 mb-6">
-                    Great job! You've completed the listening practice session.
+                     ग्रेट जॉब! तुम्ही लिसनिंग प्रॅक्टिस सेशन पूर्ण केलं आहे.
                   </p>
                   <div className="flex justify-center space-x-4">
                     <button
                       onClick={backToLevelSelection}
                       className="bg-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-pink-700"
                     >
-                      Back to Levels
+                       लेव्हल्सकडे परत जा
                     </button>
                     <button
                       onClick={() => setShowEvaluation(true)}
                       className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700"
                     >
-                      Show Results
+                      रिझल्ट दाखवा
                     </button>
                   </div>
                 </>
@@ -733,10 +733,10 @@ function ListeningPractice() {
             </div>
           ) : testCompleted && showEvaluation ? (
             <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">Your Practice Results</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">तुमचे प्रॅक्टिस रिझल्ट्स</h1>
               
               <div className="mb-6 p-4 bg-purple-50 rounded-lg">
-                <h2 className="text-xl font-bold text-purple-800 mb-2">Overall Performance</h2>
+                <h2 className="text-xl font-bold text-purple-800 mb-2">ओव्हरऑल परफॉर्मन्स</h2>
                 <div className="flex justify-center mb-4">
                   {/* Star display for overall rating */}
                   <div className="flex space-x-2">
@@ -754,17 +754,17 @@ function ListeningPractice() {
                 </div>
                 
                 <div className="text-lg text-gray-700 mb-4">
-                  {evaluationResult?.evaluation?.feedback || "You've completed this level. Keep practicing to improve your skills!"}
+                  {evaluationResult?.evaluation?.feedback || "तुम्ही ही लेव्हल पूर्ण केली आहे. तुमचे स्किल्स सुधारण्यासाठी प्रॅक्टिस करत राहा!"}
                 </div>
               </div>
               
               <div className="mb-8">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Level {selectedLevel} Completed!</h2>
+                <h2 className="text-xl font-bold text-gray-800 mb-4"> लेव्हल {selectedLevel} कंप्लीट!</h2>
                 <p className="text-lg text-gray-600">
-                  You've earned {evaluationResult?.levelProgress?.stars || 1} star{(evaluationResult?.levelProgress?.stars || 1) !== 1 ? 's' : ''} for this level.
+                  तुम्हाला या लेव्हलसाठी {evaluationResult?.levelProgress?.stars || 1} स्टार{(evaluationResult?.levelProgress?.stars || 1) !== 1 ? 's' : ''} मिळाले आहेत.
                 </p>
                 {evaluationResult?.levelProgress?.stars === 3 && (
-                  <div className="mt-2 text-green-600 font-bold">Perfect score! Excellent work!</div>
+                  <div className="mt-2 text-green-600 font-bold">परिपूर्ण स्कोर! उत्कृष्ट कामगिरी! </div>
                 )}
               </div>
               
@@ -773,7 +773,7 @@ function ListeningPractice() {
                   onClick={backToLevelSelection}
                   className="bg-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-pink-700"
                 >
-                  Back to Levels
+                  लेव्हल्सकडे परत जा
                 </button>
                 {selectedLevel < 30 && (
                   <button
@@ -786,7 +786,7 @@ function ListeningPractice() {
                     }}
                     className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700"
                   >
-                    Next Level
+                    पुढील लेव्हल
                   </button>
                 )}
               </div>
@@ -796,10 +796,10 @@ function ListeningPractice() {
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm font-medium text-gray-600">
-                    Question {currentIndex + 1} of {questions.length}
+                     प्रश्न  {currentIndex + 1} पैकी {questions.length}
                   </span>
                   <span className="text-sm font-medium text-gray-600">
-                    {difficulty} Level • {selectedLevel || ''}
+                    {difficulty} लेव्हल • {selectedLevel || ''}
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-1 mb-1">
@@ -812,7 +812,7 @@ function ListeningPractice() {
 
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-gray-800 mb-2">
-                  {questions[currentIndex]?.instructions || "Listen to the audio and answer:"}
+                  {questions[currentIndex]?.instructions || " ऑडिओ ऐका आणि उत्तर द्या:"}
                 </h2>
                 
                 {/* Audio content section */}
@@ -847,13 +847,13 @@ function ListeningPractice() {
                           );
                         })}
                     </div>
-                  ) : "No content available"}
+                  ) : "कंटेंट उपलब्ध नाही"}
                 </div>
                 
                 {/* Question text - Added to display the actual question */}
                 <div className="p-4 bg-indigo-50 rounded-lg text-indigo-900 border border-indigo-100">
-                  <h3 className="font-bold mb-2">Question:</h3>
-                  <p>{questions[currentIndex]?.questionText || questions[currentIndex]?.question || "What is the main topic of the audio?"}</p>
+                  <h3 className="font-bold mb-2">प्रश्न:</h3>
+                  <p>{questions[currentIndex]?.questionText || questions[currentIndex]?.question || "ऑडिओचा मुख्य विषय काय आहे?"}</p>
                 </div>
                 
                 {/* Audio player section */}
@@ -870,7 +870,7 @@ function ListeningPractice() {
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414-3.536 5 5 0 00-1.414-3.536M2.757 12a9 9 0 002.828-6.364A9 9 0 002.757 2.636" />
                     </svg>
-                    {audioPlayed ? 'Audio Played' : 'Play Audio'}
+                    {audioPlayed ? 'ऑडिओ प्ले झाला' : 'ऑडिओ प्ले करा'}
                   </button>
                 </div>
                 
@@ -897,7 +897,7 @@ function ListeningPractice() {
               <div className="mb-6">
                 {questions[currentIndex]?.type === 'multiple-choice' ? (
                   <div>
-                    <h3 className="font-medium text-gray-700 mb-2">Select your answer:</h3>
+                    <h3 className="font-medium text-gray-700 mb-2"> तुमचा पर्याय निवडा:</h3>
                     <div className="space-y-2">
                       {questions[currentIndex]?.options?.map((option, index) => (
                         <div 
@@ -916,11 +916,11 @@ function ListeningPractice() {
                   </div>
                 ) : (
                   <div>
-                    <h3 className="font-medium text-gray-700 mb-2">Your response:</h3>
+                    <h3 className="font-medium text-gray-700 mb-2">तुमचा प्रतिसाद:</h3>
                     <textarea
                       value={userResponse}
                       onChange={handleTextResponseChange}
-                      placeholder="Type your answer here..."
+                      placeholder="कृपया आपले उत्तर येथे टाइप करा."
                       className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       rows="4"
                     ></textarea>
@@ -936,7 +936,7 @@ function ListeningPractice() {
                     'bg-yellow-50 text-yellow-800'
                   }`}>
                     <div className="flex items-center mb-2">
-                      <h3 className="font-bold text-lg">Feedback:</h3>
+                      <h3 className="font-bold text-lg">फीडबॅक:</h3>
                       <div className="ml-2 flex">
                         {[...Array(3)].map((_, i) => (
                           <svg 
@@ -957,7 +957,7 @@ function ListeningPractice() {
                     onClick={handleNext}
                     className="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg"
                   >
-                    {currentIndex < questions.length - 1 ? 'Next Question' : 'Complete Practice'}
+                    {currentIndex < questions.length - 1 ? ' पुढचा प्रश्न' : 'प्रॅक्टिस पूर्ण करा'}
                   </button>
                 </div>
               ) : (
@@ -978,7 +978,7 @@ function ListeningPractice() {
                       : 'bg-purple-600 hover:bg-purple-700 text-white'
                   }`}
                 >
-                  {loading ? 'Submitting...' : 'Submit Answer'}
+                  {loading ? 'सबमिट करत आहे...' : 'उत्तर सबमिट करा'}
                 </button>
               )}
             </div>

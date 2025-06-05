@@ -22,32 +22,32 @@ function Practices() {
   const practiceCards = [
     {
       id: 1,
-      title: "Personality Test",
-      description: "Assess your personality traits and discover your strengths and areas for improvement.",
+      title: "पर्सनॅलिटी टेस्ट",
+      description: "तुमचे पर्सनॅलिटी ट्रेट्स जाणून घ्या आणि स्ट्रेंथ्स व इम्प्रूव्हमेंट एरियाज ओळखा.",
       image: "/personality.png",
       bgColor: "from-purple-600 to-indigo-800",
       link: "/personalityTest"
     },
     {
       id: 2,
-      title: "Speaking Practice",
-      description: "Improve your speaking skills with interactive exercises at different difficulty levels.",
+      title: "बोलण्याचा सराव",
+      description: "वेगवेगळ्या डिफिकल्टी लेव्हल्सवर इंटरॲक्टिव्ह सरावाने तुमची बोलण्याची कौशल्ये सुधारवा.",
       image: "/speaking.png",
       bgColor: "from-pink-600 to-rose-800",
       link: "/speakingPractice"
     },
     {
       id: 3,
-      title: "Listening Practice",
-      description: "Enhance your listening comprehension with guided audio exercises and real-world scenarios.",
+      title: "ऐकण्याचा सराव",
+      description: "मार्गदर्शित ऑडिओ सराव आणि प्रत्यक्ष आयुष्यातील परिस्थितींच्या आधारे तुमची ऐकण्याची समज सुधारवा.",
       image: "/listening.png",
       bgColor: "from-blue-600 to-cyan-800",
       link: "/listeningPractice"
     },
     {
       id: 4,
-      title: "Reading & Writing",
-      description: "Develop your reading comprehension and written expression through structured activities.",
+      title: "वाचन आणि लेखन",
+      description: "संघटित उपक्रमांद्वारे तुमची वाचन समज आणि लेखन कौशल्ये विकसित करा.",
       image: "/reading.png",
       bgColor: "from-emerald-600 to-teal-800",
       link: "/readingWritingPractice"
@@ -57,7 +57,7 @@ function Practices() {
   return (
     <>
       <Head>
-        <title>SHAKKTII AI - Practice Tests</title>
+        <title>SHAKKTII AI - सराव परीक्षा</title>
       </Head>
       <div className="min-h-screen bg-gray-100" style={{ backgroundImage: "url('/BG.jpg')", backgroundSize: 'cover' }}>
         <div className="container mx-auto px-4 py-16">
@@ -69,12 +69,12 @@ function Practices() {
                 className="flex items-center text-purple-600 hover:text-purple-800 transition-colors"
               >
                 <img src="/2.svg" alt="Back" className="w-8 h-8 mr-2" />
-                <span className="text-lg font-medium">Back</span>
+                <span className="text-lg font-medium">मागे जा</span>
               </button>
             </div>
             <div className="flex items-center">
               <div className="mr-4 text-right">
-                <p className="text-sm text-gray-600">Welcome,</p>
+                <p className="text-sm text-gray-600">आपले स्वागत आहे,</p>
                 <p className="font-semibold text-lg text-purple-900">{userName}</p>
               </div>
               <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
@@ -85,9 +85,9 @@ function Practices() {
 
           {/* Title */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-purple-900">Practice Assessments</h1>
+            <h1 className="text-4xl font-bold text-purple-900">प्रॅक्टिस अ‍ॅसेसमेंट्स</h1>
             <p className="text-lg text-gray-700 mt-2">
-              Enhance your skills through our specialized practice sessions
+              आमच्या विशेष सराव सत्रांद्वारे तुमची कौशल्ये वाढवा.
             </p>
             <button
               onClick={() => router.push('/practiceProgress')}
@@ -96,7 +96,7 @@ function Practices() {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
               </svg>
-              View Your Progress
+              तुमची प्रोग्रेस पाहा
             </button>
           </div>
 
@@ -124,7 +124,7 @@ function Practices() {
                   <button 
                     className="w-full bg-gradient-to-r from-pink-800 to-purple-900 text-white py-2 rounded-md hover:opacity-90 transition-opacity"
                   >
-                    Start Practice
+                    सराव सुरू करा
                   </button>
                 </div>
               </div>

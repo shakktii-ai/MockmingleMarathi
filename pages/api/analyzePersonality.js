@@ -84,7 +84,7 @@ Return your analysis as a structured JSON object with the following format:
   "challenges": ["challenge 1", "challenge 2"],
   "career_matches": ["career 1", "career 2", "career 3"],
   "development_suggestions": ["suggestion 1", "suggestion 2", "suggestion 3"]
-}`;
+} all in marathi language `;
 
   const payload = {
     model: "claude-3-haiku-20240307", 

@@ -303,12 +303,12 @@ function ReportDetailPopup({ user, isOpen, setIsOpen }) {
   
           {/* Back Side */}
           <div className="back flex flex-col justify-center items-center p-4 bg-[#b393f8] rounded-lg overflow-y-auto">
-            <h5 className="text-xl font-semibold">{label} - Details</h5>
+            <h5 className="text-xl font-semibold">{label} - तपशील</h5>
             <p className="mt-4 text-sm">
               {feedback.split(" ").slice(0, 32).join(" ")}...
             </p>
   
-            <p className="mt-4 text-sm">Learn More</p>
+            <p className="mt-4 text-sm">अधिक जाणून घ्या</p>
           </div>
         </div>
       </div>
@@ -329,7 +329,7 @@ return (
           <div className="back-button" onClick={handleClosee}>
             <IoIosArrowBack />
           </div>
-          <h1 className="text-center">Interview Report</h1>
+          <h1 className="text-center">मुलाखत अहवाल</h1>
         </div>
         
         <div className="mx-auto mt-5">
@@ -353,11 +353,11 @@ return (
                     {reportVisibility[index] && (
                       <div className="p-4">
                         <h2 className="text-lg font-semibold">
-                          <strong>Role:</strong> {report.role}
+                          <strong>पद:</strong> {report.role}
                         </h2>
                         <div className="report-analysis mt-4">
                           <h4 className="text-xl font-semibold mb-2">
-                            <strong>Analysis</strong>
+                            <strong>परीक्षण</strong>
                           </h4>
 
                           <div className="score-cards-container">
@@ -371,7 +371,7 @@ return (
                             className="button mt-4"
                             onClick={() => downloadReport(report.reportAnalysis, report)}
                           >
-                            Download Report
+                            रिपोर्ट डाउनलोड करा
                           </button>
                         </div>
                       </div>
@@ -379,7 +379,7 @@ return (
                   </div>
                 ))
               ) : (
-                <div className="text-center mt-5 text-gray-600">For Report Visit After 5 Min</div>
+                <div className="text-center mt-5 text-gray-600">अहवाल पाहण्यासाठी कृपया ५ मिनिटांनंतर पुन्हा भेट द्या</div>
               )}
             </div>
           )}

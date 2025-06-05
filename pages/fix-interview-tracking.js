@@ -51,16 +51,16 @@ export default function FixInterviewTracking() {
 
       const data = await response.json();
 
-      if (response.ok) {
+       if (response.ok) {
         setSuccess(true);
         
         if (updateAllUsers) {
-          setMessage(`Successfully updated ${data.updatedCount} user accounts with interview tracking fields.`);
+          setMessage(`${data.updatedCount} वापरकर्ता खात्यांमध्ये इंटरव्ह्यू ट्रॅकिंग फील्ड्स यशस्वीरित्या अद्ययावत करण्यात आले आहेत.`);
           setUpdatedUsers(data.updatedUsers || []);
         } else {
-          setMessage('Interview tracking fields updated successfully! Your account now has: ' + 
-            `${data.user.no_of_interviews} available interviews and ` +
-            `${data.user.no_of_interviews_completed} completed interviews.`);
+          setMessage('इंटरव्ह्यू ट्रॅकिंग फील्ड्स यशस्वीरित्या अद्ययावत करण्यात आले आहेत! तुमच्या खात्यात आता ' + 
+            `${data.user.no_of_interviews} उपलब्ध मुलाखती आणि ` +
+            `${data.user.no_of_interviews_completed} पूर्ण झालेल्या मुलाखती आहेत.`);
           
           // Update user in localStorage
           if (user) {
@@ -73,10 +73,10 @@ export default function FixInterviewTracking() {
           }
         }
       } else {
-        setMessage(`Error: ${data.error || 'Failed to update interview tracking fields'}`);
+        setMessage(`त्रुटी: ${data.error || 'इंटरव्ह्यू ट्रॅकिंग फील्ड्स अपडेट होऊ शकले नाहीत. कृपया पुन्हा प्रयत्न करा.'}`);
       }
     } catch (error) {
-      setMessage(`Error: ${error.message}`);
+      setMessage(`त्रुटी: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -85,15 +85,15 @@ export default function FixInterviewTracking() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-900 to-black bg-cover bg-center flex flex-col items-center justify-start pt-16 px-4">
       <Head>
-        <title>Fix Interview Tracking | SHAKKTII AI</title>
+        <title>इंटरव्ह्यू ट्रॅकिंग अपडेट करा | SHAKKTII AI</title>
         <meta name="description" content="Fix interview tracking fields for user accounts" />
       </Head>
       
       <div className="bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full border border-indigo-500">
-        <h1 className="text-2xl font-bold text-white mb-6 text-center">Fix Interview Tracking</h1>
+        <h1 className="text-2xl font-bold text-white mb-6 text-center">अपडेट इंटरव्ह्यू ट्रॅकिंग</h1>
         
         <p className="text-gray-300 mb-6">
-          This utility will update your user account to include the interview tracking fields if they're missing.
+          जर तुमच्या खात्यात इंटरव्ह्यू ट्रॅकिंग फील्ड्स नसतील, तर ही युटिलिटी ते जोडून खाते अपडेट करेल.
         </p>
         
         <div className="mb-6">
@@ -107,13 +107,13 @@ export default function FixInterviewTracking() {
               disabled={loading}
             />
             <label htmlFor="update-all" className="ml-2 text-sm font-medium text-gray-300">
-              Update all users in database (admin option)
+              डेटाबेसमधील सर्व युजर्स अद्ययावत करा. (अ‍ॅडमिन पर्याय)
             </label>
           </div>
           
           {!updateAllUsers && (
             <div className="mb-4">
-              <label className="block text-gray-300 mb-2">Your Email:</label>
+              <label className="block text-gray-300 mb-2">ई-मेल:</label>
               <input
                 type="email"
                 value={email}
@@ -137,10 +137,10 @@ export default function FixInterviewTracking() {
           }`}
         >
           {loading 
-            ? 'Updating...' 
+            ? 'अपडेट करत आहे...' 
             : updateAllUsers 
-              ? 'Update All User Accounts' 
-              : 'Fix Interview Tracking Fields'
+              ? 'सर्व युजर्सचे अकाउंट्स अपडेट करा' 
+              : 'इंटरव्ह्यू ट्रॅकिंग फील्ड्स अपडेट करा'
           }
         </button>
         
@@ -156,21 +156,21 @@ export default function FixInterviewTracking() {
               onClick={() => router.push('/profile')}
               className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
             >
-              Go to Profile
+              प्रोफाइल पहा
             </button>
           </div>
         )}
         
         {success && updateAllUsers && updatedUsers.length > 0 && (
           <div className="mt-6">
-            <h3 className="text-lg font-medium text-white mb-2">Updated Users:</h3>
+            <h3 className="text-lg font-medium text-white mb-2">अपडेटेड युजर्स:</h3>
             <div className="max-h-60 overflow-y-auto bg-gray-900 rounded-lg p-3">
               <table className="w-full text-sm text-gray-300">
                 <thead>
                   <tr>
-                    <th className="text-left p-2">Name</th>
-                    <th className="text-left p-2">Email</th>
-                    <th className="text-right p-2">Interviews</th>
+                    <th className="text-left p-2">नाव</th>
+                    <th className="text-left p-2">ई-मेल</th>
+                    <th className="text-right p-2">मुलाखती</th>
                   </tr>
                 </thead>
                 <tbody>

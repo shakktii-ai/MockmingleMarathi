@@ -314,7 +314,24 @@ async function getApiResponseReport(data) {
     'anthropic-version': '2023-06-01',
   };
 
-  const prompt = `Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence,  language fluency and overall(0-50). Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(data, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise.`;
+  //const prompt = `कृपया खालील सर्व मूल्यांकन अहवाल **मराठीत** तयार करा. Generate a report scoring (0-10) technical proficiency, communication, decision-making, confidence,  language fluency and overall(0-50). Compare the original and provided responses, evaluating the user's answers based on ${JSON.stringify(data, null, 2)}. After scoring, give a detailed analysis of each area with relevant YouTube links and books and websites name for improvement. Provide a single comprehensive report, not question-wise. Give all report in marathi language`;
+const prompt = `
+कृपया खालील सर्व मूल्यांकन अहवाल **मराठीत** तयार करा.
+
+तांत्रिक कौशल्य, संवाद कौशल्य, निर्णय क्षमता, आत्मविश्वास, भाषेची प्राविण्य आणि एकूण गुण (०-५०) यांचे मूल्यमापन करा, प्रत्येकीला ० ते १० गुण द्या.
+
+मूल्यांकनासाठी वापरकर्ता दिलेल्या मूळ आणि सुधारीत उत्तरांची तुलना करा. खालील निकष वापरून उत्तरांचे विश्लेषण करा:
+${JSON.stringify(data, null, 2)}
+
+गुण दिल्यानंतर, प्रत्येक घटकासाठी सविस्तर विश्लेषण द्या, ज्यामध्ये:
+- ताकदी आणि कमकुवत बाजू
+- उत्तरांमधील विशिष्ट उदाहरणे
+- सुधारणा करण्यासाठी सूचना
+
+प्रत्येक घटक सुधारण्यासाठी YouTube व्हिडिओ लिंक्स, पुस्तकांची नावे आणि वेबसाइट्स सुचवा.
+
+संपूर्ण अहवाल एकाच संपूर्ण रिपोर्ट स्वरूपात तयार करा, प्रश्नानुसार वेगवेगळे अहवाल तयार करू नका.
+`;
 
   const payload = {
     model: "claude-3-7-sonnet-20250219", // You can change to 'claude-3-sonnet-20240229' for a lighter model

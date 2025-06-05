@@ -218,15 +218,15 @@ function PersonalityTest() {
       console.error('Error submitting personality test:', error);
       // Fallback results if API fails
       setResults({
-        personality_type: "Analytical Problem-Solver",
+        personality_type: "अ‍ॅनालिटिकल प्रॉब्लेम सॉल्वर",
         strengths: [
-          "Logical thinking",
-          "Detail-oriented",
-          "Good at planning"
+          "तार्किक विचार करण्याची क्षमता",
+          "तपशीलांकडे लक्ष देणे",
+          "नीट नियोजन करणे"
         ],
         challenges: [
-          "May overthink decisions",
-          "Could improve emotional intelligence"
+          "निर्णयांबाबत कधी कधी जास्त विचार करतो/करते",
+          "भावनिक बुद्धिमत्तेत सुधारणा होऊ शकते"
         ],
         career_matches: [
           "Software Development",
@@ -234,9 +234,9 @@ function PersonalityTest() {
           "Project Management"
         ],
         development_suggestions: [
-          "Practice active listening",
-          "Take on leadership opportunities",
-          "Develop creative thinking skills"
+         "सक्रियपणे ऐकण्याचा सराव करा",
+         "नेतृत्वाची संधी स्वीकारा",
+         "सर्जनशील विचार करण्याच्या कौशल्यांचा विकास करा"
         ]
       });
     } finally {
@@ -258,8 +258,8 @@ function PersonalityTest() {
 
   return (
     <>
-      <Head>
-        <title>SHAKKTII AI - Personality Test</title>
+       <Head>
+        <title>SHAKKTII AI - व्यक्तिमत्व चाचणी</title>
       </Head>
       <div className="min-h-screen bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8" style={{ backgroundImage: "url('/BG.jpg')" }}>
         <div className="absolute top-4 left-4">
@@ -268,7 +268,7 @@ function PersonalityTest() {
             className="flex items-center text-purple-600 hover:text-purple-800 transition-colors"
           >
             <img src="/2.svg" alt="Back" className="w-8 h-8 mr-2" />
-            <span className="text-lg font-medium">Back</span>
+            <span className="text-lg font-medium">मागे जा</span>
           </button>
         </div>
 
@@ -281,38 +281,38 @@ function PersonalityTest() {
         <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-12">
           {!testStarted ? (
             <div className="p-8 text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">Personality Assessment</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">व्यक्तिमत्त्व मूल्यांकन</h1>
               <p className="text-lg text-gray-600 mb-6">
-                Discover your personality traits, strengths, and areas for growth with our comprehensive assessment.
+                तुमचे व्यक्तिमत्त्व, क्षमता आणि सुधारणा गरज असलेले भाग आमच्या सखोल मूल्यांकनाद्वारे समजून घ्या.
               </p>
               <div className="bg-purple-100 rounded-lg p-4 mb-6">
-                <h2 className="font-bold text-purple-800 mb-2">Instructions:</h2>
+                <h2 className="font-bold text-purple-800 mb-2">सूचना:</h2>
                 <ul className="text-left text-purple-700 list-disc pl-5 space-y-1">
-                  <li>This test consists of 10 questions</li>
-                  <li>You will have 5 minutes to complete the assessment</li>
-                  <li>Answer honestly for the most accurate results</li>
-                  <li>There are no right or wrong answers</li>
+                  <li>या चाचणीमध्ये एकूण १० प्रश्न आहेत.</li>
+                  <li>ही टेस्ट पूर्ण करण्यासाठी आपल्याकडे ५ मिनिटांचा वेळ आहे</li>
+                  <li>अचूक निकालांसाठी कृपया प्रामाणिकपणे उत्तर द्या.</li>
+                  <li>बरोबर किंवा चूक अशी कोणतीही उत्तरे नाहीत.</li>
                 </ul>
               </div>
               <button
                 onClick={startTest}
                 className="bg-gradient-to-r from-pink-800 to-purple-900 text-white py-3 px-8 rounded-lg text-lg font-medium hover:opacity-90 transition-opacity"
               >
-                Start Assessment
+              टेस्ट सुरू करा
               </button>
             </div>
           ) : results ? (
             <div className="p-8">
-              <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Your Personality Profile</h1>
+              <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">तुमचे व्यक्तिमत्व प्रोफाइल</h1>
               
               <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-6 mb-6">
                 <h2 className="text-2xl font-bold text-purple-900 mb-2">{results.personality_type}</h2>
-                <p className="text-gray-700 italic">Based on your responses to our assessment</p>
+                <p className="text-gray-700 italic">तुमच्या दिलेल्या उत्तरांच्या आधारावर तयार करण्यात आलेला अहवाल.</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-xl font-bold text-purple-800 mb-3">Your Strengths</h3>
+                  <h3 className="text-xl font-bold text-purple-800 mb-3">क्षमता</h3>
                   <ul className="list-disc pl-5 space-y-1 text-gray-700">
                     {results.strengths.map((strength, index) => (
                       <li key={index}>{strength}</li>
@@ -321,7 +321,7 @@ function PersonalityTest() {
                 </div>
                 
                 <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-xl font-bold text-purple-800 mb-3">Areas for Growth</h3>
+                  <h3 className="text-xl font-bold text-purple-800 mb-3">सुधारणा करण्याचे क्षेत्र</h3>
                   <ul className="list-disc pl-5 space-y-1 text-gray-700">
                     {results.challenges.map((challenge, index) => (
                       <li key={index}>{challenge}</li>
@@ -331,7 +331,7 @@ function PersonalityTest() {
               </div>
               
               <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 className="text-xl font-bold text-purple-800 mb-3">Career Matches</h3>
+                <h3 className="text-xl font-bold text-purple-800 mb-3">करिअरची योग्य निवड</h3>
                 <div className="flex flex-wrap gap-2">
                   {results.career_matches.map((career, index) => (
                     <span key={index} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
@@ -342,7 +342,7 @@ function PersonalityTest() {
               </div>
               
               <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-bold text-purple-800 mb-3">Development Suggestions</h3>
+                <h3 className="text-xl font-bold text-purple-800 mb-3">सुधारणेसाठी सूचना</h3>
                 <ul className="list-disc pl-5 space-y-2 text-gray-700">
                   {results.development_suggestions.map((suggestion, index) => (
                     <li key={index}>{suggestion}</li>
@@ -355,7 +355,7 @@ function PersonalityTest() {
                   onClick={() => router.push('/practices')}
                   className="bg-gradient-to-r from-pink-800 to-purple-900 text-white py-2 px-6 rounded-lg font-medium hover:opacity-90 transition-opacity"
                 >
-                  Return to Practices
+                  पुन्हा सराव सुरू करा
                 </button>
               </div>
             </div>
@@ -375,7 +375,7 @@ function PersonalityTest() {
                   />
                 </div>
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold text-purple-900">Personality Assessment</h2>
+                  <h2 className="text-2xl font-bold text-purple-900">व्यक्तिमत्व मूल्यांकन</h2>
                 </div>
                 <div className="bg-purple-100 px-4 py-2 rounded-lg">
                   <span className="text-lg font-medium text-purple-800">{formatTime(timeLeft)}</span>
@@ -411,7 +411,7 @@ function PersonalityTest() {
                       : 'bg-purple-600 text-white hover:bg-purple-700'
                   }`}
                 >
-                  Previous
+                  मागे जा
                 </button>
                 
                 {currentQuestionIndex < questions.length - 1 ? (
@@ -419,7 +419,7 @@ function PersonalityTest() {
                     onClick={handleNext}
                     className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700"
                   >
-                    Next
+                   पुढे जा 
                   </button>
                 ) : (
                   <button
@@ -431,7 +431,7 @@ function PersonalityTest() {
                         : 'bg-gradient-to-r from-pink-800 to-purple-900 text-white hover:opacity-90'
                     }`}
                   >
-                    {isSubmitting ? 'Analyzing...' : 'Submit'}
+                    {isSubmitting ? 'विश्लेषण करत आहे...' : 'सबमिट करा'}
                   </button>
                 )}
               </div>

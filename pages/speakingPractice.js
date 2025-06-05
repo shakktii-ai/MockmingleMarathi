@@ -174,15 +174,15 @@ function SpeakingPractice() {
         // If unauthorized, redirect to login
         if (response.status === 401) {
           localStorage.removeItem('token');
-          alert("Your session has expired. Please log in again.");
+          alert("सत्राचा कालावधी संपला आहे. कृपया पुनः लॉगिन करा.");
           router.push("/login");
           return;
         }
-        throw new Error(data.error || 'Failed to fetch questions');
+        throw new Error(data.error || 'प्रश्न लोड करण्यात अडचण आली.');
       }
       
       if (!data.questions || data.questions.length === 0) {
-        throw new Error('No questions received');
+        throw new Error('कोणतेही प्रश्न प्राप्त झाले नाहीत.');
       }
 
       setQuestions(data.questions);
@@ -191,7 +191,7 @@ function SpeakingPractice() {
       setCurrentIndex(0);
     } catch (error) {
       console.error("Error fetching questions:", error);
-      alert("Failed to load speaking practice questions. Please try again later.");
+      alert("स्पीकिंग प्रॅक्टिस प्रश्न लोड करण्यात अडचण आली आहे. कृपया नंतर पुन्हा प्रयत्न करा.");
     } finally {
       setLoading(false);
     }
@@ -227,7 +227,7 @@ function SpeakingPractice() {
       recognitionRef.current.onerror = (event) => {
         console.error("Speech recognition error", event);
         if (event.error === 'not-allowed') {
-          alert("Microphone permission denied. Please enable microphone access.");
+          alert("मायक्रोफोन परवानगी नाकारली. कृपया मायक्रोफोन अ‍ॅक्सेस चालू करा.");
         }
       };
     }
@@ -315,7 +315,7 @@ function SpeakingPractice() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit response');
+        throw new Error('प्रतिसाद सबमिट करण्यात अयशस्वी.');
       }
 
       const data = await response.json();
@@ -342,7 +342,7 @@ function SpeakingPractice() {
       }]);
     } catch (error) {
       console.error("Error submitting for feedback:", error);
-      setFeedback("Sorry, we couldn't process your response. Please try again.");
+      setFeedback("माफ करा, तुमचा प्रतिसाद स्वीकारला जाऊ शकला नाही. कृपया पुन्हा प्रयत्न करा.");
     }
   };
 
@@ -412,12 +412,12 @@ function SpeakingPractice() {
             });
           }
         } else {
-          console.error('Failed to evaluate level completion');
+          console.error('लेव्हल पूर्णतेचे मूल्यमापन करण्यात अडचण आली.');
           // Force show evaluation with default values even on error
           setEvaluationResult({
             evaluation: {
               overallRating: 1,
-              feedback: "We couldn't fully evaluate your responses, but you've completed the level.",
+              feedback: "तुमच्या प्रतिसादांचे संपूर्ण मूल्यमापन शक्य झाले नाही, तरीही तुम्ही लेव्हल पूर्ण केला आहे.",
               completed: true
             },
             levelProgress: {
@@ -434,7 +434,7 @@ function SpeakingPractice() {
         setEvaluationResult({
           evaluation: {
             overallRating: 1,
-            feedback: "We couldn't process your level evaluation, but we've recorded your progress.",
+            feedback: "तुमच्या लेव्हलचे मूल्यांकन पूर्ण करू शकले नाही, तरीही तुमचा प्रगती नोंदवला आहे.",
             completed: true
           },
           levelProgress: {
@@ -451,7 +451,7 @@ function SpeakingPractice() {
       setEvaluationResult({
         evaluation: {
           overallRating: 1,
-          feedback: "There was a problem connecting to the server, but we've still recorded your practice session.",
+          feedback: "सर्व्हरशी कनेक्ट होण्यात त्रुटी आली, पण तुमचा सराव सत्र नोंदवला आहे.",
           completed: true
         },
         levelProgress: {
@@ -489,7 +489,7 @@ function SpeakingPractice() {
   return (
     <>
       <Head>
-        <title>SHAKKTII AI - Speaking Practice</title>
+        <title>SHAKKTII AI - बोलण्याचा सराव</title>
       </Head>
       <div className="min-h-screen bg-gray-100" style={{ backgroundImage: "url('/BG.jpg')", backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative', backgroundColor: 'rgba(0,0,0,0.7)', backgroundBlendMode: 'overlay' }}>
         <div className="container mx-auto px-4 py-16">
@@ -501,7 +501,7 @@ function SpeakingPractice() {
                 className="flex items-center text-pink-600 hover:text-pink-800 transition-colors"
               >
                 <img src="/2.svg" alt="Back" className="w-8 h-8 mr-2" />
-                <span className="text-lg font-medium">Back to Practices</span>
+                <span className="text-lg font-medium">सराव भागाकडे परत जा</span>
               </button>
             </div>
             <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
@@ -511,9 +511,9 @@ function SpeakingPractice() {
 
           {/* Title */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-pink-900">Speaking Practice</h1>
+            <h1 className="text-4xl font-bold text-pink-900">बोलण्याचा सराव</h1>
             <p className="text-lg text-gray-700 mt-2">
-              Enhance your speaking skills through interactive exercises
+              परस्पर संवादात्मक सरावांद्वारे तुमच्या बोलण्याच्या कौशल्यात सुधारणा करा.
             </p>
           </div>
 
@@ -521,9 +521,9 @@ function SpeakingPractice() {
             <div>
               {!showLevelSelection ? (
                 <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden p-6">
-                  <h2 className="text-2xl font-bold text-center text-pink-900 mb-4">Select Difficulty Level</h2>
+                  <h2 className="text-2xl font-bold text-center text-pink-900 mb-4">लेव्हल निवडा</h2>
                   <div className="space-y-4">
-                    {['Beginner', 'Moderate', 'Expert'].map(level => (
+                    {['बिगिनर', 'मॉडरेट', 'एक्स्पर्ट'].map(level => (
                       <button
                         key={level}
                         onClick={() => setDifficulty(level)}
@@ -540,12 +540,12 @@ function SpeakingPractice() {
                 </div>
               ) : testCompleted && showEvaluation && evaluationResult ? (
                 <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
-                  <h2 className="text-2xl font-bold mb-4 text-green-600">Level {selectedLevel} Completed!</h2>
+                  <h2 className="text-2xl font-bold mb-4 text-green-600">लेव्हल {selectedLevel} पूर्ण झाली!</h2>
                   
                   {/* Level evaluation results with stars */}
                   <div className="bg-gray-50 p-6 rounded-lg mb-6 border border-gray-200">
-                    <h3 className="text-xl font-semibold mb-3 text-gray-800">Your Performance</h3>
-                    <p className="text-gray-600 mb-4">{evaluationResult.evaluation?.feedback || "Your level has been evaluated."}</p>
+                    <h3 className="text-xl font-semibold mb-3 text-gray-800">तुमचा पर्फॉर्मन्स</h3>
+                    <p className="text-gray-600 mb-4">{evaluationResult.evaluation?.feedback || "तुमचा लेव्हल मूल्यांकन केला गेला आहे."}</p>
                     
                     <div className="flex justify-center mb-4">
                       {[...Array(3)].map((_, i) => (
@@ -562,13 +562,13 @@ function SpeakingPractice() {
                     
                     <div className="text-center text-sm text-gray-500">
                       {evaluationResult.evaluation?.overallRating === 3 ? (
-                        <span>Perfect! You've mastered this level!</span>
+                        <span>छान! तुम्ही हा स्तर पार केला आहे!</span>
                       ) : evaluationResult.evaluation?.overallRating === 2 ? (
-                        <span>Great job! You've earned 2 stars!</span>
+                        <span>छान! तुम्ही २ स्टार मिळवले आहेत! </span>
                       ) : evaluationResult.evaluation?.overallRating === 1 ? (
-                        <span>Good effort! You've earned 1 star. Keep practicing!</span>
+                        <span>चांगला प्रयत्न! तुम्हाला १ स्टार मिळाला आहे. सराव करत रहा!</span>
                       ) : (
-                        <span>You need more practice with this level.</span>
+                        <span>या पातळीवर तुम्हाला अधिक सरावाची आवश्यकता आहे.</span>
                       )}
                     </div>
                   </div>
@@ -578,7 +578,7 @@ function SpeakingPractice() {
                       onClick={backToLevelSelection}
                       className="py-2 px-6 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
                     >
-                      Back to Levels
+                     लेव्हल परत जा
                     </button>
                     {evaluationResult.nextLevel && (
                       <button
@@ -589,7 +589,7 @@ function SpeakingPractice() {
                         }}
                         className="py-2 px-6 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                       >
-                        Next Level
+                        पुढील लेव्हल
                       </button>
                     )}
                   </div>
@@ -598,13 +598,13 @@ function SpeakingPractice() {
                 <div className="max-w-4xl mx-auto bg-white bg-opacity-90 p-6 rounded-xl shadow-lg">
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-pink-900">
-                      {difficulty} Level Practice
+                      {difficulty} लेव्हल सराव
                     </h2>
                     <button 
                       onClick={() => {setShowLevelSelection(false); setDifficulty('');}}
                       className="text-pink-600 hover:text-pink-800 transition-colors"
                     >
-                      ← Back to Difficulty Selection
+                      ← लेव्हल कडे परत जा.
                     </button>
                   </div>
                   
@@ -639,7 +639,7 @@ function SpeakingPractice() {
                               selectedLevel === level ? 'ring-4 ring-pink-500 ring-opacity-70 transform scale-105' : ''
                             }`}
                           >
-                            <div className="text-2xl font-bold text-pink-900 mb-2">Level {level}</div>
+                            <div className="text-2xl font-bold text-pink-900 mb-2">लेव्हल {level}</div>
                             
                             {/* Star display */}
                             <div className="flex space-x-1">
@@ -675,11 +675,11 @@ function SpeakingPractice() {
             </div>
           ) : testCompleted && !showEvaluation ? (
             <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">Practice Completed!</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">सराव पूर्ण झाला!</h1>
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-pink-500 mb-4"></div>
-                  <p className="text-lg text-gray-600">Evaluating your responses with Claude AI...</p>
+                  <p className="text-lg text-gray-600">क्लॉड एआय सोबत तुमच्या प्रतिसादांचे मूल्यांकन करत आहे...</p>
                 </div>
               ) : (
                 <>
@@ -689,20 +689,20 @@ function SpeakingPractice() {
                     }} />
                   </div>
                   <p className="text-lg text-gray-600 mb-6">
-                    Great job! You've completed the speaking practice session.
+                   छान! तुम्ही बोलण्याचा सराव सत्र पूर्ण केला आहे.
                   </p>
                   <div className="flex justify-center space-x-4">
                     <button
                       onClick={backToLevelSelection}
                       className="bg-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-pink-700"
                     >
-                      Back to Levels
+                       लेव्हल परत जा
                     </button>
                     <button
                       onClick={() => setShowEvaluation(true)}
                       className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700"
                     >
-                      Show Results
+                      निकाल दाखवा
                     </button>
                   </div>
                 </>
@@ -710,10 +710,10 @@ function SpeakingPractice() {
             </div>
           ) : testCompleted && showEvaluation ? (
             <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">Your Practice Results</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">तुमचे सरावाचे निकाल</h1>
               
               <div className="mb-6 p-4 bg-purple-50 rounded-lg">
-                <h2 className="text-xl font-bold text-purple-800 mb-2">Overall Performance</h2>
+                <h2 className="text-xl font-bold text-purple-800 mb-2">एकूण पर्फॉर्मन्स</h2>
                 <div className="flex justify-center mb-4">
                   {/* Star display for overall rating */}
                   <div className="flex space-x-2">
@@ -731,17 +731,17 @@ function SpeakingPractice() {
                 </div>
                 
                 <div className="text-lg text-gray-700 mb-4">
-                  {evaluationResult?.evaluation?.feedback || "You've completed this level. Keep practicing to improve your skills!"}
+                  {evaluationResult?.evaluation?.feedback || "तुम्ही हा स्तर पूर्ण केला आहे. तुमच्या कौशल्यांना सुधारण्यासाठी सराव चालू ठेवा!"}
                 </div>
               </div>
               
               <div className="mb-8">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Level {selectedLevel} Completed!</h2>
+                <h2 className="text-xl font-bold text-gray-800 mb-4">लेवल {selectedLevel} पूर्ण झाली</h2>
                 <p className="text-lg text-gray-600">
-                  You've earned {evaluationResult?.levelProgress?.stars || 1} star{(evaluationResult?.levelProgress?.stars || 1) !== 1 ? 's' : ''} for this level.
+                  तुम्ही या लेवलसाठी {evaluationResult?.levelProgress?.stars || 1} स्टार{(evaluationResult?.levelProgress?.stars || 1) !== 1 ? 's' : ''} मिळवला आहे.
                 </p>
                 {evaluationResult?.levelProgress?.stars === 3 && (
-                  <div className="mt-2 text-green-600 font-bold">Perfect score! Excellent work!</div>
+                  <div className="mt-2 text-green-600 font-bold">उत्तम गुण! छान!</div>
                 )}
               </div>
               
@@ -750,7 +750,7 @@ function SpeakingPractice() {
                   onClick={backToLevelSelection}
                   className="bg-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-pink-700"
                 >
-                  Back to Levels
+                  लेव्हल्सकडे परत जा 
                 </button>
                 {selectedLevel < 30 && (
                   <button
@@ -763,7 +763,7 @@ function SpeakingPractice() {
                     }}
                     className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700"
                   >
-                    Next Level
+                    पुढील लेवल
                   </button>
                 )}
               </div>
@@ -773,10 +773,10 @@ function SpeakingPractice() {
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm font-medium text-gray-600">
-                    Question {currentIndex + 1} of {questions.length}
+                    प्रश्न {currentIndex + 1} / {questions.length}
                   </span>
                   <span className="text-sm font-medium text-gray-600">
-                    {difficulty} Level • {selectedLevel || ''}
+                    {difficulty} लेवल  • {selectedLevel || ''}
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-1 mb-1">
@@ -819,7 +819,7 @@ function SpeakingPractice() {
                       )}
                     </button>
                     <span className="ml-3 text-sm font-medium text-gray-700">
-                      {recording ? "Recording... Click to stop" : "Click to speak"}
+                      {recording ? "रेकॉर्डिंग सुरू आहे... थांबवण्यासाठी क्लिक करा" : "बोलण्यासाठी क्लिक करा"}
                     </span>
                   </div>
 
@@ -841,14 +841,14 @@ function SpeakingPractice() {
 
                 {userResponse && (
                   <div className="p-4 bg-gray-50 rounded-lg mb-4">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Your Response:</h3>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">फीडबॅक</h3>
                     <p className="text-gray-800">{userResponse}</p>
                   </div>
                 )}
 
                 {feedback && (
                   <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-                    <h3 className="text-sm font-semibold text-green-800 mb-2">Feedback:</h3>
+                    <h3 className="text-sm font-semibold text-green-800 mb-2">फीडबॅक:</h3>
                     <div className="flex items-center mb-2">
                       <div className="flex space-x-1 mr-2">
                         {[...Array(3)].map((_, i) => (
@@ -863,7 +863,7 @@ function SpeakingPractice() {
                         ))}
                       </div>
                       <span className="text-sm text-gray-600">
-                        {score === 3 ? 'Excellent!' : score === 2 ? 'Good job!' : 'Keep practicing!'}
+                        {score === 3 ? 'उत्कृष्ट!' : score === 2 ? 'चांगले काम!' : 'सराव करत राहा!'}
                       </span>
                     </div>
                     <p className="text-green-800 text-sm">
@@ -883,7 +883,7 @@ function SpeakingPractice() {
                       : 'bg-purple-600 text-white hover:bg-purple-700'
                   }`}
                 >
-                  {currentIndex < questions.length - 1 ? 'Next Question' : 'Complete Practice'}
+                  {currentIndex < questions.length - 1 ? 'पुढील प्रश्न' : 'सराव पूर्ण करा'}
                 </button>
               </div>
             </div>

@@ -326,41 +326,41 @@ function EditProfile() {
         className="absolute top-0 left-0 w-full h-full object-cover z-[-1]"
       />
       <div className="max-w-md mx-auto p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-semibold text-orange-500 text-center mb-6">Edit Profile</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <h2 className="text-2xl font-semibold text-orange-500 text-center mb-6">प्रोफाईल अपडेट करा</h2>
+        <form  className="space-y-4">
 
         <div className="flex flex-col">
            
-            {profileImg && (
+           
               <img
-                src={profileImg}
-                alt="Profile Preview"
+                src=""
+                alt="प्रोफाईल पूर्वदृश्य"
                 className="w-24 h-24 rounded-full object-cover mx-auto"
               />
-            )}
+            
              <label htmlFor="profileImg" className="text-sm font-medium text-white mb-1">
-              Profile Picture
+              प्रोफाईल पिक्चर
             </label>
             <input
               type="file"
               id="profileImg"
               name="profileImg"
-              onChange={handleImageChange}
+              
               accept="image/*"
               className="mb-3"
             />
           </div>
           <div className="flex flex-col">
             <label htmlFor="fullName" className="text-sm font-medium text-white mb-1">
-              Full Name
+              पूर्ण नाव
             </label>
             <input
               type="text"
               id="fullName"
               name="fullName"
-              value={fullName}
-              onChange={handleInputChange}
-              placeholder="Edit your fullName"
+              
+              
+              placeholder="पूर्ण नाव अपडेट करा"
               required
               className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white text-base mb-4 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
             />
@@ -368,15 +368,15 @@ function EditProfile() {
 
           <div className="flex flex-col">
             <label htmlFor="email" className="text-sm font-medium text-white mb-1">
-              Email
+              ई-मेल
             </label>
             <input
               type="email"
               id="email"
               name="email"
-              value={email}
-              onChange={handleInputChange}
-              placeholder="Edit your email"
+             
+              
+              placeholder="ईमेल अपडेट करा"
               required
               className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white text-base mb-4 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
             />
@@ -384,15 +384,14 @@ function EditProfile() {
 
           <div className="flex flex-col">
             <label htmlFor="DOB" className="text-sm font-medium text-white mb-1">
-              Date of Birth
+              जन्मतारीख
             </label>
             <input
               type="text"
               id="DOB"
               name="DOB"
-              value={DOB}
-              onChange={handleInputChange}
-              placeholder="Edit your DOB"
+              
+              placeholder="जन्मतारीख अपडेट करा"
               required
               className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white text-base mb-4 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
             />
@@ -400,15 +399,15 @@ function EditProfile() {
 
           <div className="flex flex-col">
             <label htmlFor="address" className="text-sm font-medium text-white mb-1">
-              Address
+              पत्ता
             </label>
             <input
               type="text"
               id="address"
               name="address"
-              value={address}
-              onChange={handleInputChange}
-              placeholder="Edit your address"
+             
+              
+              placeholder="पत्ता अपडेट करा"
               required
               className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white text-base mb-4 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
             />
@@ -416,15 +415,15 @@ function EditProfile() {
 
           <div className="flex flex-col">
             <label htmlFor="mobileNo" className="text-sm font-medium text-white mb-1">
-              Mobile Number
+              मोबाईल नंबर
             </label>
             <input
               type="text"
               id="mobileNo"
               name="mobileNo"
-              value={mobileNo}
-              onChange={handleInputChange}
-              placeholder="Edit your mobileNo"
+              
+              
+              placeholder="मोबाईल क्रमांक अपडेट करा"
               required
               className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white text-base mb-4 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
             />
@@ -432,15 +431,15 @@ function EditProfile() {
 
           <div className="flex flex-col">
             <label htmlFor="education" className="text-sm font-medium text-white mb-1">
-              Education
+              शिक्षण
             </label>
             <input
               type="text"
               id="education"
               name="education"
-              value={education}
-              onChange={handleInputChange}
-              placeholder="Edit your education"
+            
+              
+              placeholder="शिक्षण अपडेट करा"
               required
               className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white text-base mb-4 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
             />
@@ -452,7 +451,7 @@ function EditProfile() {
             type="submit"
             className="w-full p-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            Save Changes
+            जतन करा
           </button>
         </form>
       </div>

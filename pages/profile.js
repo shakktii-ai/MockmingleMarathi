@@ -130,7 +130,7 @@ export default function Profile() {
           <div onClick={goBack} className="text-white text-2xl cursor-pointer hover:text-[#e600ff] transition-colors">
             <IoIosArrowBack />
           </div>
-          <h1 className="text-xl font-bold text-white">My Profile</h1>
+          <h1 className="text-xl font-bold text-white">प्रोफाइल</h1>
           <div className="w-5"></div> {/* Empty div for spacing */}
         </div>
 
@@ -171,29 +171,29 @@ export default function Profile() {
                     <div className="bg-[#1a0035] rounded-lg p-4 shadow-inner">
                       <h3 className="text-[#e600ff] text-sm font-semibold mb-3 flex items-center">
                         <BsBarChartFill className="mr-2" />
-                        INTERVIEW STATISTICS
+                        मुलाखत स्टॅटिस्टिक्स
                       </h3>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="bg-[#3a0a5c] p-3 rounded-lg text-center">
-                          <p className="text-xs text-gray-300 mb-1">AVAILABLE</p>
+                          <p className="text-xs text-gray-300 mb-1">उपलब्ध</p>
                           <p className="text-xl font-bold text-white">
                             {userData.no_of_interviews - userData.no_of_interviews_completed}
                           </p>
                         </div>
                         <div className="bg-[#3a0a5c] p-3 rounded-lg text-center">
-                          <p className="text-xs text-gray-300 mb-1">COMPLETED</p>
+                          <p className="text-xs text-gray-300 mb-1">पूर्ण झाले</p>
                           <p className="text-xl font-bold text-white">{userData.no_of_interviews_completed}</p>
                         </div>
                       </div>
                       <div className="mt-4">
                         <InterviewProgress userData={userData} />
                       </div>
-                      <Link href="/purchase-interviews">
+                      <Link href="/profile">
                         <button className="w-full mt-4 py-2 bg-gradient-to-r from-[#8000ff] to-[#e600ff] text-white rounded-lg font-semibold text-sm transition-transform hover:scale-105 flex items-center justify-center">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                           </svg>
-                          Buy More Interviews
+                          अधिक मुलाखती खरेदी करा.
                         </button>
                       </Link>
                     </div>
@@ -211,8 +211,8 @@ export default function Profile() {
                     <BsFileEarmarkText className="text-white text-xl" />
                   </div>
                   <div>
-                    <h3 className="text-white font-semibold">My Reports</h3>
-                    <p className="text-gray-300 text-xs">View your interview reports</p>
+                    <h3 className="text-white font-semibold">माझे अहवाल</h3>
+                    <p className="text-gray-300 text-xs">तुमचे मुलाखत अहवाल पाहा</p>
                   </div>
                 </div>
               </Link>
@@ -224,8 +224,8 @@ export default function Profile() {
                     <FaUserEdit className="text-white text-xl" />
                   </div>
                   <div>
-                    <h3 className="text-white font-semibold">Edit Profile</h3>
-                    <p className="text-gray-300 text-xs">Update your personal information</p>
+                    <h3 className="text-white font-semibold">अपडेट प्रोफाइल</h3>
+                    <p className="text-gray-300 text-xs">तुमची वैयक्तिक माहिती अपडेट करा</p>
                   </div>
                 </div>
               </Link>
@@ -236,14 +236,14 @@ export default function Profile() {
               <div className="p-4 bg-[#3a0a5c]">
                 <h3 className="text-white font-semibold flex items-center">
                   <IoMdSettings className="mr-2" />
-                  Settings & Information
+                  सेटिंग्ज आणि माहिती
                 </h3>
               </div>
               <div className="divide-y divide-[#3a0a5c]">
                 <div className="flex justify-between items-center p-4 hover:bg-[#3a0a5c] cursor-pointer transition-colors">
                   <div className="flex items-center gap-3">
                     <FaLock className="text-[#e600ff]" />
-                    <span className="text-white">Change Password</span>
+                    <span className="text-white">पासवर्ड बदला</span>
                   </div>
                   <div className="text-gray-400">
                     <span>›</span>
@@ -253,7 +253,7 @@ export default function Profile() {
                 <div className="flex justify-between items-center p-4 hover:bg-[#3a0a5c] cursor-pointer transition-colors">
                   <div className="flex items-center gap-3">
                     <FaInfoCircle className="text-[#e600ff]" />
-                    <span className="text-white">About App</span>
+                    <span className="text-white">ॲप बद्दल माहिती</span>
                   </div>
                   <div className="text-gray-400">
                     <span>›</span>
@@ -263,7 +263,7 @@ export default function Profile() {
                 <div className="flex justify-between items-center p-4 hover:bg-[#3a0a5c] cursor-pointer transition-colors">
                   <div className="flex items-center gap-3">
                     <FaLock className="text-[#e600ff]" />
-                    <span className="text-white">Privacy Policy</span>
+                    <span className="text-white">गोपनीयता धोरण</span>
                   </div>
                   <div className="text-gray-400">
                     <span>›</span>
@@ -273,7 +273,7 @@ export default function Profile() {
                 <div className="flex justify-between items-center p-4 hover:bg-[#3a0a5c] cursor-pointer transition-colors">
                   <div className="flex items-center gap-3">
                     <FaShare className="text-[#e600ff]" />
-                    <span className="text-white">Share This App</span>
+                    <span className="text-white">अ‍ॅप शेअर करा</span>
                   </div>
                   <div className="text-gray-400">
                     <span>›</span>
@@ -286,15 +286,15 @@ export default function Profile() {
             <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6 mb-8">
               <Link href="/role">
                 <button className="bg-gradient-to-r from-[#e600ff] to-[#8000ff] text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all transform hover:scale-105">
-                  Start New Interview
+                  नवीन मुलाखत सुरू करा.
                 </button>
               </Link>
-              <Link href="/purchase-interviews">
+              <Link href="">
                 <button className="bg-[#3a0a5c] text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-[#500d80] transition-all transform hover:scale-105 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  Buy More Interviews
+                  अधिक मुलाखती खरेदी करा
                 </button>
               </Link>
             </div>

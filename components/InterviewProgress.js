@@ -98,10 +98,10 @@ const InterviewProgress = ({ userData = null }) => {
           <div className="w-4 h-4 border-2 border-t-2 border-blue-500 rounded-full animate-spin"></div>
         </div>
       )}
-      <h2 className="text-xl font-semibold mb-4 text-white">Interview Completion Progress</h2>
+      <h2 className="text-xl font-semibold mb-4 text-white">मुलाखतीच्या प्रगतीचा आढावा</h2>
       
       <div className="flex justify-between items-center mb-4">
-        <span className="text-lg font-medium text-white">Interviews Completed</span>
+        <span className="text-lg font-medium text-white">पूर्ण झालेल्या मुलाखती</span>
         <span className="text-xl font-bold text-white">
           {interviewStats.no_of_interviews_completed} / {interviewStats.no_of_interviews}
         </span>
@@ -122,9 +122,9 @@ const InterviewProgress = ({ userData = null }) => {
       
       <div className="mt-4 text-sm text-gray-300">
         {interviewStats.no_of_interviews_completed === 0 
-          ? "You haven't completed any interviews yet. Start your first interview to see your progress!" 
+          ? "तुम्ही अद्याप कोणतीही मुलाखत पूर्ण केलेली नाही. तुमची प्रगती पाहण्यासाठी पहिली मुलाखत सुरू करा!" 
           : interviewStats.no_of_interviews_completed === interviewStats.no_of_interviews 
-            ? "Congratulations! You've completed all available interviews. Great job!" 
+            ? "अभिनंदन! तुम्ही उपलब्ध असलेल्या सर्व मुलाखती पूर्ण केल्या आहेत." 
             : `You've completed ${interviewStats.no_of_interviews_completed} out of ${interviewStats.no_of_interviews} interviews. Keep going!`}
       </div>
       
@@ -134,7 +134,7 @@ const InterviewProgress = ({ userData = null }) => {
             onClick={handleStartInterview} 
             className="px-5 py-2 bg-gradient-to-r from-indigo-600 to-pink-500 text-white rounded-lg shadow-lg hover:from-indigo-700 hover:to-pink-600 transition-all duration-200"
           >
-            Start Next Interview
+            पुढील मुलाखत सुरू करा
           </button>
         </div>
       )}

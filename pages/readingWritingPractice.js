@@ -69,7 +69,7 @@ function ReadingWritingPractice() {
       const userId = userObj?._id || userObj?.id || '6462d8fbf6c3e30000000001';
       
       // Fetch progress data from API
-      const response = await fetch(`/api/getPracticeProgress?skillArea=${mode === 'reading' ? 'Reading' : 'Writing'}&difficulty=${selectedDifficulty}&userId=${userId}`);
+      const response = await fetch(`/api/getPracticeProgress?skillArea=${mode === 'reading' ? 'Reading' : 'Writing'}&difficulty=${selectedDifficulty}&userId=${userId}&t=${Date.now()}`);
       const data = await response.json();
       
       if (response.ok && data.progress) {
@@ -144,11 +144,11 @@ function ReadingWritingPractice() {
       setTestStarted(false);
 
       // If it's a double-click or if it's a single click on a level that was already selected, start the practice
-      if (selectedLevel === level) {
+     if (selectedLevel === level) {
         fetchQuestions();
       }
     } else {
-      alert('This level is locked. Complete previous levels to unlock.');
+      alert('हा लेव्हल लॉक आहे. अनलॉक करण्यासाठी मागील लेव्हल्स पूर्ण करा');
     }
   };
   
@@ -176,7 +176,7 @@ function ReadingWritingPractice() {
       // Start practice
       fetchQuestions();
     } else {
-      alert('This level is locked. Complete previous levels to unlock.');
+      alert('हा लेव्हल लॉक आहे. अनलॉक करण्यासाठी मागील लेव्हल्स पूर्ण करा.');
     }
   };
   
@@ -256,7 +256,7 @@ function ReadingWritingPractice() {
         }
       }
     } catch (error) {
-      console.error('Error refreshing level progress:', error);
+      console.error(' लेव्हल प्रोग्रेस अपडेट करताना एरर:', error);
     } finally {
       setLoading(false);
       setShowLevelSelection(true);
@@ -268,7 +268,7 @@ function ReadingWritingPractice() {
 
     setLoading(true);
     try {
-      console.log(`Fetching ${mode} practice questions for ${difficulty} level ${selectedLevel}`);
+      console.log(`${mode}" मोडमध्ये "${difficulty}" लेव्हल ${selectedLevel} साठी प्रॅक्टिस प्रश्न लोड करत आहे.`);
       
       // Simple auth approach - include user ID in the request body instead of using token in header
       const userObj = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
@@ -281,7 +281,7 @@ function ReadingWritingPractice() {
           // No Authorization header to avoid 431 error
         },
         body: JSON.stringify({
-          skillArea: mode === 'reading' ? 'Reading' : 'Writing',
+          skillArea: mode === 'वाचन सराव' ? 'वाचन सराव' : 'लेखन सराव',
           difficulty: difficulty,
           count: 5,
           userId: userId, // Send user ID in the body instead
@@ -295,22 +295,22 @@ function ReadingWritingPractice() {
         // If unauthorized, redirect to login
         if (response.status === 401) {
           localStorage.removeItem('token');
-          alert("Your session has expired. Please log in again.");
+          alert("तुमचे सेशन संपले आहे. कृपया पुन्हा लॉग इन करा.");
           router.push("/login");
           return;
         }
-        throw new Error(data.error || 'Failed to fetch questions');
+        throw new Error(data.error || 'प्रश्न फेच करण्यात अडचण आली');
       }
       
       if (!data.questions || data.questions.length === 0) {
-        throw new Error('No questions received');
+        throw new Error('कोणतेही प्रश्न मिळाले नाहीत');
       }
+      console.log(data.questions);
       
       // Add default properties to questions if not present and ensure question text is properly set
       const processedQuestions = data.questions.map(question => {
         // Extract actual question text, filtering out any text that looks like instructions or card IDs
         let questionText = question.questionText || question.question;
-        
         // Filter out questionText that contains card ID patterns or generic instructions
         if (questionText && (
             questionText.match(/card\s+[a-zA-Z]+-[a-zA-Z]+-\d+-\d+/i) ||
@@ -320,6 +320,7 @@ function ReadingWritingPractice() {
             // This is likely not a real question but instructions or card ID
             questionText = null;
         }
+        
         
         // If no valid question text, generate a default question based on content
         if (!questionText && question.content) {
@@ -343,7 +344,7 @@ function ReadingWritingPractice() {
           instructions: question.instructions || 'Read the passage and answer the question.'
         };
       });
-
+console.log(processedQuestions);
       // Set the processed questions
       setQuestions(processedQuestions);
       setTestStarted(true);
@@ -365,8 +366,8 @@ function ReadingWritingPractice() {
         }, 100);
       }
     } catch (error) {
-      console.error("Error fetching questions:", error);
-      alert(`Failed to load ${mode} practice questions. Please try again.`);
+      console.error("प्रश्न फेच करण्यात अडचण आली", error);
+      alert(`${mode} प्रॅक्टिस प्रश्न लोड करण्यात अयशस्वी. कृपया पुन्हा प्रयत्न करा.`);
       // Reset to level selection on failure
       backToLevelSelection();
     } finally {
@@ -376,10 +377,28 @@ function ReadingWritingPractice() {
 
   const startTimer = () => {
     // Safety check to make sure questions and currentIndex are valid
-    if (!questions || !questions.length || currentIndex >= questions.length) {
-      console.log('No valid question found to start timer');
+    if(!questions){
+      console.log('Questions missing');
       return;
     }
+    else if(questions.length===null){
+      console.log('length problem 0');
+      return;
+    }
+    else if(questions.length===undefined){
+      console.log('undefined');
+      return;
+    }
+    else if(currentIndex>=questions.length){
+      console.log('current index..')
+    }else{
+      console.log('another ');
+      return;
+    }
+    // if (!questions || !questions.length || currentIndex >= questions.length) {
+    //   console.log(' टायमर सुरु करण्यासाठी वैध प्रश्न सापडले नाहीत');
+    //   return;
+    // }
     
     const currentQuestion = questions[currentIndex];
     // Safety check for timeLimit property
@@ -438,13 +457,13 @@ function ReadingWritingPractice() {
       : userResponse;
       
     if (!responseToSubmit.trim()) {
-      alert("Please provide a response before submitting.");
+      alert("सबमिट करण्यापूर्वी कृपया उत्तर द्या.");
       return;
     }
     
     // Check minimum word count for writing practice
     if (mode === 'writing' && !isMultipleChoice() && countWords(responseToSubmit) < 50) {
-      alert("Your response must be at least 50 words. Please write more.");
+      alert("तुमचे उत्तर किमान ५० शब्दांचे असावे. कृपया अधिक लिहा.");
       return;
     }
     
@@ -493,12 +512,12 @@ function ReadingWritingPractice() {
         
         // For MCQ questions, if the answer is correct, override Claude's feedback with more appropriate feedback
         if (isMCQ && currentQuestion.expectedResponse && responseToSubmit.includes(currentQuestion.expectedResponse)) {
-          const mcqFeedback = "Great job! You selected the correct answer. Keep up the good work!";
+          const mcqFeedback = " छान! तुम्ही बरोबर उत्तर निवडले आहे.";
           setFeedback(mcqFeedback);
           setScore(3); // Give full score for correct MCQ answer
         } else if (isMCQ) {
           // If MCQ but incorrect answer
-          const mcqFeedback = "Your answer wasn't correct. Try again and carefully read the passage.";
+          const mcqFeedback = "तुमचे उत्तर बरोबर नाही. कृपया पुन्हा प्रयत्न करा आणि परिच्छेद काळजीपूर्वक वाचा.";
           setFeedback(mcqFeedback);
           setScore(data.score || 1);
         } else {
@@ -517,7 +536,7 @@ function ReadingWritingPractice() {
           expectedResponse = currentQuestion.answer;
         }
         
-        console.log('Storing response with expected response:', expectedResponse);
+        console.log('अपेक्षित उत्तरासह प्रतिसाद नोंदवला जात आहे:', expectedResponse);
         
         // Calculate correct score for storing in responses
         let calculatedScore = data.score || 1;
@@ -535,11 +554,11 @@ function ReadingWritingPractice() {
           completedAt: new Date()
         }]);
       } else {
-        throw new Error('Error submitting answer');
+        throw new Error(' उत्तर सबमिट करताना त्रुटी आली');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('An error occurred. Please try again.');
+      alert('त्रुटी आली आहे. कृपया पुन्हा प्रयत्न करा.');
     } finally {
       setLoading(false);
     }
@@ -574,7 +593,7 @@ function ReadingWritingPractice() {
   const evaluateWithClaude = async () => {
     // Evaluate responses with Claude AI
     // This is a placeholder for actual evaluation logic
-    console.log('Evaluating responses with Claude AI...');
+    console.log('Claude AI सह प्रतिसादांचे मूल्यांकन करत आहे...');
   };
 
   // Function to evaluate level completion using Claude AI
@@ -590,11 +609,11 @@ function ReadingWritingPractice() {
       
       // Make sure we have responses to evaluate
       if (!responses || responses.length === 0) {
-        console.error('No responses to evaluate!');
+        console.error('मूल्यमापनासाठी कोणतेही प्रतिसाद नाहीत!');
         setEvaluationResult({
           evaluation: {
             overallRating: 1,
-            feedback: "No responses were recorded for evaluation. We've assigned a default rating.",
+            feedback: "मूल्यमापनासाठी कोणतेही उत्तर नोंदवले गेले नाहीत. आम्ही डिफॉल्ट रेटिंग दिली आहे.",
             completed: true
           },
           levelProgress: {
@@ -672,7 +691,7 @@ function ReadingWritingPractice() {
           setEvaluationResult({
             evaluation: {
               overallRating: 1,
-              feedback: "We couldn't fully evaluate your responses, but you've completed the level.",
+              feedback: "आम्ही तुमचे प्रतिसाद पूर्णपणे मूल्यमापन करू शकलो नाही, पण तुम्ही हा लेव्हल पूर्ण केला आहे.",
               completed: true
             },
             levelProgress: {
@@ -689,7 +708,7 @@ function ReadingWritingPractice() {
         setEvaluationResult({
           evaluation: {
             overallRating: 1,
-            feedback: "We couldn't process your level evaluation, but we've recorded your progress.",
+            feedback: " आम्ही तुमच्या लेव्हलचे मूल्यमापन प्रक्रिया करू शकलो नाही, पण तुमची प्रगती नोंदवली आहे..",
             completed: true
           },
           levelProgress: {
@@ -706,7 +725,7 @@ function ReadingWritingPractice() {
       setEvaluationResult({
         evaluation: {
           overallRating: 1,
-          feedback: "There was a problem connecting to the server, but we've still recorded your practice session.",
+          feedback: "सर्व्हरशी कनेक्ट होण्यात अडचण आली, पण तुमचा प्रॅक्टिस सेशन नोंदवला गेला आहे.",
           completed: true
         },
         levelProgress: {
@@ -754,7 +773,7 @@ function ReadingWritingPractice() {
   return (
     <>
       <Head>
-        <title>SHAKKTII AI - Reading & Writing Practice</title>
+        <title>SHAKKTII AI -  वाचन आणि लेखन सराव</title>
       </Head>
       <div className="min-h-screen bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8" style={{ backgroundImage: "url('/BG.jpg')" }}>
         <div className="absolute top-4 left-4">
@@ -763,7 +782,7 @@ function ReadingWritingPractice() {
             className="flex items-center text-purple-600 hover:text-purple-800 transition-colors"
           >
             <img src="/2.svg" alt="Back" className="w-8 h-8 mr-2" />
-            <span className="text-lg font-medium">Back</span>
+            <span className="text-lg font-medium">मागे जा</span>
           </button>
         </div>
 
@@ -776,9 +795,9 @@ function ReadingWritingPractice() {
         <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-12">
           {!mode ? (
             <div className="p-8 text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">Reading & Writing Practice</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4"> वाचन आणि लेखन सराव</h1>
               <p className="text-lg text-gray-600 mb-8">
-                Choose which skill you would like to practice
+                 तुम्हाला कोणती कौशल्ये प्रॅक्टिस करायची आहेत ती निवडा.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -796,9 +815,9 @@ function ReadingWritingPractice() {
                       }}  
                     />
                   </div>
-                  <h3 className="text-xl font-bold text-purple-900 mt-4">Reading Practice</h3>
+                  <h3 className="text-xl font-bold text-purple-900 mt-4">वाचन सराव</h3>
                   <p className="text-gray-600 mt-2">
-                    Improve your reading comprehension through engaging passages and articles
+                    आकर्षक उतारे आणि लेखांद्वारे तुमचे वाचन आकलन सुधारा.
                   </p>
                 </div>
                 
@@ -816,9 +835,9 @@ function ReadingWritingPractice() {
                       }}
                     />
                   </div>
-                  <h3 className="text-xl font-bold text-purple-900 mt-4">Writing Practice</h3>
+                  <h3 className="text-xl font-bold text-purple-900 mt-4">लेखनाचा सराव</h3>
                   <p className="text-gray-600 mt-2">
-                    Develop your written expression skills with guided writing exercises
+                    मार्गदर्शित लेखन सरावांद्वारे तुमची लेखन कौशल्ये विकसित करा.
                   </p>
                 </div>
               </div>
@@ -826,14 +845,14 @@ function ReadingWritingPractice() {
           ) : mode && !difficulty ? (  
             <div className="p-8 text-center">  
               <h1 className="text-3xl font-bold text-gray-800 mb-4">  
-                {mode === 'reading' ? 'Reading Practice' : 'Writing Practice'}  
+                {mode === 'reading' ? 'वाचन सराव' : 'लेखनाचा सराव'}  
               </h1>  
               <p className="text-lg text-gray-600 mb-6">  
-                Select a difficulty level to begin your practice  
+                तुमचा सराव सुरू करण्यासाठी कठीणतेचा स्तर निवडा. 
               </p>  
               
               <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">  
-                {['Beginner', 'Moderate', 'Expert'].map((level) => (  
+                {['बिगिनर', 'मॉडरेट', 'एक्स्पर्ट'].map((level) => (  
                   <button  
                     key={level}  
                     onClick={() => handleDifficultySelect(level)}  
@@ -852,16 +871,16 @@ function ReadingWritingPractice() {
                 onClick={() => setMode('')}  
                 className="bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700"  
               >  
-                Back  
+               मागे जा  
               </button>  
             </div>  
           ) : showLevelSelection ? (  
             <div className="p-8 text-center">  
               <h1 className="text-3xl font-bold text-gray-800 mb-4">  
-                {mode === 'reading' ? 'Reading Practice' : 'Writing Practice'} - {difficulty}  
+                {mode === 'reading' ? 'वाचन सराव' : 'लेखनाचा सराव'} - {difficulty}  
               </h1>  
               <p className="text-lg text-gray-600 mb-6">  
-                Select a level to start practicing  
+                सराव सुरू करण्यासाठी एक लेवल निवडा 
               </p>  
               
               {loading ? (  
@@ -894,7 +913,7 @@ function ReadingWritingPractice() {
                               'bg-white border border-gray-200 hover:border-purple-300 hover:bg-purple-50'  
                             } flex flex-col items-center justify-center`}  
                           >  
-                            <div className="text-2xl font-bold text-pink-900 mb-2">Level {levelData.level}</div>  
+                            <div className="text-2xl font-bold text-pink-900 mb-2"> लेवल {levelData.level}</div>  
                             
                             {/* Star display */}  
                             <div className="flex space-x-1">  
@@ -936,7 +955,7 @@ function ReadingWritingPractice() {
                   }}  
                   className="bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700"  
                 >  
-                  Back  
+                  मागे जा 
                 </button>  
                 <button  
                   onClick={fetchQuestions}  
@@ -947,36 +966,36 @@ function ReadingWritingPractice() {
                       : 'bg-gradient-to-r from-pink-800 to-purple-900 text-white hover:opacity-90'  
                   }`}  
                 >  
-                  {loading ? 'Loading...' : 'Start Practice'}  
+                  {loading ? 'लोड होत आहे...' : 'सराव सुरु करा'}  
                 </button>  
               </div>  
             </div>            ) : !testStarted ? (
             <div className="p-8 text-center">
               <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                {mode === 'reading' ? 'Reading Practice' : 'Writing Practice'}
+                {mode === 'reading' ? 'वाचनाचा सराव' : 'लेखनाचा सराव'}
               </h1>
               <p className="text-lg text-gray-600 mb-6">
                 {mode === 'reading' 
-                  ? 'Enhance your reading comprehension skills with our interactive exercises.'
-                  : 'Improve your writing skills with our structured writing activities.'}
+                  ? 'आमच्या संवादात्मक सरावांद्वारे तुमच्या वाचन समजण्याच्या कौशल्यांत सुधारणा करा.'
+                  : 'आमच्या नियोजित लेखन सरावांमुळे तुमचे लेखन कौशल्य अधिक प्रगल्भ करा.'}
               </p>
               
               <div className="bg-purple-100 rounded-lg p-4 mb-6">
-                <h2 className="font-bold text-purple-800 mb-2">Instructions:</h2>
+                <h2 className="font-bold text-purple-800 mb-2">सूचना:</h2>
                 <ul className="text-left text-purple-700 list-disc pl-5 space-y-1">
                   {mode === 'reading' ? (
                     <>
-                      <li>You'll read passages of varying complexity based on your level</li>
-                      <li>After reading, you'll answer questions testing your comprehension</li>
-                      <li>You'll have a limited time to provide your answers</li>
-                      <li>Read carefully and think about the main ideas and details</li>
+                      <li>आपणास आपल्या स्तरानुसार वेगवेगळ्या प्रमाणात कठीण असणारे उतारे वाचण्यासाठी दिले जातील.</li>
+                      <li>वाचनानंतर, आपल्या चाचणी प्रश्न विचारले जातील.</li>
+                      <li>प्रश्नांची उत्तरे देण्यासाठी निश्चित वेळ मर्यादा असेल.</li>
+                      <li>कृपया काळजीपूर्वक वाचा आणि मुख्य कल्पना तसेच महत्त्वाचे तपशील लक्षात ठेवा.</li>
                     </>
                   ) : (
                     <>
-                      <li>You'll be given writing prompts based on your level</li>
-                      <li>Write your response in the provided text area</li>
-                      <li>You'll have a limited time to complete each writing task</li>
-                      <li>Focus on clarity, organization, and proper grammar</li>
+                      <li>आपल्याला आपल्या स्तरानुसार लेखनासाठी विषय दिले जातील.</li>
+                      <li>दिलेल्या मजकूर क्षेत्रात आपल्या विचारांचे स्पष्ट आणि सुसंगत लेखन करा.</li>
+                      <li>प्रत्येक लेखन कार्य पूर्ण करण्यासाठी निश्चित वेळ मर्यादा असणार आहे.</li>
+                      <li>लेखनामध्ये स्पष्टता, सुव्यवस्था, तसेच व्याकरणाच्या शुद्धतेवर विशेष लक्ष द्या.</li>
                     </>
                   )}
                 </ul>
@@ -990,7 +1009,7 @@ function ReadingWritingPractice() {
                   }}
                   className="px-4 py-2 rounded-lg font-medium bg-gray-600 text-white hover:bg-gray-700"
                 >
-                  Back
+                  मागे जा 
                 </button>
                 <button
                   onClick={fetchQuestions}
@@ -1001,17 +1020,17 @@ function ReadingWritingPractice() {
                       : 'bg-gradient-to-r from-pink-800 to-purple-900 text-white hover:opacity-90'
                   }`}
                 >
-                  {loading ? 'Loading...' : 'Start Practice'}
+                  {loading ? 'लोड होत आहे...' : 'सराव सुरु करा'}
                 </button>
               </div>
             </div>
           ) : testCompleted && !showEvaluation ? (
             <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">Practice Completed!</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">सराव यशस्वीरीत्या पूर्ण झाला.</h1>
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-pink-500 mb-4"></div>
-                  <p className="text-lg text-gray-600">Evaluating your responses with Claude AI...</p>
+                  <p className="text-lg text-gray-600">तुमच्या उत्तरांचे Claude AI सोबत मूल्यांकन केले जात आहे..."</p>
                 </div>
               ) : (
                 <>
@@ -1021,20 +1040,20 @@ function ReadingWritingPractice() {
                     }} />
                   </div>
                   <p className="text-lg text-gray-600 mb-6">
-                    Great job! You've completed the {mode} practice session.
+                 छान! तुम्ही {mode} सराव सत्र पूर्ण केले आहे.
                   </p>
                   <div className="flex justify-center space-x-4">
                     <button
                       onClick={backToLevelSelection}
                       className="bg-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-pink-700"
                     >
-                      Back to Levels
+                      लेव्हल्सकडे परत जा
                     </button>
                     <button
                       onClick={() => setShowEvaluation(true)}
                       className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700"
                     >
-                      Show Results
+                      निकाल पाहा
                     </button>
                   </div>
                 </>
@@ -1042,10 +1061,10 @@ function ReadingWritingPractice() {
             </div>
           ) : testCompleted && showEvaluation ? (
             <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">Your Practice Results</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">तुमच्या सरावाचे निकाल</h1>
               
               <div className="mb-6 p-4 bg-purple-50 rounded-lg">
-                <h2 className="text-xl font-bold text-purple-800 mb-2">Overall Performance</h2>
+                <h2 className="text-xl font-bold text-purple-800 mb-2">एकूण परफॉर्मन्स</h2>
                 <div className="flex justify-center mb-4">
                   {/* Star display for overall rating */}
                   <div className="flex space-x-2">
@@ -1068,18 +1087,18 @@ function ReadingWritingPractice() {
               </div>
               
               <div className="mb-8">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Level {selectedLevel} Completed!</h2>
+                <h2 className="text-xl font-bold text-gray-800 mb-4">लेव्हल {selectedLevel} यशस्वीरित्या पूर्ण झाला!</h2>
                 <p className="text-lg text-gray-600">
-                  You've earned {evaluationResult?.levelProgress?.stars || 1} star{(evaluationResult?.levelProgress?.stars || 1) !== 1 ? 's' : ''} for this level.
+                 तुम्हाला या लेव्हलसाठी {evaluationResult?.levelProgress?.stars || 1} स्टार{(evaluationResult?.levelProgress?.stars || 1) !== 1 ? 's' : ''} मिळाले आहेत.
                 </p>
                 {evaluationResult?.levelProgress?.stars === 3 && (
-                  <div className="mt-2 text-green-600 font-bold">Perfect score! Excellent work!</div>
+                  <div className="mt-2 text-green-600 font-bold">अभिनंदन! तुम्ही सर्वोत्तम गुण मिळवले आहेत.</div>
                 )}
                 {evaluationResult?.levelProgress?.stars === 2 && (
-                  <div className="mt-2 text-blue-600 font-bold">Good job! Keep practicing!</div>
+                  <div className="mt-2 text-blue-600 font-bold">छान! सराव चालू ठेवा!</div>
                 )}
                 {evaluationResult?.levelProgress?.stars === 1 && (
-                  <div className="mt-2 text-purple-600 font-bold">Keep working on your skills!</div>
+                  <div className="mt-2 text-purple-600 font-bold">तुमच्या कौशल्यांवर काम करत रहा!</div>
                 )}
               </div>
               
@@ -1088,7 +1107,7 @@ function ReadingWritingPractice() {
                   onClick={backToLevelSelection}
                   className="bg-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-pink-700"
                 >
-                  Back to Levels
+                  लेव्हल्सकडे परत जा
                 </button>
                 {selectedLevel < 30 && (
                   <button
@@ -1122,10 +1141,10 @@ function ReadingWritingPractice() {
                     {loading ? (
                       <>
                         <span className="inline-block animate-spin h-4 w-4 border-t-2 border-white rounded-full mr-2"></span>
-                        Evaluating...
+                        रिव्ह्यू होत आहे...
                       </>
                     ) : (
-                      'Next Level'
+                      'पुढील लेव्हल'
                     )}
                   </button>
                 )}
@@ -1148,9 +1167,9 @@ function ReadingWritingPractice() {
                 </div>
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-purple-900">
-                    {mode === 'reading' ? 'Reading Practice' : 'Writing Practice'}
+                    {mode === 'reading' ? 'वाचनाचा सराव' : 'लेखनाचा सराव'}
                   </h2>
-                  <p className="text-sm text-gray-600">{difficulty} Level</p>
+                  <p className="text-sm text-gray-600">{difficulty} लेव्हल</p>
                 </div>
                 <div className="bg-purple-100 px-4 py-2 rounded-lg">
                   <span className="text-lg font-medium text-purple-800">
@@ -1161,18 +1180,18 @@ function ReadingWritingPractice() {
 
               <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                 {/* STEP 1: INSTRUCTIONS */}
-                <h3 className="text-lg font-semibold mb-2">Instructions:</h3>
+                <h3 className="text-lg font-semibold mb-2">सूचना:</h3>
                 <p className="text-gray-700 mb-4">
-                  {questions[currentIndex]?.instructions || "Read the passage and answer the question."}
+                  {questions[currentIndex]?.instructions || "उतारा वाचा आणि प्रश्नाची उत्तर द्या."}
                 </p>
                 
                 {/* STEP 2: READING CONTENT/STORY OR WRITING PROMPT */}
                 {mode === 'reading' ? (
                   <div className="bg-gray-100 p-4 rounded-lg mb-6">
-                    <h3 className="text-lg font-semibold mb-2">Passage:</h3>
+                    <h3 className="text-lg font-semibold mb-2">उतारा:</h3>
                     <div className="prose max-w-none">
                       <p className="text-gray-800 whitespace-pre-line">
-                        {questions[currentIndex]?.content || questions[currentIndex]?.passage || questions[currentIndex]?.text || "Loading passage..."}
+                        {questions[currentIndex]?.content || questions[currentIndex]?.passage || questions[currentIndex]?.text || "लोड होत आहे..."}
                       </p>
                     </div>
                     
@@ -1206,21 +1225,23 @@ function ReadingWritingPractice() {
                 )}
                 
                 {/* STEP 3: QUESTION OR WRITING PROMPT */}
-                <h3 className="text-lg font-semibold mb-3">{mode === 'reading' ? 'Question:' : 'Writing Prompt:'}</h3>
+                <h3 className="text-lg font-semibold mb-3">{mode === 'reading' ? 'प्रश्न:' : 'लेखन विषय:'}</h3>
                 <p className="text-gray-700 mb-5 font-medium">
                   {mode === 'reading' ?
                     (questions[currentIndex]?.questionText || 
                      (questions[currentIndex]?.content && !questions[currentIndex]?.questionText ? 
-                       "What happened in the story?" : "Loading question...")) :
+                       "कथेतील मुख्य घटना काय आहे?" : "प्रश्न लोड होत आहे...")) :
+                     
                     (questions[currentIndex]?.content || questions[currentIndex]?.passage || questions[currentIndex]?.text || 
-                     questions[currentIndex]?.questionText || "Write a short paragraph describing your favorite hobby or activity.")
+                     questions[currentIndex]?.questionText || "तुमच्या आवडत्या छंदाची किंवा उपक्रमाची थोडक्यात ओळख देणारा परिच्छेद लिहा.")
                   }
+                  
                 </p>
                 
                 {/* STEP 4: MULTIPLE CHOICE OPTIONS */}
                 {isMultipleChoice() ? (
                   <div>
-                    <h3 className="text-lg font-semibold mb-3">Choose the correct answer:</h3>
+                    <h3 className="text-lg font-semibold mb-3">योग्य पर्याय निवडा:</h3>
                     <div className="space-y-3 mb-4">
                       {questions[currentIndex].options.map((option, index) => (
                         <div 
@@ -1255,22 +1276,22 @@ function ReadingWritingPractice() {
                       onChange={handleTextResponseChange}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       rows={6}
-                      placeholder={mode === 'reading' ? "Type your answer here..." : "Write your response here (minimum 50 words)..."}
+                      placeholder={mode === 'reading' ? "इथे तुमचे उत्तर लिहा..." : "कृपया इथे तुमचा प्रतिसाद लिहा (किमान ५० शब्द असणे आवश्यक आहे)..."}
                       disabled={!!feedback}
                     />
                     {mode === 'writing' && (
                       <div className="mt-2 flex justify-between items-center">
                         <div className="text-sm text-gray-600">
-                          Word count: <span className={`font-medium ${countWords(userResponse) >= 50 ? 'text-green-600' : 'text-red-600'}`}>
+                          शब्द: <span className={`font-medium ${countWords(userResponse) >= 50 ? 'text-green-600' : 'text-red-600'}`}>
                             {countWords(userResponse)}
-                          </span> / 50 minimum
+                          </span> / किमान ५०
                         </div>
                         {countWords(userResponse) >= 50 && (
                           <div className="text-sm text-green-600 flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
-                            Minimum word count reached
+                            किमान शब्द मर्यादा पूर्ण झाली
                           </div>
                         )}
                       </div>
@@ -1301,7 +1322,7 @@ function ReadingWritingPractice() {
                           : 'bg-purple-600 text-white hover:bg-purple-700'
                       }`}
                     >
-                      Submit Answer
+                      उत्तर सबमिट करा
                     </button>
                   </div>
                 )}
@@ -1309,7 +1330,7 @@ function ReadingWritingPractice() {
                 {feedback && (
                   <div className="mt-4">
                     <div className="flex items-center mb-2">
-                      <h4 className="font-medium text-gray-700">Feedback:</h4>
+                      <h4 className="font-medium text-gray-700">फीडबॅक:</h4>
                       <div className="ml-3 flex">
                         {[1, 2, 3].map((star) => (
                           <svg
@@ -1339,7 +1360,7 @@ function ReadingWritingPractice() {
                     onClick={handleNext}
                     className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700"
                   >
-                    {currentIndex < questions.length - 1 ? 'Next Question' : 'Complete Practice'}
+                    {currentIndex < questions.length - 1 ? 'पुढील प्रश्न' : 'सराव पूर्ण करा'}
                   </button>
                 </div>
               )}

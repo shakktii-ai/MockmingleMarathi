@@ -45,7 +45,7 @@ const evaluateWithClaude = async (responses, skillArea, difficulty, level) => {
       Return your evaluation as a JSON object with this structure:
       {
         "overallRating": (number from 0-3),
-        "feedback": "(your specific feedback for the user)",
+        "feedback": "(your specific feedback for the user in a marathi language)",
         "completed": true
       }
     `;

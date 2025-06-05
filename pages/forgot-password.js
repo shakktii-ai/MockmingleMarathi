@@ -64,17 +64,18 @@ const ForgotPasswordPage = () => {
 
     const data = await res.json();
 
+    
     if (data.success) {
-      setMessage("Password reset email sent!");
+      setMessage("पासवर्ड रीसेटसाठी ईमेल तुमच्या नोंदणीकृत ईमेलवर पाठवण्यात आला आहे.");
     } else {
-      setMessage(`Error: ${data.error}`);
+      setMessage(`त्रुटी: ${data.error}`);
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h1 className="text-2xl font-semibold text-center text-gray-800 mb-6">Forgot Password</h1>
+        <h1 className="text-2xl font-semibold text-center text-gray-800 mb-6">पासवर्ड विसरलात?</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <input
@@ -82,7 +83,7 @@ const ForgotPasswordPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="Enter your email"
+              placeholder="ईमेल एंटर करा"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -90,9 +91,8 @@ const ForgotPasswordPage = () => {
             type="submit"
             className="w-full py-2 px-4 rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Send Reset Link
-          </button>
-        </form>
+            रीसेट लिंक पाठवा
+          </button>   </form>
         {message && (
           <p className={`mt-4 text-center ${message.startsWith("Error") ? 'text-red-600' : 'text-green-600'}`}>
             {message}

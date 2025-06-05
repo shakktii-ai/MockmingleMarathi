@@ -11,7 +11,7 @@ export default function Role() {
   // const [jobRole, setJobRole] = useState("");
   const [level, setLevel] = useState("Beginner");
   const [standard, setStandard] = useState("");
-  const [subject, setSubject] = useState('');
+  const [subject, setSubject] = useState("English");
   const [email, setEmail] = useState("");
   const [questions, setQuestions] = useState("");
   const [user, setUser] = useState(null);
@@ -22,27 +22,27 @@ export default function Role() {
 
   // Declare boards array here (not inside JSX)
   const boards = [
-    { label: "Maharashtra State Board", value: "maharashtra" },
-    { label: "CBSE (Central Board of Secondary Education)", value: "cbse" },
-    { label: "ICSE (Indian Certificate of Secondary Education)", value: "icse" },
-    { label: "Other State Board", value: "stateboard" },
-    { label: "NIOS (National Institute of Open Schooling)", value: "nios" },
-    { label: "IB (International Baccalaureate)", value: "ib" },
-    { label: "Cambridge International (CIE)", value: "cie" },
-    { label: "Karnataka State Board", value: "karnataka" },
-    { label: "Tamil Nadu State Board", value: "tamilnadu" },
-    { label: "Andhra Pradesh State Board", value: "andhrapradesh" },
-    { label: "Telangana State Board", value: "telangana" },
-    { label: "Uttar Pradesh State Board", value: "uttarpradesh" },
-    { label: "West Bengal State Board", value: "westbengal" },
-    { label: "Gujarat State Board", value: "gujarat" },
-    { label: "Rajasthan State Board", value: "rajasthan" },
-    { label: "Punjab State Board", value: "punjab" },
-    { label: "Haryana State Board", value: "haryana" },
-    { label: "Madhya Pradesh State Board", value: "madhyapradesh" },
-    { label: "Bihar State Board", value: "bihar" },
-    { label: "Odisha State Board", value: "odisha" },
-    { label: "Chhattisgarh State Board", value: "chhattisgarh" }
+     { label: "Maharashtra State Board", value: "maharashtra" },
+  { label: "CBSE (Central Board of Secondary Education)", value: "cbse" },
+  { label: "ICSE (Indian Certificate of Secondary Education)", value: "icse" },
+  { label: "Other State Board", value: "stateboard" },
+  { label: "NIOS (National Institute of Open Schooling)", value: "nios" },
+  { label: "IB (International Baccalaureate)", value: "ib" },
+  { label: "Cambridge International (CIE)", value: "cie" },
+  { label: "Karnataka State Board", value: "karnataka" },
+  { label: "Tamil Nadu State Board", value: "tamilnadu" },
+  { label: "Andhra Pradesh State Board", value: "andhrapradesh" },
+  { label: "Telangana State Board", value: "telangana" },
+  { label: "Uttar Pradesh State Board", value: "uttarpradesh" },
+  { label: "West Bengal State Board", value: "westbengal" },
+  { label: "Gujarat State Board", value: "gujarat" },
+  { label: "Rajasthan State Board", value: "rajasthan" },
+  { label: "Punjab State Board", value: "punjab" },
+  { label: "Haryana State Board", value: "haryana" },
+  { label: "Madhya Pradesh State Board", value: "madhyapradesh" },
+  { label: "Bihar State Board", value: "bihar" },
+  { label: "Odisha State Board", value: "odisha" },
+  { label: "Chhattisgarh State Board", value: "chhattisgarh" }
   ];
   useEffect(() => {
     if (!localStorage.getItem("token")) {
@@ -147,7 +147,7 @@ export default function Role() {
 
     // Replace this with a fetch request to your new API
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/questionsFetchFormModel`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/engQuestionsFetchFormModel`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -156,7 +156,7 @@ export default function Role() {
           // jobRole,
           level,
           subject,
-          standard, board
+          standard,board
         }),
       });
 
@@ -184,24 +184,43 @@ export default function Role() {
 
 
           const patterns = [
-            // Bold Marathi numbered item: **१. काहीतरी मजकूर**
-            {
-              regex: /\*\*[०-९]+\.\s+([^*]+?)\*\*/gu,
-              type: 'Bold with ** markers (Marathi)'
-            },
+  // Bold Marathi numbered item: **१. काहीतरी मजकूर**
+  {
+    regex: /\*\*[०-९]+\.\s+([^*]+?)\*\*/gu,
+    type: 'Bold with ** markers (Marathi)'
+  },
 
-            // Regular Marathi numbered list pattern at start of line
-            {
-              regex: /^\s*[०-९]+\.\s+([^\n]+)/gmu,
-              type: 'Regular numbered list (Marathi)'
-            },
+  // Regular Marathi numbered list pattern at start of line
+  {
+    regex: /^\s*[०-९]+\.\s+([^\n]+)/gmu,
+    type: 'Regular numbered list (Marathi)'
+  },
 
-            // Simple match for Marathi number followed by text
-            {
-              regex: /[०-९]+\.\s+([^\n(]+)/gu,
-              type: 'Simple number followed by text (Marathi)'
-            }
-          ];
+  // Simple match for Marathi number followed by text
+  {
+    regex: /[०-९]+\.\s+([^\n(]+)/gu,
+    type: 'Simple number followed by text (Marathi)'
+  },
+
+  // NEW: Bold English numbered item: **1. Some text**
+  {
+    regex: /\*\*[0-9]+\.\s+([^*]+?)\*\*/gu,
+    type: 'Bold with ** markers (English)'
+  },
+
+  // NEW: Regular English numbered list at start of line
+  {
+    regex: /^\s*[0-9]+\.\s+([^\n]+)/gmu,
+    type: 'Regular numbered list (English)'
+  },
+
+  // NEW: Simple match for English number followed by text
+  {
+    regex: /[0-9]+\.\s+([^\n(]+)/gu,
+    type: 'Simple number followed by text (English)'
+  }
+];
+
 
 
           // Try each pattern until we find matches
@@ -273,7 +292,7 @@ export default function Role() {
       console.log("Questions to be sent:", formattedQuestions);
 
       if (formattedQuestions && formattedQuestions.length > 0) {
-        const data = { email, level, subject, standard, board, questions: formattedQuestions };
+        const data = { email, level, subject, standard,board, questions: formattedQuestions };
 
         try {
           const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/jobRoleAndQuestionsSave`, {
@@ -360,7 +379,7 @@ export default function Role() {
         </div>
       )}
 
-
+      
 
       <div className="bg-transparent w-11/12 max-w-md p-8 text-center">
         <img src="/logoo.png" alt="Shakti AI लोगो" className="w-20 mx-auto mb-4" />
@@ -384,7 +403,7 @@ export default function Role() {
               ))}
             </select>
           </div>
-
+        
 
           <div className="pl-15 mb-6">
             <select
@@ -400,22 +419,16 @@ export default function Role() {
               ))}
             </select>
           </div>
-          <div>
-          <Link href="/engrole" passHref >
-            <button type="button" className="text-black bg-[#2a72ff] text-lg p-2 rounded w-64 pl-15 mb-6">
-              For English Subject click me
-            </button>
-          </Link>
+
           
-            </div>
 
           <input
             type="text"
             name="subject"
             id="subject"
             value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="w-full p-2 mb-4 rounded-lg text-xl border border-transparent bg-gray-100 focus:border-purple-500 focus:outline-none"
+            readOnly
+            className="w-1/2 p-2 mb-4 rounded-lg text-xl border border-transparent bg-gray-500 focus:border-purple-500 focus:outline-none"
             placeholder="विषय निवडा. (e.g. Marathi, Maths)"
             required
           />
@@ -472,15 +485,6 @@ export default function Role() {
               /> अनुभवी
             </label>
           </div>
-
-
-
-
-
-
-
-
-
           <button type="submit" className="bg-[#2a72ff] text-white py-2 px-8 font-semibold rounded-full w-full mt-4 hover:bg-[#1a5adb] flex justify-center items-center">
             पुढील <span className="ml-4 text-2xl">»</span>
           </button>

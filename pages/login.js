@@ -42,7 +42,7 @@ export default function Login() {
             // Check if the response is a 401 error (Unauthorized)
             if (res.status === 401) {
                 // Show the error from the response in a toast
-                toast.error(response.error || 'Invalid credentials. Please check your email and password.', {
+                toast.error(response.error || 'अवैध क्रेडेन्शियल्स. कृपया तुमचा ईमेल आणि पासवर्ड तपासा.', {
                     position: "top-left",
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -64,7 +64,7 @@ export default function Login() {
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('user', JSON.stringify(response.user));
 
-                toast.success('You are successfully logged in!', {
+                toast.success('तुम्ही यशस्वीरित्या लॉगिन झाला आहात!', {
                     position: "top-left",
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -77,7 +77,7 @@ export default function Login() {
 
                 setTimeout(() => {
                     router.push({
-                        pathname: '/dashboard', 
+                        pathname: '/', 
                         query: { user: response.user },
                     });
                 }, 1000);
@@ -115,7 +115,7 @@ export default function Login() {
             <img src="/Logoo.png" className="absolute top-4 right-8 w-20 mb-4" alt="Logo" />
             
             <div className="bg-transparent text-center p-6 w-full max-w-xs rounded-lg">
-                <h1 className="text-2xl text-white mb-6">Welcome <span className="text-pink-400">Back!</span></h1>
+                <h1 className="text-2xl text-white mb-6">स्वागत आहे <span className="text-pink-400">मागे जा!</span></h1>
                 
                 <form onSubmit={handleSubmit}>
                     <input 
@@ -124,7 +124,7 @@ export default function Login() {
                         name="email"
                         value={email}
                         onChange={handleChange}
-                        placeholder="Email Address" 
+                        placeholder="आपला ईमेल प्रविष्ट करा" 
                         className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white text-base mb-4 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
                     />
                     
@@ -135,7 +135,7 @@ export default function Login() {
                             name="password"
                             value={password}
                             onChange={handleChange}
-                            placeholder="Password"
+                            placeholder="आपला पासवर्ड प्रविष्ट करा"
                             className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white text-base focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
                         />
                         <span 
@@ -148,22 +148,22 @@ export default function Login() {
                     
                     <div className="flex items-center text-white text-sm mb-4">
                         <input type="checkbox" id="remember" className="mr-2" />
-                        <label htmlFor="remember">Remember for 30 days</label>
+                        <label htmlFor="remember">३० दिवसांसाठी आपली माहिती लक्षात ठेवा.</label>
                     </div>
                     
                     <button 
                         type="submit" 
                         className="w-full py-3 rounded-md bg-pink-400 text-white text-base transition-all hover:bg-pink-600"
                     >
-                        LOG IN
+                        लॉग इन
                     </button>
                 </form>
                 
-                <a href="/forgot-password" className="text-pink-400 text-sm mt-4 block">Forgot Password?</a>
+                <a href="/forgot-password" className="text-pink-400 text-sm mt-4 block">पासवर्ड विसरलात?</a>
                 
                 <div className="text-white text-sm mt-4">
-                    Don't have an account? 
-                    <a href="/signup" className="font-bold text-pink-400">Sign up</a>
+                    नोंदणी नसल्यास, कृपया नवीन खाते तयार करा 
+                    <a href="/signup" className="font-bold text-pink-400"> साइन अप</a>
                 </div>
             </div>
 

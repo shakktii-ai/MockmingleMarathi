@@ -1,4 +1,5 @@
 import JobRole from '../../models/JobRole';
+import Standard from '@/models/Standard';
 import mongoose from 'mongoose';
 export async function handler(req, res) {
     if (!mongoose.connections[0].readyState) {
@@ -14,8 +15,8 @@ export async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       // Attempt to find the job role by email
-      const jobRole = await JobRole.findOne({ email , _id});
-
+      // const jobRole = await JobRole.findOne({ email , _id});
+const jobRole = await Standard.findOne({ email , _id});
       if (!jobRole) {
         return res.status(404).json({ message: 'Job role not found' });
       }
@@ -45,7 +46,7 @@ export async function handler(req, res) {
 
     try {
       // Attempt to find the job role by email
-      const jobRole = await JobRole.findOne({ email });
+      const jobRole = await Standard.findOne({ email });
 
       if (!jobRole) {
         return res.status(404).json({ message: 'Job role not found' });

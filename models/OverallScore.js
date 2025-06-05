@@ -1,7 +1,15 @@
 import mongoose from 'mongoose';
 
 const OverallScoreSchema = new mongoose.Schema({
-  role: {
+  standards: {
+    type: Number,
+    required: true,
+  },
+  subject: {
+    type: String,
+    required: true,
+  },
+   email: {
     type: String,
     required: true,
   },
@@ -9,12 +17,9 @@ const OverallScoreSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  email: {
-    type: String,
-    required: true,
-  },
+ 
   overallScore: {
-    type: String,
+    type: Number,
     required: true,
   },
   

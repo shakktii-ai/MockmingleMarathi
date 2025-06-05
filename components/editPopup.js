@@ -49,7 +49,7 @@ const EditPopup = ({
       onClick={handleOutsideClick} // Close modal if clicked outside
     >
       <div className="bg-white p-8 rounded-lg shadow-lg w-1/2" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
+        <h2 className="text-xl font-semibold mb-4">प्रोफाइल अपडेट करा</h2>
         
         {errorMessage && (
           <div className="text-red-500 text-sm mb-4">{errorMessage}</div>
@@ -57,7 +57,7 @@ const EditPopup = ({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Full Name</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">संपूर्ण नाव</label>
             <input
               type="text"
               value={newFullName}
@@ -66,7 +66,7 @@ const EditPopup = ({
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Mobile No</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">मोबाईल नंबर</label>
             <input
               type="text"
               value={newMobileNo}
@@ -75,7 +75,7 @@ const EditPopup = ({
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Date Of Birth</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">जन्म तारीख</label>
             <input
               type="text"
               value={newDOB}
@@ -85,7 +85,7 @@ const EditPopup = ({
           </div>
 
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Email</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">ई-मेल</label>
             <input
               type="text"
               value={newEmail}
@@ -94,7 +94,7 @@ const EditPopup = ({
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Education</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">शिक्षण</label>
             <input
               type="text"
               value={newEducation}
@@ -103,7 +103,7 @@ const EditPopup = ({
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Address</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">पत्ता</label>
             <input
               type="text"
               value={newAddress}
@@ -118,14 +118,14 @@ const EditPopup = ({
             onClick={() => setIsOpen(false)} // Close the modal
             className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100"
           >
-            Cancel
+            रद्द करा
           </button>
           <button
             onClick={handleSave}
             disabled={!newFullName || !newDOB || !newEmail || !newEducation || !newAddress || !newMobileNo} // Disable button if fields are empty
             className={`px-4 py-2 text-white rounded-lg ${!newFullName || !newDOB || !newEmail || !newEducation || !newAddress || !newMobileNo ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#c3baf7] hover:bg-purple-600'}`}
           >
-            Save
+           जतन करा
           </button>
         </div>
       </div>
