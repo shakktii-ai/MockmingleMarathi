@@ -1,13 +1,45 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { FcSpeaker } from 'react-icons/fc';
-import { FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa';
+import dynamic from 'next/dynamic';
 import Head from 'next/head';
+
+// Import icons with no SSR to avoid window is not defined errors
+const FcSpeaker = dynamic(() => import('react-icons/fc').then(mod => mod.FcSpeaker), { ssr: false });
+const FaMicrophone = dynamic(() => import('react-icons/fa').then(mod => mod.FaMicrophone), { ssr: false });
+const FaMicrophoneSlash = dynamic(() => import('react-icons/fa').then(mod => mod.FaMicrophoneSlash), { ssr: false });
+
+// Add a check for window object
+const isBrowser = typeof window !== 'undefined';
 
 const QuestionForm = () => {
   const router = useRouter();
   const [questions, setQuestions] = useState([]);
   const [email, setEmail] = useState('');
+  const [user, setUser] = useState(null);
+  const [userEmail, setUserEmail] = useState('');
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [recordedText, setRecordedText] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [recognition, setRecognition] = useState(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isExitModalVisible, setIsExitModalVisible] = useState(false);
+  const [isIphone, setIsIphone] = useState(false);
+  const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
+  const [interviewComplete, setInterviewComplete] = useState(false);
+  const [micTimeout, setMicTimeout] = useState(null);
+  const [silenceTimeout, setSilenceTimeout] = useState(null);
+  const [answers, setAnswers] = useState([]);
+  const [micPermission, setMicPermission] = useState(null); // 'granted', 'denied', or null
+  const [micWorking, setMicWorking] = useState(null); // true, false, or null
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [collageName, setCollageName] = useState('');
+  
+  // Refs
+  const isSpeakingRef = useRef(false);
+  const questionSpokenRef = useRef(false);
+  const questionTimerRef = useRef(null);
   
   useEffect(() => {
     // Disable all speech synthesis globally - runs only on client side
@@ -106,32 +138,7 @@ const QuestionForm = () => {
   const handleRefreshPage = () => {
     window.location.reload();
   };
-  const [user, setUser] = useState(null);
-  const [userEmail, setUserEmail] = useState('');
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [recordedText, setRecordedText] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [recognition, setRecognition] = useState(null);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isExitModalVisible, setIsExitModalVisible] = useState(false);
-  const [isIphone, setIsIphone] = useState(false);
-  const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
-  const [interviewComplete, setInterviewComplete] = useState(false);
-  const [micTimeout, setMicTimeout] = useState(null);
-  const [silenceTimeout, setSilenceTimeout] = useState(null);
-  const [answers, setAnswers] = useState([]);
-  const [micPermission, setMicPermission] = useState(null); // 'granted', 'denied', or null
-  const [micWorking, setMicWorking] = useState(null); // true, false, or null
-  const [showPermissionModal, setShowPermissionModal] = useState(false);
-  // Use a ref instead of state to avoid re-renders
-  const isSpeakingRef = useRef(false);
-  const questionSpokenRef = useRef(false);
-  // Add questionTimerRef at the top level - IMPORTANT for React hooks rules
-  const questionTimerRef = useRef(null);
-
-  const [collageName, setCollageName] = useState('');
+  // State variables are already declared at the top of the component
 
   useEffect(() => {
     if (!localStorage.getItem("token")) {
@@ -1503,32 +1510,31 @@ After fixing, please refresh the page.`);
     }
   };
   
-  // Initialize voice list on component mount
+  // Initialize voice list on component mount - client-side only
   useEffect(() => {
-    // Load voices
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      const loadVoices = () => {
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          console.log('🔈 Loaded', voices.length, 'voices');
-          const femaleVoice = getFemaleVoice();
-          if (femaleVoice) {
-            console.log('🔈 Selected female voice:', femaleVoice.name);
-          }
-        }
-      };
-      
-      // Try loading voices immediately
-      loadVoices();
-      
-      // Set up event for when voices change
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-      
-      return () => {
+    if (!isBrowser || !window.speechSynthesis) return;
+    
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      const marathiVoice = voices.find(voice => voice.lang === 'mr-IN' || voice.lang.startsWith('mr-'));
+      if (marathiVoice) {
+        setVoice(marathiVoice);
+      } else if (voices.length > 0) {
+        // Fallback to first available voice if Marathi not found
+        setVoice(voices[0]);
+      }
+    };
+    
+    // Load voices immediately and when they change
+    loadVoices();
+    
+    // Cleanup
+    return () => {
+      if (window.speechSynthesis) {
         window.speechSynthesis.onvoiceschanged = null;
-      };
-    }
-  }, []);
+      }
+    };
+  }, [isBrowser]);
   
   // Fully stop all speech and clear all queues
   const forceStopAllSpeech = () => {
