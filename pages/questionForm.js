@@ -35,6 +35,7 @@ const QuestionForm = () => {
   const [micWorking, setMicWorking] = useState(null); // true, false, or null
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [collageName, setCollageName] = useState('');
+  const [voice, setVoice] = useState(null);
   
   // Refs
   const isSpeakingRef = useRef(false);
