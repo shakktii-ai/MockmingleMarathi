@@ -9,10 +9,10 @@ export const config = {
   maxDuration: 300,
 };
 
-// Claude API integration function
-const evaluateWithClaude = async (responses, skillArea, difficulty, level) => {
+// OpenAI GPT API integration function
+const evaluateWithGPT = async (responses, skillArea, difficulty, level) => {
   try {
-    console.log('Evaluating responses with Claude:', { responsesCount: responses.length, skillArea, difficulty, level });
+    console.log('Evaluating responses with GPT:', { responsesCount: responses.length, skillArea, difficulty, level });
     // Prepare the data to send to Claude
     const responseData = responses.map(r => ({
       questionId: r.cardId,
@@ -26,50 +26,72 @@ const evaluateWithClaude = async (responses, skillArea, difficulty, level) => {
     // Create a prompt for Claude to evaluate the responses
     const prompt = `
       You are evaluating a user's responses for a language learning exercise.
-      
-      Skill Area: ${skillArea}
-      Difficulty Level: ${difficulty}
-      Level Number: ${level}
-      
-      Here are the user's responses:
-      ${JSON.stringify(responseData, null, 2)}
-      
-      Please evaluate the overall performance and assign a star rating from 0-3 stars, where:
-      - 0 stars: Poor performance, many significant errors or incomplete responses
-      - 1 star: Basic performance with several errors
-      - 2 stars: Good performance with minor errors
-      - 3 stars: Excellent performance with few or no errors
-      
-      Provide specific, constructive feedback in 2-3 sentences on the user's overall performance.
-      
-      Return your evaluation as a JSON object with this structure:
-      {
-        "overallRating": (number from 0-3),
-        "feedback": "(your specific feedback for the user in a marathi language)",
-        "completed": true
-      }
+
+Skill Area: ${skillArea}  
+Difficulty Level: ${difficulty}  
+Level Number: ${level}  
+
+Here are the user's responses:  
+${JSON.stringify(responseData, null, 2)}
+
+Please evaluate the overall performance and assign a star rating from 0 to 3 stars. Be sure to **adjust your expectations based on the level**:
+
+- 0 stars: Poor performance — many significant errors or incomplete responses, even considering the level.
+- 1 star: Basic performance — several errors, but shows some understanding appropriate to the level.
+- 2 stars: Good performance — mostly correct with minor errors; meets most expectations for this level.
+- 3 stars: Excellent performance — few or no errors **based on what is expected at this level**. Even if the response is simple, it deserves full credit if it's accurate and appropriate.
+
+✅ Do not penalize for simplicity at lower levels. If a response is correct and aligns with the expected learning outcomes of the level, award 3 stars.
+
+Provide specific, constructive feedback in 2–3 sentences about the user’s performance.
+feedback must be in marathi language.
+
+Return your evaluation as a JSON object in the following format:
+
+{
+  "overallRating": (number from 0–3),
+  "feedback": "(your specific feedback for the user)",
+  "completed": true
+}
+
     `;
 
-    // Call Claude API with timeout
+    // Check if API key is available
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('OpenAI API key is missing');
+      return { 
+        overallRating: 1, 
+        feedback: "तुम्ही ही लेव्हल पूर्ण केली आहे. तुमचे स्किल्स सुधारण्यासाठी प्रॅक्टिस करत राहा!", 
+        completed: true 
+      };
+    }
+
+    // Call OpenAI GPT API with timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
         },
         body: JSON.stringify({
-          model: "claude-3-haiku-20240307",
+          model: "gpt-4o",
           max_tokens: 300,
           temperature: 0.7,
-          messages: [{
-            role: "user",
-            content: prompt
-          }]
+          response_format: { type: "json_object" },
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert language learning evaluator. You analyze student responses and provide constructive feedback and fair ratings. Always return valid JSON."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ]
         }),
         signal: controller.signal
       });
@@ -78,26 +100,26 @@ const evaluateWithClaude = async (responses, skillArea, difficulty, level) => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Claude API error response:', errorText);
+        console.error('OpenAI API error response:', errorText);
         return { 
           overallRating: 1, 
-          feedback: "Thank you for your responses. More practice is needed to improve your skills.", 
+          feedback: "तुमच्या प्रतिसादांसाठी धन्यवाद. तुमच्या कौशल्यात सुधारणा करण्यासाठी अधिक सरावाची गरज आहे", 
           completed: true 
         };
       }
 
       const result = await response.json();
       
-      if (!result.content || !result.content[0] || !result.content[0].text) {
-        console.error('Unexpected Claude API response structure:', JSON.stringify(result));
+      if (!result.choices || !result.choices[0] || !result.choices[0].message || !result.choices[0].message.content) {
+        console.error('Unexpected OpenAI API response structure:', JSON.stringify(result));
         return { 
           overallRating: 1, 
-          feedback: "Thank you for your responses. Keep practicing to improve your skills.", 
+          feedback: "तुम्ही ही लेव्हल पूर्ण केली आहे. तुमचे स्किल्स सुधारण्यासाठी प्रॅक्टिस करत राहा!", 
           completed: true 
         };
       }
 
-      const textResponse = result.content[0].text;
+      const textResponse = result.choices[0].message.content;
       
       // Extract JSON object from the response
       const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
@@ -105,7 +127,7 @@ const evaluateWithClaude = async (responses, skillArea, difficulty, level) => {
         console.error('Could not find valid JSON object in Claude response');
         return { 
           overallRating: 1, 
-          feedback: "Thank you for your responses. Keep practicing to improve your skills.", 
+          feedback: "तुम्ही ही लेव्हल पूर्ण केली आहे. तुमचे स्किल्स सुधारण्यासाठी प्रॅक्टिस करत राहा!", 
           completed: true 
         };
       }
@@ -115,10 +137,10 @@ const evaluateWithClaude = async (responses, skillArea, difficulty, level) => {
         
         // Validate the evaluation format
         if (typeof evaluation.overallRating !== 'number' || typeof evaluation.feedback !== 'string') {
-          console.error('Invalid evaluation format from Claude');
+          console.error('Invalid evaluation format from GPT');
           return { 
             overallRating: 1, 
-            feedback: "Thank you for your responses. Keep practicing to improve your skills.", 
+            feedback: "तुम्ही ही लेव्हल पूर्ण केली आहे. तुमचे स्किल्स सुधारण्यासाठी प्रॅक्टिस करत राहा!", 
             completed: true 
           };
         }
@@ -131,29 +153,29 @@ const evaluateWithClaude = async (responses, skillArea, difficulty, level) => {
           evaluation.completed = true;
         }
         
-        console.log('Claude evaluation:', evaluation);
+        console.log('GPT evaluation:', evaluation);
         return evaluation;
       } catch (parseError) {
-        console.error('Error parsing Claude response as JSON:', parseError);
+        console.error('Error parsing GPT response as JSON:', parseError);
         return { 
           overallRating: 1, 
-          feedback: "Thank you for your responses. Keep practicing to improve your skills.", 
+          feedback: "तुम्ही ही लेव्हल पूर्ण केली आहे. तुमचे स्किल्स सुधारण्यासाठी प्रॅक्टिस करत राहा!", 
           completed: true 
         };
       }
     } catch (fetchError) {
-      console.error('Error fetching from Claude API:', fetchError);
+      console.error('Error fetching from OpenAI API:', fetchError);
       return { 
         overallRating: 1, 
-        feedback: "Thank you for your responses. Keep practicing to improve your skills.", 
+        feedback: "तुम्ही ही लेव्हल पूर्ण केली आहे. तुमचे स्किल्स सुधारण्यासाठी प्रॅक्टिस करत राहा!", 
         completed: true 
       };
     }
   } catch (error) {
-    console.error('Error in evaluateWithClaude:', error);
+    console.error('Error in evaluateWithGPT:', error);
     return { 
       overallRating: 1, 
-      feedback: "Thank you for your responses. Keep practicing to improve your skills.", 
+      feedback: "तुम्ही ही लेव्हल पूर्ण केली आहे. तुमचे स्किल्स सुधारण्यासाठी प्रॅक्टिस करत राहा!", 
       completed: true 
     };
   }
@@ -195,8 +217,8 @@ async function handler(req, res) {
       verifiedUserId = userId || '6462d8fbf6c3e30000000001';
     }
 
-    // Use Claude API to evaluate the responses when we have them
-    const evaluation = await evaluateWithClaude(responses, skillArea, difficulty, level);
+    // Use GPT API to evaluate the responses when we have them
+    const evaluation = await evaluateWithGPT(responses, skillArea, difficulty, level);
     
     // Find or create progress record for this user, skill area, and difficulty
     let progressRecord;

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
 const PracticeResponseSchema = new mongoose.Schema(
   {
@@ -17,4 +17,4 @@ const PracticeResponseSchema = new mongoose.Schema(
 // Create model or use existing one if available
 const PracticeResponse = mongoose.models.PracticeResponse || mongoose.model("PracticeResponse", PracticeResponseSchema);
 
-export default PracticeResponse;
+module.exports = PracticeResponse;

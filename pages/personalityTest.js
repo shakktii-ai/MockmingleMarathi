@@ -1,8 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import TestResults from '@/components/TestResults';
+
+function generateFallbackQuestions(count = 10) {
+  const questions = [];
+  const questionTexts = [
+    'मला सामाजिक संमेलने आणि नवीन लोकांशी भेटायला आवडते.',
+    'मला मोठ्या गटात अनेकदा चिंताग्रस्त वाटते.',
+    'मला संघात काम करण्याऐवजी एकटा काम करणे पसंत आहे.',
+    'मी स्वत:ला एक सुव्यवस्थित व्यक्ती मानतो/माना.',
+    'मी गटाच्या वातावरणात पुढाकार घेण्याचा प्रयत्न करतो/करते.',
+    'मला लवचिक वेळापत्रकाऐवजी नियमीत दिनचर्या आवडते.',
+    'मला नवीन अनुभव आणि उपक्रम करण्यास आवडते.',
+    'मी अनेकदा इतर लोक माझ्याबद्दल काय विचार करतात याची काळजी करतो/करते.',
+    'मी निर्णय भावना न ठेवता विचारपूर्वक घेतो/घेते.',
+    'इतर लोकांसोबत वेळ घालवल्यानंतर मला ऊर्जा प्राप्त होते.'
+  ];
+
+
+  for (let i = 0; i < Math.min(count, questionTexts.length); i++) {
+    questions.push({
+      id: `q${i + 1}`,
+      text: questionTexts[i],
+      options: [
+        { value: '1', text: 'पूर्णतः असहमत' },
+        { value: '2', text: 'असहमत' },
+        { value: '3', text: 'निष्पक्ष' },
+        { value: '4', text: 'सहमत' },
+        { value: '5', text: 'पूर्णतः सहमत' }
+      ]
+
+    });
+  }
+
+  return questions;
+}
 
 function PersonalityTest() {
   const router = useRouter();
@@ -13,433 +48,465 @@ function PersonalityTest() {
   const [timeLeft, setTimeLeft] = useState(null);
   const [testStarted, setTestStarted] = useState(false);
   const [token, setToken] = useState('');
+  const [questions, setQuestions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [userId, setUserId] = useState('demo-user');
 
-  // Sample personality questions - in production, these should come from the API
-  const questions = [
-    {
-      id: 'p1',
-      text: 'I enjoy being the center of attention in social situations.',
-      options: [
-        { value: 1, text: 'Strongly Disagree' },
-        { value: 2, text: 'Disagree' },
-        { value: 3, text: 'Neutral' },
-        { value: 4, text: 'Agree' },
-        { value: 5, text: 'Strongly Agree' }
-      ]
-    },
-    {
-      id: 'p2',
-      text: 'I prefer making plans in advance rather than being spontaneous.',
-      options: [
-        { value: 1, text: 'Strongly Disagree' },
-        { value: 2, text: 'Disagree' },
-        { value: 3, text: 'Neutral' },
-        { value: 4, text: 'Agree' },
-        { value: 5, text: 'Strongly Agree' }
-      ]
-    },
-    {
-      id: 'p3',
-      text: 'I often rely on logic rather than feelings when making decisions.',
-      options: [
-        { value: 1, text: 'Strongly Disagree' },
-        { value: 2, text: 'Disagree' },
-        { value: 3, text: 'Neutral' },
-        { value: 4, text: 'Agree' },
-        { value: 5, text: 'Strongly Agree' }
-      ]
-    },
-    {
-      id: 'p4',
-      text: 'I enjoy working under pressure with tight deadlines.',
-      options: [
-        { value: 1, text: 'Strongly Disagree' },
-        { value: 2, text: 'Disagree' },
-        { value: 3, text: 'Neutral' },
-        { value: 4, text: 'Agree' },
-        { value: 5, text: 'Strongly Agree' }
-      ]
-    },
-    {
-      id: 'p5',
-      text: 'I prefer working in a team rather than independently.',
-      options: [
-        { value: 1, text: 'Strongly Disagree' },
-        { value: 2, text: 'Disagree' },
-        { value: 3, text: 'Neutral' },
-        { value: 4, text: 'Agree' },
-        { value: 5, text: 'Strongly Agree' }
-      ]
-    },
-    {
-      id: 'p6',
-      text: 'I am comfortable with change and adapting to new situations.',
-      options: [
-        { value: 1, text: 'Strongly Disagree' },
-        { value: 2, text: 'Disagree' },
-        { value: 3, text: 'Neutral' },
-        { value: 4, text: 'Agree' },
-        { value: 5, text: 'Strongly Agree' }
-      ]
-    },
-    {
-      id: 'p7',
-      text: 'I prefer to focus on details rather than the big picture.',
-      options: [
-        { value: 1, text: 'Strongly Disagree' },
-        { value: 2, text: 'Disagree' },
-        { value: 3, text: 'Neutral' },
-        { value: 4, text: 'Agree' },
-        { value: 5, text: 'Strongly Agree' }
-      ]
-    },
-    {
-      id: 'p8',
-      text: 'I find it easy to empathize with others\' feelings.',
-      options: [
-        { value: 1, text: 'Strongly Disagree' },
-        { value: 2, text: 'Disagree' },
-        { value: 3, text: 'Neutral' },
-        { value: 4, text: 'Agree' },
-        { value: 5, text: 'Strongly Agree' }
-      ]
-    },
-    {
-      id: 'p9',
-      text: 'I prefer environments with clear rules and structures.',
-      options: [
-        { value: 1, text: 'Strongly Disagree' },
-        { value: 2, text: 'Disagree' },
-        { value: 3, text: 'Neutral' },
-        { value: 4, text: 'Agree' },
-        { value: 5, text: 'Strongly Agree' }
-      ]
-    },
-    {
-      id: 'p10',
-      text: 'I am often the one who takes initiative in group settings.',
-      options: [
-        { value: 1, text: 'Strongly Disagree' },
-        { value: 2, text: 'Disagree' },
-        { value: 3, text: 'Neutral' },
-        { value: 4, text: 'Agree' },
-        { value: 5, text: 'Strongly Agree' }
-      ]
-    }
-  ];
+  // Fetch questions from API
+  const fetchQuestions = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/personalityTest/generateQuestions');
+      const data = await response.json();
 
-  useEffect(() => {
-    // Check if user is authenticated
-    const storedToken = localStorage.getItem("token");
-    if (!storedToken) {
-      router.push("/login");
-    } else {
-      setToken(storedToken);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load questions');
+      }
+
+      // Ensure we have exactly 10 questions
+      const questions = Array.isArray(data.questions) ? data.questions :
+        (Array.isArray(data) ? data : []);
+
+      if (questions.length === 0) {
+        throw new Error('No questions returned from API');
+      }
+
+      // Take first 10 questions if more are returned
+      setQuestions(questions.slice(0, 10));
+    } catch (err) {
+      console.error('Error fetching questions:', err);
+      setError('Failed to load questions. Using default questions instead.');
+      // Fallback to default questions (10 questions)
+      setQuestions(generateFallbackQuestions(10));
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    // Timer logic for the test
-    if (testStarted && !results) {
-      const totalTime = 300; // 5 minutes in seconds
-      setTimeLeft(totalTime);
-
-      const timer = setInterval(() => {
-        setTimeLeft(prevTime => {
-          if (prevTime <= 1) {
-            clearInterval(timer);
-            handleSubmitTest();
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(timer);
+    // Get user ID from localStorage when component mounts
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user && (user._id || user.id)) {
+        setUserId(user._id || user.id);
+      }
+    } catch (e) {
+      console.error('Error getting user ID:', e);
     }
-  }, [testStarted, results]);
+    
+    // Check if user is authenticated
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) {
+      router.push('/login');
+      return;
+    }
+    setToken(storedToken);
+    fetchQuestions();
+  }, [fetchQuestions, router]);
 
-  const startTest = () => {
-    setTestStarted(true);
-  };
+  // Start the test timer (30 minutes)
+ useEffect(() => {
+     // Timer logic for the test
+     if (testStarted && !results) {
+       const totalTime = 1800; // 5 minutes in seconds
+       setTimeLeft(totalTime);
+ 
+       const timer = setInterval(() => {
+         setTimeLeft(prevTime => {
+           if (prevTime <= 1) {
+             clearInterval(timer);
+             handleSubmitTest();
+             return 0;
+           }
+           return prevTime - 1;
+         });
+       }, 1000);
+ 
+       return () => clearInterval(timer);
+     }
+   }, [testStarted, results]);
+ 
+   const startTest = () => {
+     setTestStarted(true);
+   };
 
+  // Handle option selection
   const handleSelectOption = (questionId, value) => {
+    // Convert value to number to ensure consistent type
+    const numericValue = Number(value);
     setResponses(prev => ({
       ...prev,
-      [questionId]: value
+      [questionId]: numericValue
     }));
   };
 
+  // Navigate to next question
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+      setCurrentQuestionIndex(prev => prev + 1);
     }
   };
 
+  // Navigate to previous question
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prevIndex => prevIndex - 1);
+      setCurrentQuestionIndex(prev => prev - 1);
     }
   };
 
-  const handleSubmitTest = async () => {
-    // Make sure all questions are answered
-    if (Object.keys(responses).length < questions.length) {
-      // Add default neutral responses for unanswered questions
-      const updatedResponses = { ...responses };
-      questions.forEach(q => {
-        if (!updatedResponses[q.id]) {
-          updatedResponses[q.id] = 3; // Default to neutral
-        }
+  // Function to clean up cookies and localStorage
+  const cleanupAuthData = () => {
+    try {
+      // Clear all cookies
+      document.cookie.split(';').forEach(c => {
+        document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
       });
-      setResponses(updatedResponses);
+      
+      // Clear localStorage items
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      // Force reload to clear any cached data
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error cleaning up auth data:', error);
+    }
+  };
+
+  // Function to submit the test
+  const submitTest = async () => {
+    try {
+      // Format responses as a simple object with just question IDs and selected options
+      const formattedResponses = questions.reduce((acc, question) => {
+        // Ensure the response is a number
+        acc[question.id] = Number(responses[question.id]);
+        return acc;
+      }, {});
+      
+      console.log('Submitting test responses');
+      
+      // Prepare minimal request body
+      const requestBody = {
+        responses: formattedResponses,
+        questions: questions.map(q => ({
+          id: q.id,
+          text: q.text
+          // Don't include options here as they're not needed for evaluation
+        }))
+      };
+      
+      // Use minimal headers - no authentication
+      const headers = { 'Content-Type': 'application/json' };
+      
+      // Simple fetch with increased timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 300000); // Increased to 120 seconds (2 minutes)
+      
+      try {
+        const response = await fetch(`/api/personalityTest/evaluateTest?userId=${encodeURIComponent(userId)}`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+          credentials: 'omit' // Don't send cookies
+        });
+        
+        clearTimeout(timeoutId);
+        console.log("responses......",response);
+        if (!response.ok) {
+          const errorMessage = `HTTP error! status: ${response.status}`;
+          console.error('Server error:', errorMessage);
+          throw new Error(errorMessage);
+        }
+        
+        return response;
+      } catch (error) {
+        clearTimeout(timeoutId);
+        console.error('Request failed:', error);
+        if (error.name === 'AbortError') {
+          throw new Error('The request took too long to complete. Please try again.');
+        }
+        throw new Error(error.message || 'Failed to submit test. Please check your connection and try again.');
+      }
+      
+      const data = await response.json();
+      console.log('API Response:', JSON.stringify(data, null, 2));
+      
+      // Handle both response formats for backward compatibility
+      if (data.success) {
+        // New format with nested data.analysis
+        if (data.data?.analysis) {
+          return {
+            ...data.data.analysis,
+            reportId: data.data.meta?.reportId
+          };
+        }
+        // Old format with direct analysis
+        else if (data.analysis) {
+          return data.analysis;
+        }
+      }
+      
+      throw new Error('Invalid response format from server');
+    } catch (error) {
+      console.error(`Attempt ${attempt} failed:`, error);
+      
+      // If this was a retry or we have no more attempts, rethrow the error
+      if (attempt >= maxAttempts) {
+        throw error;
+      }
+      
+      // Otherwise, retry
+      return submitTestWithRetry(attempt + 1, maxAttempts);
+    }
+  };
+
+  // Submit test for evaluation
+  const handleSubmitTest = async () => {
+    if (isSubmitting) return;
+
+    // Validate all questions are answered
+    const unansweredQuestions = questions.filter(
+      q => responses[q.id] === undefined ||
+        responses[q.id] === null ||
+        (typeof responses[q.id] === 'string' && responses[q.id].trim() === '')
+    );
+
+    if (unansweredQuestions.length > 0) {
+         alert(`Please answer all questions before submitting. ${unansweredQuestions.length} question(s) remaining.`);
+      return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // Call Claude API to analyze personality
-      const analysisResponse = await fetch('/api/analyzePersonality', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ responses })
-      });
-
-      if (!analysisResponse.ok) {
-        throw new Error('Failed to analyze personality');
+      const response = await submitTest();
+      const result = await response.json();
+      
+      console.log('Test submission result:', result);
+      
+      if (result.success && result.data?.analysis) {
+        setResults({
+          ...result.data.analysis,
+          reportId: result.data.meta?.reportId
+        });
+      } else {
+        throw new Error('Invalid response format from server');
       }
-
-      const analysisData = await analysisResponse.json();
-      setResults(analysisData.analysis);
     } catch (error) {
-      console.error('Error submitting personality test:', error);
-      // Fallback results if API fails
-      setResults({
-        personality_type: "अ‍ॅनालिटिकल प्रॉब्लेम सॉल्वर",
-        strengths: [
-          "तार्किक विचार करण्याची क्षमता",
-          "तपशीलांकडे लक्ष देणे",
-          "नीट नियोजन करणे"
-        ],
-        challenges: [
-          "निर्णयांबाबत कधी कधी जास्त विचार करतो/करते",
-          "भावनिक बुद्धिमत्तेत सुधारणा होऊ शकते"
-        ],
-        career_matches: [
-          "Software Development",
-          "Data Analysis",
-          "Project Management"
-        ],
-        development_suggestions: [
-         "सक्रियपणे ऐकण्याचा सराव करा",
-         "नेतृत्वाची संधी स्वीकारा",
-         "सर्जनशील विचार करण्याच्या कौशल्यांचा विकास करा"
-        ]
-      });
+      console.error('Error submitting test:', error);
+      alert('चाचणीचे मूल्यमापन करण्यात अयशस्वी. कृपया पुन्हा प्रयत्न करा.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  // Handle retake test
+  const handleRetakeTest = () => {
+    setResponses({});
+    setResults(null);
+    setCurrentQuestionIndex(0);
+    setTestStarted(false);
+    fetchQuestions();
   };
 
-  // Calculate progress percentage
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+  // Render loading state
+  if (isLoading && !testStarted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-700">प्रश्न लोड करत आहे...</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Current question
+  // Render error state
+  if (error && !testStarted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md p-6 bg-white rounded-lg shadow-md">
+          <div className="text-red-500 text-4xl mb-4 text-center">⚠️</div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">प्रश्न लोड करताना त्रुटी आली आहे</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <div className="flex justify-center">
+            <button
+              onClick={fetchQuestions}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+            >
+              पुन्हा प्रयत्न करा
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render test instructions
+  if (!testStarted) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
+            <h1 className="text-3xl font-bold text-white text-center mb-6">व्यक्तिमत्त्व चाचणी</h1>
+             <p className="text-lg text-white text-center mb-6">आमच्या सर्वसमावेशक मूल्यमापनाद्वारे आपली व्यक्तिमत्व वैशिष्ट्ये, सामर्थ्ये आणि वाढीच्या क्षेत्रांचा शोध घ्या..</p> 
+        <div className="max-w-2xl w-full bg-[#D2E9FA] rounded-xl shadow-lg overflow-hidden">
+          <div className="p-8">
+            <h1 className="text-3xl font-bold test-gray-800 text-center mb-6">सूचना</h1>
+            <div className="prose max-w-none text-gray-700 mb-8">
+              <p className="mb-4">
+                ही व्यक्तिमत्त्व चाचणी {questions.length} प्रश्नांची आहे, जी आपले व्यक्तिमत्त्व गुण अधिक चांगल्या प्रकारे समजून घेण्यास मदत करते.
+              </p>
+              <p className="mb-4">
+                प्रत्येक विधानासाठी, कृपया "पूर्णतः असहमत" ते "पूर्णतः सहमत" या स्तरावर आपला कितपत सहमत किंवा असहमत आहात हे दर्शवा.
+              </p>
+              <p className="mb-6">
+                चाचणी पूर्ण करण्यासाठी सुमारे १०-१५ मिनिटे लागतील. चाचणी सुरू केल्यानंतर ती पूर्ण करण्यासाठी आपल्याकडे ३० मिनिटे उपलब्ध असतील.
+              </p>
+              <div className="bg-white p-4 rounded-lg border shadow-[inset_0_0_10px_0_rgba(0,0,0,1)] border-blue-100">
+                <h3 className="font-semibold text-blue-800 mb-2">अचूक निकालांसाठी सूचना:</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>कृपया प्रामाणिकपणे उत्तर द्या; येथे कोणतेही योग्य किंवा अयोग्य उत्तर नाहीत.</li>
+                  <li>अतिविचार न करता, आपल्या पहिल्या प्रतिसादावर विश्वास ठेवा.</li>
+                  <li>सर्व प्रश्नांचे उत्तर देण्याचा प्रयत्न करा.</li>
+                </ul>
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <button
+                onClick={startTest}
+                className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-lg font-medium"
+              >
+                टेस्ट सुरू करा
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render test results
+  if (results) {
+    return <TestResults results={results} onRetakeTest={handleRetakeTest} />;
+  }
+
+  // Render the test interface
   const currentQuestion = questions[currentQuestionIndex];
+  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+  const selectedOption = responses[currentQuestion?.id] || '';
 
   return (
-    <>
-       <Head>
-        <title>SHAKKTII AI - व्यक्तिमत्व चाचणी</title>
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <Head>
+        <title>व्यक्तिमत्त्व चाचणी - प्रश्न {currentQuestionIndex + 1}</title>
       </Head>
-      <div className="min-h-screen bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8" style={{ backgroundImage: "url('/BG.jpg')" }}>
-        <div className="absolute top-4 left-4">
-          <button 
-            onClick={() => router.push('/practices')} 
-            className="flex items-center text-purple-600 hover:text-purple-800 transition-colors"
-          >
-            <img src="/2.svg" alt="Back" className="w-8 h-8 mr-2" />
-            <span className="text-lg font-medium">मागे जा</span>
-          </button>
-        </div>
 
-        <div className="absolute top-4 right-4">
-          <div className="rounded-full flex items-center justify-center">
-            <img src="/logoo.png" alt="Logo" className="w-16 h-16" />
+      <div className="max-w-3xl mx-auto">
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-700">
+              प्रश्न {currentQuestionIndex + 1} / {questions.length}
+            </span>
+            <span className="text-sm font-medium text-white">
+              {Math.round(progress)}% Complete
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div
+              className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            ></div>
           </div>
         </div>
 
-        <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-12">
-          {!testStarted ? (
-            <div className="p-8 text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">व्यक्तिमत्त्व मूल्यांकन</h1>
-              <p className="text-lg text-gray-600 mb-6">
-                तुमचे व्यक्तिमत्त्व, क्षमता आणि सुधारणा गरज असलेले भाग आमच्या सखोल मूल्यांकनाद्वारे समजून घ्या.
-              </p>
-              <div className="bg-purple-100 rounded-lg p-4 mb-6">
-                <h2 className="font-bold text-purple-800 mb-2">सूचना:</h2>
-                <ul className="text-left text-purple-700 list-disc pl-5 space-y-1">
-                  <li>या चाचणीमध्ये एकूण १० प्रश्न आहेत.</li>
-                  <li>ही टेस्ट पूर्ण करण्यासाठी आपल्याकडे ५ मिनिटांचा वेळ आहे</li>
-                  <li>अचूक निकालांसाठी कृपया प्रामाणिकपणे उत्तर द्या.</li>
-                  <li>बरोबर किंवा चूक अशी कोणतीही उत्तरे नाहीत.</li>
-                </ul>
-              </div>
-              <button
-                onClick={startTest}
-                className="bg-gradient-to-r from-pink-800 to-purple-900 text-white py-3 px-8 rounded-lg text-lg font-medium hover:opacity-90 transition-opacity"
-              >
-              टेस्ट सुरू करा
-              </button>
+        {/* Timer */}
+        {timeLeft !== null && (
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              उर्वरित वेळ: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
             </div>
-          ) : results ? (
-            <div className="p-8">
-              <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">तुमचे व्यक्तिमत्व प्रोफाइल</h1>
-              
-              <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-6 mb-6">
-                <h2 className="text-2xl font-bold text-purple-900 mb-2">{results.personality_type}</h2>
-                <p className="text-gray-700 italic">तुमच्या दिलेल्या उत्तरांच्या आधारावर तयार करण्यात आलेला अहवाल.</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-xl font-bold text-purple-800 mb-3">क्षमता</h3>
-                  <ul className="list-disc pl-5 space-y-1 text-gray-700">
-                    {results.strengths.map((strength, index) => (
-                      <li key={index}>{strength}</li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h3 className="text-xl font-bold text-purple-800 mb-3">सुधारणा करण्याचे क्षेत्र</h3>
-                  <ul className="list-disc pl-5 space-y-1 text-gray-700">
-                    {results.challenges.map((challenge, index) => (
-                      <li key={index}>{challenge}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 className="text-xl font-bold text-purple-800 mb-3">करिअरची योग्य निवड</h3>
-                <div className="flex flex-wrap gap-2">
-                  {results.career_matches.map((career, index) => (
-                    <span key={index} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                      {career}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-xl font-bold text-purple-800 mb-3">सुधारणेसाठी सूचना</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                  {results.development_suggestions.map((suggestion, index) => (
-                    <li key={index}>{suggestion}</li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div className="mt-8 text-center">
-                <button
-                  onClick={() => router.push('/practices')}
-                  className="bg-gradient-to-r from-pink-800 to-purple-900 text-white py-2 px-6 rounded-lg font-medium hover:opacity-90 transition-opacity"
-                >
-                  पुन्हा सराव सुरू करा
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="p-8">
-              <div className="flex justify-between items-center mb-6">
-                <div className="w-20 h-20">
-                  <CircularProgressbar
-                    value={progress}
-                    text={`${currentQuestionIndex + 1}/${questions.length}`}
-                    styles={buildStyles({
-                      textSize: '22px',
-                      pathColor: '#9333ea',
-                      textColor: '#4a044e',
-                      trailColor: '#e9d5ff',
-                    })}
-                  />
-                </div>
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold text-purple-900">व्यक्तिमत्व मूल्यांकन</h2>
-                </div>
-                <div className="bg-purple-100 px-4 py-2 rounded-lg">
-                  <span className="text-lg font-medium text-purple-800">{formatTime(timeLeft)}</span>
-                </div>
-              </div>
+          </div>
+        )}
 
-              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h3 className="text-xl font-semibold mb-4">{currentQuestion.text}</h3>
-                <div className="space-y-3">
-                  {currentQuestion.options.map((option) => (
-                    <div 
-                      key={option.value}
-                      onClick={() => handleSelectOption(currentQuestion.id, option.value)}
-                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                        responses[currentQuestion.id] === option.value
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
-                      }`}
-                    >
-                      {option.text}
-                    </div>
-                  ))}
-                </div>
-              </div>
+        {/* Question Card */}
+        <div className="bg-[white] rounded-xl shadow-md overflow-hidden">
+          <div className="p-6">
+            <h2 className="text-xl font-medium text-gray-800 mb-6">
+              {currentQuestion?.text}
+            </h2>
 
-              <div className="flex justify-between">
+            <div className="space-y-3">
+              {currentQuestion?.options?.map((option) => (
                 <button
-                  onClick={handlePrevious}
-                  disabled={currentQuestionIndex === 0}
-                  className={`px-4 py-2 rounded-lg font-medium ${
-                    currentQuestionIndex === 0
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-purple-600 text-white hover:bg-purple-700'
-                  }`}
-                >
-                  मागे जा
-                </button>
-                
-                {currentQuestionIndex < questions.length - 1 ? (
-                  <button
-                    onClick={handleNext}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700"
-                  >
-                   पुढे जा 
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleSubmitTest}
-                    disabled={isSubmitting}
-                    className={`px-4 py-2 rounded-lg font-medium ${
-                      isSubmitting
-                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-pink-800 to-purple-900 text-white hover:opacity-90'
+                  key={option.value}
+                  onClick={() => handleSelectOption(currentQuestion.id, option.value)}
+                  className={`w-full text-left p-4 rounded-lg border transition-colors ${selectedOption === Number(option.value)
+                    ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                    : 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50'
                     }`}
-                  >
-                    {isSubmitting ? 'विश्लेषण करत आहे...' : 'सबमिट करा'}
-                  </button>
-                )}
-              </div>
+                >
+                  {option.text}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
+
+          {/* Navigation Buttons */}
+          <div className=" px-6 py-4 flex justify-between">
+            <button
+              onClick={handlePrevious}
+              disabled={currentQuestionIndex === 0}
+              className={`px-4 py-2 rounded-md ${currentQuestionIndex === 0
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-indigo-600 hover:bg-indigo-50'
+                }`}
+            >
+              मागे जा
+            </button>
+
+            {currentQuestionIndex < questions.length - 1 ? (
+              <button
+                onClick={handleNext}
+                disabled={!selectedOption}
+                className={`px-6 py-2 rounded-md ${!selectedOption
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                  }`}
+              >
+                पुढे जा
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmitTest}
+                disabled={!selectedOption || isSubmitting}
+                className={`px-6 py-2 rounded-md flex items-center ${!selectedOption || isSubmitting
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  : 'bg-green-600 text-white hover:bg-green-700'
+                  }`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    सबमिट करत आहे...
+                  </>
+                ) : (
+                  'टेस्ट सबमिट करा'
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

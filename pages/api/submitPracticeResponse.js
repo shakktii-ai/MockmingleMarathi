@@ -86,12 +86,12 @@ async function handler(req, res) {
       level: level || getLevelFromCardId(cardId) || 1
     };
     
-    // Use Claude AI to evaluate the response and generate feedback
-    const evaluation = await evaluateWithClaude(userResponse, cardDetails);
+    // Use GPT AI to evaluate the response and generate feedback
+    const evaluation = await evaluateWithGPT(userResponse, cardDetails);
     
     // Extract score and feedback from the evaluation
     const calculatedScore = evaluation.score || 1; // Default to 1 if evaluation fails
-    const feedback = evaluation.feedback || "Thank you for your response. Keep practicing to improve your skills.";
+    const feedback = evaluation.feedback || "तुम्ही ही लेव्हल पूर्ण केली आहे. तुमचे स्किल्स सुधारण्यासाठी प्रॅक्टिस करत राहा!";
 
     // Update the response with feedback and the calculated score
     practiceResponse.feedbackResponse = feedback;
@@ -133,55 +133,76 @@ async function handler(req, res) {
   }
 }
 
-// Function to evaluate response and generate feedback using Claude API
-async function evaluateWithClaude(userResponse, cardDetails) {
+// Function to evaluate response and generate feedback using OpenAI GPT API
+async function evaluateWithGPT(userResponse, cardDetails) {
   try {
-    console.log('Evaluating practice response with Claude:', { cardId: cardDetails.cardId });
+    console.log('Evaluating practice response with GPT:', { 
+      cardId: cardDetails.cardId,
+      skillArea: cardDetails.skillArea,
+      difficulty: cardDetails.difficulty,
+      level: cardDetails.level
+    });
     
-    if (!process.env.ANTHROPIC_API_KEY) {
-      console.error('Claude API key is missing');
-      return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+    if (!process.env.OPENAI_API_KEY) {
+      const errorMsg = 'OpenAI API key is not configured';
+      console.error(errorMsg);
+      return { 
+        score: 1, 
+        feedback: "सध्या आम्ही प्रतिसादांचे मूल्यांकन करू शकत नाही. कृपया नंतर पुन्हा प्रयत्न करा.",
+        strengths: ["Your response was received successfully"],
+        areasForImprovement: ["Evaluation service is temporarily unavailable"],
+        completed: false
+      };
     }
     
-    const url = 'https://api.anthropic.com/v1/messages';
+    const url = 'https://api.openai.com/v1/chat/completions';
 
     const headers = {
       'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
     };
 
-    // Create a prompt for Claude to evaluate the response
-    const prompt = `
-      You are evaluating a student's response for a language learning exercise.
-      
-      Skill Area: ${cardDetails.skillArea}
-      Difficulty Level: ${cardDetails.difficulty}
-      Level Number: ${cardDetails.level}
-      
-      Student's response: "${userResponse}"
-      
-      Please evaluate the response based on:
-      - Accuracy of content
-      - Language usage and grammar
-      - Completeness of response
-      - Relevance to the topic
-      
-      Assign a star rating from 1-3 stars, where:
-      - 1 star: Needs improvement, basic response with errors or incomplete
-      - 2 stars: Good response with minor errors or areas for improvement
-      - 3 stars: Excellent response, comprehensive and well-articulated
-      
-      Then provide specific, constructive feedback in 2-3 sentences that would help the student improve.
-      
-      Return your evaluation as a JSON object with this structure:
-      {
-        "score": (number from 1-3),
-        "feedback": "(your specific feedback for the student)"
-      }
-    `;
+    // Create a detailed prompt for GPT-4-turbo to evaluate the response
+    const prompt = `You are an expert language learning evaluator. Please evaluate the following response based on the given context.
+                    - Response must be in marathi language.
 
-    // Call Claude API with timeout
+SKILL AREA: ${cardDetails.skillArea}
+DIFFICULTY: ${cardDetails.difficulty} (Level ${cardDetails.level})
+
+USER RESPONSE:
+${userResponse}
+
+EVALUATION CRITERIA:
+For ${cardDetails.difficulty} level ${cardDetails.skillArea} practice (Level ${cardDetails.level}), consider:
+1. Accuracy of language use (grammar, vocabulary)
+2. Relevance and completeness of the response
+3. Complexity and fluency appropriate for the level
+4. Achievement of the task's communicative purpose
+
+SCORING GUIDE (0-3 stars):
+- 0 stars: Response is largely incomprehensible or completely off-topic
+- 1 star: Response shows minimal understanding with significant errors
+- 2 stars: Response is mostly correct with some errors but communicates the main idea
+- 3 stars: Response is accurate, appropriate, and demonstrates good command at this level
+
+INSTRUCTIONS:
+1. Be encouraging and constructive in your feedback
+2. Focus on 1-2 key areas for improvement
+3. Acknowledge what was done well
+4. Adjust expectations based on the difficulty level
+
+Return your evaluation as a valid JSON object in this exact format:
+{
+  "score": 0-3,
+  "feedback": "Your specific, constructive feedback here.",
+  "strengths": ["List 1-2 specific strengths"],
+  "areasForImprovement": ["List 1-2 specific areas to improve"],
+  "completed": true
+}
+
+IMPORTANT: Only return valid JSON with no other text. Must be in marathi Langauge.`;
+
+    // Call OpenAI API with timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
@@ -190,13 +211,20 @@ async function evaluateWithClaude(userResponse, cardDetails) {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          model: "claude-3-haiku-20240307",
-          max_tokens: 300,
-          temperature: 0.7,
-          messages: [{
-            role: "user",
-            content: prompt
-          }]
+          model: "gpt-4-turbo-preview",
+          max_tokens: 500,
+          temperature: 0.3, // Lower temperature for more consistent evaluations
+          response_format: { type: "json_object" },
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert language learning evaluator. You provide fair, constructive feedback and accurate scoring for language learning exercises. You always return valid JSON in the exact format specified, with no additional text.`
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ]
         }),
         signal: controller.signal
       });
@@ -205,51 +233,131 @@ async function evaluateWithClaude(userResponse, cardDetails) {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Claude API error response:', errorText);
-        return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+        console.error('OpenAI API error response:', errorText);
+        return { 
+          score: 1, 
+          feedback: "तुमच्या प्रतिसादाचे मूल्यांकन करण्यात अडचण येत आहे",
+          strengths: ["Your response was received successfully"],
+          areasForImprovement: ["Please try again in a few moments"],
+          completed: false
+        };
       }
 
       const result = await response.json();
       
-      if (!result.content || !result.content[0] || !result.content[0].text) {
-        console.error('Unexpected Claude API response structure:', JSON.stringify(result));
-        return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+      if (!result.choices?.[0]?.message?.content) {
+        console.error('Unexpected OpenAI API response structure:', JSON.stringify(result));
+        throw new Error('Invalid response structure from OpenAI API');
       }
 
-      const textResponse = result.content[0].text;
+      const textResponse = result.choices[0].message.content;
+      console.log('Raw GPT response:', textResponse);
       
-      // Extract JSON object from the response
-      const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        console.error('Could not find valid JSON object in Claude response');
-        return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
-      }
-
+      // Parse the response as JSON
       try {
-        const evaluation = JSON.parse(jsonMatch[0]);
-        
-        // Validate the evaluation format
-        if (evaluation.score === undefined || !evaluation.feedback) {
-          console.error('Invalid evaluation format from Claude');
-          return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+        // Try to parse directly first
+        let evaluation;
+        try {
+          evaluation = JSON.parse(textResponse);
+        } catch (parseError) {
+          // If direct parse fails, try to extract JSON from code blocks
+          const jsonMatch = textResponse.match(/```(?:json)?\n([\s\S]*?)\n```/);
+          if (jsonMatch) {
+            evaluation = JSON.parse(jsonMatch[1]);
+          } else {
+            throw new Error('Could not parse response as JSON');
+          }
         }
         
-        return evaluation;
+        // Validate the evaluation format
+        if (typeof evaluation.score === 'undefined' || !evaluation.feedback) {
+          console.error('Invalid evaluation format from GPT:', evaluation);
+          throw new Error('Invalid evaluation format');
+        }
+        
+        // Ensure all required fields are present
+        const validatedEvaluation = {
+          score: Math.max(0, Math.min(3, parseInt(evaluation.score) || 1)),
+          feedback: (evaluation.feedback || 'तुमच्या प्रतिसादाबद्दल धन्यवाद.').trim(),
+          strengths: Array.isArray(evaluation.strengths) ? evaluation.strengths : [],
+          areasForImprovement: Array.isArray(evaluation.areasForImprovement) ? evaluation.areasForImprovement : [],
+          completed: evaluation.completed !== false
+        };
+        
+        console.log('Validated evaluation:', validatedEvaluation);
+        return validatedEvaluation;
       } catch (parseError) {
-        console.error('Error parsing Claude response as JSON:', parseError);
-        return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+        console.error('Error parsing OpenAI response as JSON:', parseError);
+        
+        // Fall back to regex extraction if direct parsing fails
+        const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            const extractedEvaluation = JSON.parse(jsonMatch[0]);
+            if (extractedEvaluation.score !== undefined && extractedEvaluation.feedback) {
+              return extractedEvaluation;
+            }
+          } catch (secondError) {
+            console.error('Second attempt at parsing JSON failed:', secondError);
+          }
+        }
+        return { 
+          score: 1, 
+          feedback: "तुमचा प्रतिसाद प्रक्रिया करू शकलो नाही. कृपया पुन्हा प्रयत्न करा.",
+          strengths: ["Your response was received successfully"],
+          areasForImprovement: ["Please ensure your response is clear and complete"],
+          completed: false
+        };
       }
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.error('Claude API request timed out');
+        console.error('OpenAI API request timed out');
       } else {
-        console.error('Error calling Claude API:', error);
+        console.error('Error calling OpenAI API:', error);
       }
-      return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+      // Generate a dynamic fallback based on the error
+      const errorType = error.name === 'AbortError' ? 'request timed out' : 'processing error';
+      const fallbackFeedback = {
+        score: 1,
+        feedback: `तुमच्या प्रतिसादाचे मूल्यांकन करताना आम्हाला ${errorType} आला. कृपया पुन्हा प्रयत्न करा.`,
+        strengths: ["Your response was received successfully"],
+        areasForImprovement: ["Please try submitting your response again"],
+        completed: false
+      };
+      
+      console.error('GPT Evaluation Error:', {
+        error: error.message,
+        errorType: error.name,
+        cardDetails,
+        timestamp: new Date().toISOString()
+      });
+      
+      return fallbackFeedback;
     }
   } catch (error) {
-    console.error('Error in evaluateWithClaude:', error);
-    return { score: 1, feedback: "Thank you for your response. Keep practicing to improve your skills." };
+    console.error('Error evaluating with GPT:', error);
+    // Generate a dynamic error message based on the error type
+    const errorContext = error.message.includes('timeout') ? 'The evaluation took too long' : 
+                        error.message.includes('JSON') ? 'We had trouble processing the evaluation' :
+                        'An unexpected error occurred';
+    
+    const fallbackFeedback = {
+      score: 1,
+      feedback: `${errorContext}. Your response has been saved.`,
+      strengths: ["Your response was received successfully"],
+      areasForImprovement: ["Please try submitting your response again"],
+      completed: false
+    };
+    
+    console.error('GPT Evaluation Error:', {
+      error: error.message,
+      errorType: error.name,
+      cardDetails,
+      timestamp: new Date().toISOString(),
+      stack: error.stack
+    });
+    
+    return fallbackFeedback;
   }
 }
 

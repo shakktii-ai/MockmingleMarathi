@@ -214,7 +214,7 @@ function SpeakingPractice() {
       recognitionRef.current = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.lang = 'mr-IN';
       
       recognitionRef.current.onresult = (event) => {
         const transcript = Array.from(event.results)

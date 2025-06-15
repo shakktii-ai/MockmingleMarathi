@@ -1,6 +1,8 @@
-import connectDb from "@/middleware/dbConnect";
-import PracticeTest from "@/models/PracticeTest";
-import jwt from 'jsonwebtoken';
+import { OpenAI } from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
 export const config = {
   runtime: 'nodejs',
@@ -9,14 +11,14 @@ export const config = {
 
 /**
  * API handler for fetching practice questions
- * Uses Claude API to generate questions if not enough exist in the database
+ * Fetches questions directly from OpenAI GPT API
  */
-async function handler(req, res) {
+const handler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method Not Allowed' });
   }
   
-  const { skillArea, difficulty, count = 5, level = 1 } = req.body;
+  const { skillArea, difficulty, count = 5, level = 1, cacheBuster } = req.body;
 
   if (!skillArea || !difficulty) {
     return res.status(400).json({ success: false, error: 'Skill area and difficulty are required.' });
@@ -29,201 +31,294 @@ async function handler(req, res) {
   }
 
   try {
-    // Check if we already have enough questions for this skill/difficulty and level
-    const existingQuestions = await PracticeTest.find({ 
-      skillArea: skillArea,
-      difficulty: difficulty,
-      level: levelNum // Include level in the query
-    }).limit(count);
-
-    if (existingQuestions.length >= count) {
-      // Return random selection if we have enough
-      const randomQuestions = existingQuestions.sort(() => 0.5 - Math.random()).slice(0, count);
-      return res.status(200).json({
-        success: true,
-        message: 'Questions fetched successfully.',
-        questions: randomQuestions,
-      });
-    }
-
-    // If we don't have enough, generate new questions with Claude API
-    let newQuestions = null;
-    let retryAttempts = 0;
-    const maxRetries = 2; // Maximum number of retries
+    console.log(`Generating ${count} ${skillArea} questions for ${difficulty} level ${levelNum}`);
     
-    // Try to get questions from Claude API with retries
-    while (retryAttempts <= maxRetries && !newQuestions) {
-      try {
-        if (retryAttempts > 0) {
-          console.log(`Claude API retry attempt ${retryAttempts} of ${maxRetries}...`);
-        }
-        newQuestions = await generatePracticeQuestions(skillArea, difficulty, levelNum, count - existingQuestions.length, retryAttempts);
-        if (newQuestions && newQuestions.length > 0) {
-          console.log('Successfully generated questions from Claude API');
-          break;
-        }
-      } catch (apiError) {
-        console.error(`Claude API attempt ${retryAttempts + 1} failed:`, apiError);
-      }
-      retryAttempts++;
-    }
+    // Generate questions from GPT API
+    const questions = await generatePracticeQuestions(skillArea, difficulty, levelNum, count);
     
-    // If all API attempts fail, use fallback questions instead of returning error
-    if (!newQuestions) {
-      console.log('All API attempts failed. Using fallback questions...');
-      newQuestions = generateFallbackQuestions(skillArea, difficulty, levelNum, count - existingQuestions.length);
-      
-      if (!newQuestions || newQuestions.length === 0) {
-        return res.status(503).json({ 
-          success: false, 
-          error: 'Failed to generate practice questions. Please try again later.' 
-        });
-      }
+    if (!questions || questions.length === 0) {
+      throw new Error('Failed to generate questions from GPT API');
     }
 
-    // Save new questions to database
-    const formattedQuestions = newQuestions.map(q => {
-      // Ensure the level is included in each question
-      if (!q.level) {
-        q.level = levelNum;
-      }
-      // Properly format evaluationCriteria based on the response structure
-      let formattedEvalCriteria;
-      
-      if (Array.isArray(q.evaluationCriteria)) {
-        // Handle array format from Claude API response
-        formattedEvalCriteria = {
-          basic: q.evaluationCriteria[0] || "Basic level performance",
-          intermediate: q.evaluationCriteria[1] || "Intermediate level performance",
-          advanced: q.evaluationCriteria[2] || "Advanced level performance"
-        };
-      } else if (typeof q.evaluationCriteria === 'object') {
-        // Handle object format from existing structure
-        formattedEvalCriteria = {
-          basic: q.evaluationCriteria.basic || "Basic level performance",
-          intermediate: q.evaluationCriteria.intermediate || "Intermediate level performance",
-          advanced: q.evaluationCriteria.advanced || "Advanced level performance"
-        };
-      } else {
-        // Fallback if structure is unexpected
-        formattedEvalCriteria = {
-          basic: "Basic level performance",
-          intermediate: "Intermediate level performance",
-          advanced: "Advanced level performance"
-        };
-      }
-      
-      return {
-        cardId: q.cardId || `${skillArea.charAt(0)}-${difficulty.charAt(0)}-${Math.floor(Math.random() * 1000)}`,
-        skillArea: skillArea,
-        difficulty: difficulty,
-        instructions: q.instructions || "Complete this practice exercise.",
-        content: q.content || "Sample content for practice",
-        expectedResponse: q.expectedResponse || "",
-        options: q.options || [],
-        timeLimit: q.timeLimit || 60,
-        evaluationCriteria: formattedEvalCriteria,
-        imageUrl: q.imageUrl || "",
-        audioUrl: q.audioUrl || "",
-      };
-    });
-
-    // Try to save questions to database, but don't fail the whole request if this errors
-    try {
-      await PracticeTest.insertMany(formattedQuestions);
-      console.log(`Successfully saved ${formattedQuestions.length} new questions to database`);
-    } catch (dbError) {
-      console.error('Error saving questions to database:', dbError);
-      // Continue with the request even if saving fails
-    }
-    
-    // Return combination of existing and new questions
-    const allQuestions = [...existingQuestions, ...formattedQuestions];
-    const randomSelection = allQuestions.sort(() => 0.5 - Math.random()).slice(0, count);
+    // Format the questions for the response
+    const formattedQuestions = questions.map((q, index) => ({
+      cardId: q.cardId || `${skillArea.charAt(0)}-${difficulty.charAt(0)}-${levelNum.toString().padStart(2, '0')}-${(index+1).toString().padStart(2, '0')}`,
+      skillArea,
+      difficulty,
+      level: levelNum,
+      instructions: q.instructions || `Read the following content and answer the question.`,
+      content: q.content || `Practice content for ${skillArea} exercise`,
+      questionText: q.questionText || `What is the main information in this ${skillArea.toLowerCase()} content?`,
+      expectedResponse: q.expectedResponse || "Expected response not provided.",
+      options: q.options || [],
+      timeLimit: q.timeLimit || 120,
+      evaluationCriteria: q.evaluationCriteria || {
+        basic: "Basic level performance",
+        intermediate: "Intermediate level performance",
+        advanced: "Advanced level performance"
+      },
+      imageUrl: q.imageUrl || "",
+      audioUrl: q.audioUrl || ""
+    }));
 
     return res.status(200).json({
       success: true,
-      message: 'Questions generated and fetched successfully.',
-      questions: randomSelection,
+      message: 'Questions generated successfully.',
+      questions: formattedQuestions,
+      count: formattedQuestions.length
     });
   } catch (error) {
-    console.error('Error processing practice questions:', error);
-    return res.status(500).json({ success: false, error: 'Error during question processing.' });
+    console.error('Error generating questions:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to generate questions. Please try again.'
+    });
   }
-}
+};
 
 /**
- * Function to generate practice questions using the Claude API
+ * Function to generate practice questions using the OpenAI GPT API
  * @param {string} skillArea - The skill area for the questions (Speaking, Listening, etc.)
  * @param {string} difficulty - The difficulty level (Beginner, Moderate, Expert)
  * @param {number} level - The specific level number (1-30) within the difficulty tier
  * @param {number} count - Number of questions to generate
  * @param {number} retryAttempt - Current retry attempt number
+ * @param {string} seed - Optional seed for ensuring different results
  * @returns {Promise<Array>} - Array of practice question objects
  */
-async function generatePracticeQuestions(skillArea, difficulty, level, count, retryAttempt = 0) {
-  const url = 'https://api.anthropic.com/v1/messages';
+async function generatePracticeQuestions(skillArea, difficulty, level, count, retryAttempt = 0, seed = null) {
+  const url = 'https://api.openai.com/v1/chat/completions';
+
+  // Get API key from environment variables
+  const apiKey = process.env.OPENAI_API_KEY;
+  
+  if (!apiKey) {
+    console.error('OpenAI API key is missing. Please add OPENAI_API_KEY to your environment variables.');
+    return null;
+  }
 
   const headers = {
     'Content-Type': 'application/json',
-    'x-api-key': process.env.ANTHROPIC_API_KEY,
-    'anthropic-version': '2023-06-01',
+    'Authorization': `Bearer ${apiKey}`
   };
 
   // Create prompt based on skill area, difficulty, and specific level, adjusting for retry attempts
-  let prompt = `Generate ${count} ${difficulty} level ${skillArea} assessment cards for language testing at level ${level} (out of 30 levels).
-
-For each card, include:
-- Card ID (format: first letter of skill area-first letter of difficulty level-${level.toString().padStart(2, '0')}-number)
-- Instructions (clear instructions on what the student should do)
-- Content (text passage or content for the student to read)
-- Question (a specific question about the content that tests comprehension)
-- Options (for multiple choice questions, if appropriate)
-- Expected Response (sample answer or correct response)
-- Time Limit (in seconds)
-- Evaluation Criteria (three levels: basic, intermediate, advanced)
-
-IMPORTANT: 
-1. These questions are for level ${level} out of 30 levels, so adjust the difficulty appropriately. Level 1 should be the easiest, and level 30 the most challenging within the ${difficulty} tier.
-2. Your response must be ONLY a valid JSON array with no markdown formatting and no additional text.
-
-FOR READING PRACTICE:
-- Include a short passage or story appropriate for the level
-- ALWAYS include a specific question that tests comprehension of the passage
-- The question should be different from the instructions
-- ALWAYS include exactly 4 multiple-choice options for the answer
-- Make sure one and only one option is correct
-- For beginner levels, ask simple questions about main ideas or specific details
-- For moderate levels, ask questions about implied meaning and relationships
-- For expert levels, ask questions about inference, analysis, or drawing conclusions
-
-Example Reading Practice format:
-[
-  {
-    "cardId": "R-B-${level.toString().padStart(2, '0')}-01",
-    "instructions": "Read the passage and answer the question below.",
-    "content": "Mary went to the store to buy some milk. On her way home, she saw her friend John. They talked for a few minutes about school.",
-    "questionText": "Where did Mary go?",  // THIS SHOULD BE A REAL QUESTION ABOUT THE CONTENT, NOT INSTRUCTIONS
-    "options": ["To the park", "To the store", "To school", "To John's house"],
-    "expectedResponse": "To the store",
-    "timeLimit": 30,
-    "level": ${level},
-    "evaluationCriteria": [
-      "Basic understanding of explicit information in the text",
-      "Accurate comprehension with supporting details",
-      "Full understanding with ability to recall specific details"
-    ]
-  }
-]
-
-IMPORTANT REQUIREMENTS:
-1. The questionText must be a REAL QUESTION about the content, NOT instructions or card ID
-2. Example questionText: "What did Sarah and her mom bake together?"
-3. BAD questionText example: "Card R-B-03-01: Read the passage and answer the question"
-4. The question must require reading the passage to answer correctly
-5. Options must include one correct answer and three incorrect but plausible answers
+  const levelRanges = {
+    'Beginner': { min: 1, max: 10 },
+    'Moderate': { min: 11, max: 20 },
+    'Expert': { min: 21, max: 30 }
+  };
   
-  Be creative and varied with the questions, ensuring they properly test ${skillArea} skills at ${difficulty} level ${level}/30. Make sure the questions are appropriate for this specific level - they should get progressively more challenging as levels increase.`;
+  const levelRange = levelRanges[difficulty] || { min: 1, max: 30 };
+  const relativeLevel = ((level - levelRange.min) / (levelRange.max - levelRange.min + 1)) * 100;
+  
+//   let prompt = `Generate exactly ${count} UNIQUE and DIVERSE ${difficulty} level ${skillArea} assessment cards for language testing at level ${level} (${relativeLevel.toFixed(0)}% through ${difficulty} tier).
+
+// For each card, include these EXACT fields in JSON format:
+// {
+//   "cardId": "[skill-difficulty-level-number]" (e.g., "L-B-01-01" for Listening-Beginner-Level 1-Question 1)
+//   "instructions": "[Clear, level-appropriate instructions]"
+//   "content": "[The main content or scenario]"
+//   "questionText": "[A SPECIFIC question about the content]"
+//   "options": ["Option 1", "Option 2", "Option 3", "Option 4"] (if applicable)
+//   "expectedResponse": "[Sample answer or correct option index]"
+//   "timeLimit": [time in seconds]
+//   "evaluationCriteria": ["Basic criteria", "Intermediate criteria", "Advanced criteria"]
+// }
+
+// CRITICAL REQUIREMENTS:
+// - All content in marathi language. 
+// - must follow all the instructions provided by the below for specific skill area.
+// - All Question must be unique with different scenarios.
+// - Each question MUST be COMPLETELY UNIQUE - different topics, scenarios, and contexts 
+// - each question and content must be grammatically correct with proper gender.
+// 1. Each question MUST be COMPLETELY UNIQUE - different topics, scenarios, and contexts
+// 2. Questions MUST be precisely calibrated for level ${level} (${difficulty} tier, ${relativeLevel.toFixed(0)}% progression)
+// 3. For Listening: Vary accents, speeds, and contexts (conversations, announcements, lectures, etc.)
+// 4. For Speaking: Include diverse prompts requiring different response types (descriptions, opinions, stories, etc.)
+// 5. For Reading: Use varied text types (stories, articles, emails, etc.) with appropriate complexity
+// 6. For Writing: Include diverse writing tasks (emails, stories, opinions, etc.) with clear requirements
+
+// LEVEL-SPECIFIC DIFFICULTY GUIDELINES:
+// - Levels 1-5: Simple vocabulary, basic structures, familiar topics, slow pace
+// - Levels 6-10: Common expressions, simple sentences, everyday situations, moderate pace
+// - Levels 11-15: Some complex structures, varied vocabulary, general knowledge topics
+// - Levels 16-20: Complex sentences, idiomatic expressions, abstract concepts
+// - Levels 21-25: Nuanced language, specialized vocabulary, implicit meaning
+// - Levels 26-30: Native-level complexity, sophisticated language, subtle distinctions
+
+// FOR LISTENING PRACTICE:
+// - Create diverse audio context descriptions on varied topics (weather, news, conversations, interviews, lectures, etc.)
+// - For each question, generate a UNIQUE question that tests a DIFFERENT aspect of listening comprehension
+// - NEVER use the generic question "What is the main topic of the audio?" repeatedly
+
+// *** CRITICAL REQUIREMENT: EVERY LISTENING PRACTICE QUESTION MUST INCLUDE THE 'questionText' FIELD ***
+// - This field MUST contain a specific question about the audio content (not just instructions)
+// - Example for content "The teacher says, 'Please take out your books and turn to page 20.'"
+//   * GOOD questionText: "What page number did the teacher ask students to turn to?"
+//   * BAD: leaving questionText blank or using generic text
+
+// - Include varied question types such as:
+//   * Questions about specific details mentioned ("What time does the train depart?") 
+//   * Questions about speaker attitudes ("How does the speaker feel about the new policy?")
+//   * Questions requiring inference ("What will likely happen next based on the conversation?")
+//   * Questions about purpose ("Why did the speaker mention the statistics?")
+//   * Questions about relationships ("How do the speakers know each other?")
+
+// LEVEL-SPECIFIC GUIDELINES FOR LISTENING PRACTICE:
+
+// - Levels 1-5: Simple comprehension of basic information, familiar topics, slow speech
+// - Levels 6-10: Understanding main points, basic opinions, everyday situations
+// - Levels 11-15: Comprehension of extended speech, implicit meanings, varied accents
+// - Levels 16-20: Understanding complex arguments, technical discussions, faster speech
+// - Levels 21-25: Comprehension of abstract concepts, idiomatic expressions, inferring meaning
+// - Levels 26-30: Understanding specialized topics, nuanced opinions, rapid native-level speech
+
+// FOR SPEAKING PRACTICE:
+// - All question must be unique with different topic. don't ask favorite fruit related question repeatedly.
+// - Create varied prompts on different topics (family, hobbies, travel, food, education, etc.)
+// - Each prompt should be unique - DO NOT repeat similar scenarios.
+// - Ensure the difficulty and complexity match exactly with level ${level} out of 30
+
+// LEVEL-SPECIFIC GUIDELINES FOR SPEAKING PRACTICE:
+// - Levels 1-5: Simple self-introduction, daily routines, favorite things, basic descriptions of familiar objects
+// - Levels 6-10: Personal preferences, past experiences, simple opinions on familiar topics
+// - Levels 11-15: Detailed descriptions, comparisons, expressing opinions with reasons
+// - Levels 16-20: Discussing advantages/disadvantages, explaining processes, making recommendations
+// - Levels 21-25: Constructing arguments, discussing abstract concepts, hypothetical scenarios
+// - Levels 26-30: Complex debates, presenting nuanced viewpoints, academic/professional discussions
+
+// For level ${level} specifically, focus on ${getLevelSpecificInstructions(level, difficulty)}
+
+// FOR READING PRACTICE:
+// FOR READING PRACTICE:
+// - Generate a short but meaningful passage or story in Marathi appropriate for the learner’s level. This passage should be placed in the "content" field and must NOT be reused or repeated in the question text.
+// - The passage must be unique for each card and reflect real-life or culturally relevant topics (e.g., festivals, school life, environment, social issues).
+// - After the passage, include one SPECIFIC question in the "questionText" field that tests understanding of the passage.
+// - The question must NOT repeat the passage — it must refer to the content logically (e.g., "Why did the character go to the village?" not "Read the passage").
+// - ALWAYS include exactly 4 multiple-choice options in the "options" field, with ONE correct answer.
+// - Make sure one and only one option is correct and clearly tied to the passage content.
+// - The "expectedResponse" should be the correct answer **text** (not just index).
+// - Use simple, correct, and natural Marathi language throughout in Devanagari script.
+// - Ensure content and questions are grammatically correct and level-appropriate.
+// - For beginner levels, ask simple questions about main ideas or specific details
+// - For moderate levels, ask questions about implied meaning and relationships
+// - For expert levels, ask questions about inference, analysis, or drawing conclusions
+
+// Example Reading Practice format:
+// [
+//   {
+//     "cardId": "R-B-07-01",
+//     "instructions": "खालील उतारा वाचा आणि प्रश्नाचे योग्य उत्तर निवडा.",
+//     "content": "रविवारी संजय आपल्या कुटुंबासोबत जवळच्या उद्यानात गेला. तिथे त्यांनी झाडांखाली बसून नाश्ता केला, फुगे उडवले आणि खूप मजा केली. संजयच्या छोट्या बहिणीला झोके खूप आवडले, त्यामुळे ती झोक्यांवर खूप वेळ खेळत होती.",
+//     "questionText": "संजय रविवारी कुठे गेला होता?",
+//     "options": [
+//       "शाळेत",
+//       "सिनेमाला",
+//       "उद्यानात",
+//       "आजोळी"
+//     ],
+//     "expectedResponse": "उद्यानात",
+//     "timeLimit": 45,
+//     "evaluationCriteria": [
+//       "उतारामधील स्पष्ट माहिती ओळखण्याची क्षमता",
+//       "योग्य पर्याय निवडण्याची अचूकता",
+//       "वाचन समज व लक्ष केंद्रित करण्याची सवय"
+//     ]
+//   }
+// ]
+
+
+// IMPORTANT REQUIREMENTS:
+
+// 1. The questionText must be a SPECIFIC, CONTENT-BASED question, NOT general instructions
+// 2. GOOD example: "What was the main reason for the character's decision?"
+// 3. BAD example: "Answer the following question about the text"
+// 4. Questions must be answerable ONLY by reading/listening to the provided content
+// 5. For multiple choice: Include exactly 4 options with one clearly correct answer
+// 6. Ensure questions test different comprehension skills (main idea, details, inference, vocabulary in context, etc.)
+// 7. Vary question types (wh- questions, true/false, multiple choice, fill-in, etc.)
+// 8. Ensure content is culturally appropriate and accessible
+// 9. For Listening: Include natural speech patterns and realistic scenarios
+// 10. For Speaking: Provide clear, engaging prompts that encourage extended responses
+
+// IMPORTANT: Your response must be a valid JSON array of question objects. Do not include any markdown formatting, code blocks, or explanatory text.`;
+let prompt=`Generate exactly ${count} UNIQUE and DIVERSE ${difficulty} level **${skillArea}** assessment cards for language testing at level ${level} (${relativeLevel.toFixed(0)}% through ${difficulty} tier).
+
+Each card must include the following fields in JSON format:
+{
+  "cardId": "[skill-difficulty-level-number]" (e.g., "R-B-01-01" for Reading-Beginner-Level 1-Question 1)
+  "instructions": "[Clear, level-appropriate instructions]"
+  "content": "[Main passage, audio context, or task prompt]"
+  "questionText": "[A SPECIFIC question related to the content]"
+  "options": ["Option 1", "Option 2", "Option 3", "Option 4"] (only if applicable)
+  "expectedResponse": "[Sample answer or correct option index]"
+  "timeLimit": [time in seconds]
+  "evaluationCriteria": ["Basic criteria", "Intermediate criteria", "Advanced criteria"]
+}
+
+⚠️ **VERY IMPORTANT**:
+- Generate content **only for the selected skill area: ${skillArea}**
+- Do **not** include or mix questions from other skill areas
+- All text — instructions, content, questionText, options, expectedResponse, evaluationCriteria — must be written in fluent **Marathi using Devanagari script**
+- Use only commonly understood English words (e.g., email, internet) when absolutely needed
+- Format output as **valid JSON only**, with no additional explanations
+
+LEVEL-BASED COMPLEXITY:
+- Levels 1–5: Simple vocabulary, short sentences, familiar topics
+- Levels 6–10: Moderate vocabulary, everyday scenarios
+- Levels 11–15: Descriptive or opinion-based language
+- Levels 16–20: Abstract or complex ideas, advanced grammar
+- Levels 21–30: Near-native fluency, nuanced expression
+
+SKILL-SPECIFIC INSTRUCTIONS:
+
+📘 **If skillArea is "Reading"**:
+- Provide a short passage and a question with 4 options (only one correct)
+- Question must test comprehension: detail, inference, conclusion
+
+🎧 **If skillArea is "Listening"**:
+- Create diverse audio context descriptions on varied topics (weather, news, conversations, interviews, lectures, etc.)
+- For each question, generate a UNIQUE question that tests a DIFFERENT aspect of listening comprehension
+- NEVER use the generic question "What is the main topic of the audio?" repeatedly
+
+*** CRITICAL REQUIREMENT: EVERY LISTENING PRACTICE QUESTION MUST INCLUDE THE 'questionText' FIELD ***
+- This field MUST contain a specific question about the audio content (not just instructions)
+- Example for content "The teacher says, 'Please take out your books and turn to page 20.'"
+  * GOOD questionText: "What page number did the teacher ask students to turn to?"
+  * BAD: leaving questionText blank or using generic text
+
+- Include varied question types such as:
+  * Questions about specific details mentioned ("What time does the train depart?") 
+  * Questions about speaker attitudes ("How does the speaker feel about the new policy?")
+  * Questions requiring inference ("What will likely happen next based on the conversation?")
+  * Questions about purpose ("Why did the speaker mention the statistics?")
+  * Questions about relationships ("How do the speakers know each other?")
+
+LEVEL-SPECIFIC GUIDELINES FOR LISTENING PRACTICE:
+
+- Levels 1-5: Simple comprehension of basic information, familiar topics, slow speech
+- Levels 6-10: Understanding main points, basic opinions, everyday situations
+- Levels 11-15: Comprehension of extended speech, implicit meanings, varied accents
+- Levels 16-20: Understanding complex arguments, technical discussions, faster speech
+- Levels 21-25: Comprehension of abstract concepts, idiomatic expressions, inferring meaning
+- Levels 26-30: Understanding specialized topics, nuanced opinions, rapid native-level speech
+
+
+🗣️ **If skillArea is "Speaking"**:
+- Give a clear, Marathi prompt that requires the user to speak
+- Include a sample response and evaluation criteria
+- Prompts should vary: describe, explain, compare, give opinion, etc.
+
+📝 **If skillArea is "Writing"**:
+- Provide a Marathi writing task (email, paragraph, opinion, etc.)
+- Include expected content elements
+- Add clear evaluation criteria (grammar, structure, ideas)
+
+✅ Output must strictly match selected skillArea: ${skillArea}
+✅ No overlap or mix with other skill types
+✅ Entire output content must be in grammatically correct Marathi (Devanagari script)`;
+
   
   // Add additional instruction for retry attempts to improve chances of success
   if (retryAttempt > 0) {
@@ -231,10 +326,16 @@ IMPORTANT REQUIREMENTS:
   }
 
   const payload = {
-    model: "claude-3-haiku-20240307",
-    max_tokens: 2000,
+    model: "gpt-4o", // Using GPT-4-turbo for better handling of structured outputs
     temperature: 0.7,
+    max_tokens: 2000,
+    response_format: { type: "json_object" }, // Tell GPT to strictly return JSON
+    seed: seed ? parseInt(seed) % 1000000 : undefined, // Use seed if provided for varied results
     messages: [
+      {
+        role: "system",
+        content: "You are a specialized AI for creating educational content. Your task is to generate practice questions in valid JSON format. ONLY respond with valid JSON, no markdown, no extra text."
+      },
       {
         role: "user",
         content: prompt,
@@ -243,7 +344,7 @@ IMPORTANT REQUIREMENTS:
   };
 
   try {
-    console.log(`Attempting to generate ${count} ${difficulty} ${skillArea} questions from Claude API (attempt ${retryAttempt + 1})`);
+    console.log(`Attempting to generate ${count} ${difficulty} ${skillArea} questions from GPT API (attempt ${retryAttempt + 1})`);
     
     const response = await fetch(url, {
       method: 'POST',
@@ -252,19 +353,64 @@ IMPORTANT REQUIREMENTS:
     });
 
     const responseData = await response.json();
-console.log("responseData",responseData);
-    if (response.ok && responseData?.content?.[0]?.text) {
-      const jsonContent = responseData.content[0].text;
+
+    if (!response.ok) {
+      console.error('OpenAI API error:', responseData);
+      throw new Error(`OpenAI API returned an error: ${responseData?.error?.message || 'Unknown error'}`);
+    }
+    
+    if (responseData?.choices?.[0]?.message?.content) {
+      const jsonContent = responseData.choices[0].message.content;
       
       // Log only the first 100 characters of the response to avoid console pollution
-      console.log(`Claude response (preview): ${jsonContent.substring(0, 100)}...`);
+      console.log(`GPT response (preview): ${jsonContent.substring(0, 100)}...`);
       
       // Strategy 1: Try to parse the entire response directly
       try {
         const parsedData = JSON.parse(jsonContent.trim());
-        if (Array.isArray(parsedData) && parsedData.length > 0) {
-          console.log(`Successfully parsed full Claude response directly as JSON array with ${parsedData.length} items`);
-          return parsedData;
+        let questions = [];
+        
+        // Check if parsedData is an object with a questions key
+        if (parsedData.questions && Array.isArray(parsedData.questions) && parsedData.questions.length > 0) {
+          questions = parsedData.questions;
+          console.log(`Successfully parsed GPT response with ${questions.length} items in 'questions' property`);
+        }
+        // Or if it's a direct array
+        else if (Array.isArray(parsedData) && parsedData.length > 0) {
+          questions = parsedData;
+          console.log(`Successfully parsed full GPT response directly as JSON array with ${questions.length} items`);
+        }
+        
+        // Ensure we have the exact number of questions requested
+        if (questions.length > 0) {
+          // If we got more questions than needed, take the first 'count' questions
+          if (questions.length > count) {
+            console.log(`Returning first ${count} of ${questions.length} questions`);
+            return questions.slice(0, count);
+          }
+          // If we got exactly the number needed, return them
+          else if (questions.length === count) {
+            return questions;
+          }
+          // If we got some questions but not enough, we'll proceed to generate more
+          else {
+            console.log(`Got ${questions.length} questions, need ${count - questions.length} more`);
+            const remainingCount = count - questions.length;
+            const additionalQuestions = await generatePracticeQuestions(
+              skillArea, 
+              difficulty, 
+              level, 
+              remainingCount, 
+              retryAttempt + 1, 
+              `${seed || ''}${retryAttempt}` // Add retry attempt to seed for variety
+            );
+            
+            if (additionalQuestions && additionalQuestions.length > 0) {
+              return [...questions, ...additionalQuestions].slice(0, count);
+            }
+            // If we couldn't get more questions, return what we have
+            return questions;
+          }
         }
       } catch (directParseErr) {
         console.log('Direct JSON parse failed, trying extraction methods');
@@ -281,6 +427,10 @@ console.log("responseData",responseData);
             if (Array.isArray(parsedData) && parsedData.length > 0) {
               console.log(`Successfully extracted JSON from code block with ${parsedData.length} items`);
               return parsedData;
+            }
+            // Check if it's wrapped in a property
+            else if (parsedData.questions && Array.isArray(parsedData.questions)) {
+              return parsedData.questions;
             }
           } catch (blockErr) {
             console.log('Failed to parse code block as JSON, trying next block');
@@ -322,13 +472,35 @@ console.log("responseData",responseData);
             try {
               // Build a JSON array from the individual object matches
               const reconstructed = `[${manualMatches.join(',')}]`;
-              const parsedData = JSON.parse(reconstructed);
-              if (Array.isArray(parsedData) && parsedData.length > 0) {
-                console.log(`Successfully reconstructed JSON array manually with ${parsedData.length} items`);
-                return parsedData;
+              let questions = JSON.parse(reconstructed);
+              
+              if (Array.isArray(questions) && questions.length > 0) {
+                console.log(`Successfully reconstructed JSON array manually with ${questions.length} items`);
+                
+                // Ensure we have the exact number of questions requested
+                if (questions.length >= count) {
+                  return questions.slice(0, count);
+                } else {
+                  // If we got some questions but not enough, we'll proceed to generate more
+                  console.log(`Got ${questions.length} questions, need ${count - questions.length} more`);
+                  const remainingCount = count - questions.length;
+                  const additionalQuestions = await generatePracticeQuestions(
+                    skillArea, 
+                    difficulty, 
+                    level, 
+                    remainingCount, 
+                    retryAttempt + 1, 
+                    `${seed || ''}${retryAttempt}`
+                  );
+                  
+                  if (additionalQuestions && additionalQuestions.length > 0) {
+                    return [...questions, ...additionalQuestions].slice(0, count);
+                  }
+                }
+                return questions;
               }
             } catch (reconstructErr) {
-              console.log('Failed to reconstruct JSON manually');
+              console.log('Failed to reconstruct JSON manually:', reconstructErr);
             }
           }
         }
@@ -338,222 +510,69 @@ console.log("responseData",responseData);
         return null;
       } catch (jsonError) {
         console.error('JSON extraction error:', jsonError);
-        throw new Error(`Failed to extract JSON from Claude API response: ${jsonError.message}`);
+        throw new Error(`Failed to extract JSON from GPT API response: ${jsonError.message}`);
       }
     } else {
-      console.error('Claude API error:', responseData);
-      throw new Error(`Claude API returned an error: ${responseData?.error?.message || 'Unknown error'}`);
+      console.error('Unexpected GPT API response format:', responseData);
+      throw new Error('GPT API returned an unexpected response format');
     }
   } catch (error) {
-    console.error('Error calling Claude API:', error);
-    throw new Error(`Failed to connect to Claude API: ${error.message}`);
+    console.error('Error calling GPT API:', error);
+    throw new Error(`Failed to connect to GPT API: ${error.message}`);
   }
 }
 
-// TEMPORARY: Simplified auth function that bypasses token verification completely
-const flexibleAuth = (handler) => async (req, res) => {
-  try {
-    // TEMPORARY FIX: Skip token verification entirely
-    console.warn('Auth temporarily disabled - using default user ID');
-    
-    // Extract userId from body if present
-    const userId = req.body?.userId || '6462d8fbf6c3e30000000001';
-    
-    // Set user object without token verification
-    req.user = { id: userId };
-    
-    // Log for debugging
-    console.log('Using userId for practice questions:', userId);
-    
-    /* ORIGINAL AUTH CODE - TEMPORARILY DISABLED
-    // Get token from request header
-    const token = req.headers.authorization?.split(' ')[1] || '';
-    
-    if (token) {
-      try {
-        // Verify token if provided
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'jwtsecret');
-        // Add user data to request
-        req.user = decoded;
-      } catch (error) {
-        console.warn('Token verification failed, proceeding without authentication');
-        // Continue without authentication
-        req.user = { id: '6462d8fbf6c3e30000000001' }; // Default user ID for testing
-      }
-    } else {
-      console.warn('No authentication token provided, proceeding with default user');
-      // Use a default user ID for testing
-      req.user = { id: '6462d8fbf6c3e30000000001' };
-    }
-    */
-    
-    // Call the original handler
-    return handler(req, res);
-  } catch (error) {
-    console.error('Auth middleware error:', error);
-    return res.status(500).json({ success: false, error: 'Server error' });
-  }
-};
-
-// Export the handler with flexible authentication
 /**
- * Generates fallback practice questions when the Claude API fails
- * @param {string} skillArea - The skill area (Listening, Reading, Speaking, etc.)
- * @param {string} difficulty - The difficulty level (Beginner, Moderate, Expert)
+ * Helper function to generate level-specific instructions for speaking practice
  * @param {number} level - Level number (1-30)
- * @param {number} count - Number of questions to generate
- * @returns {Array} - Array of practice question objects
+ * @param {string} difficulty - Difficulty tier (Beginner, Moderate, Expert)
+ * @returns {string} - Specific instructions for this level
  */
-function generateFallbackQuestions(skillArea, difficulty, level, count) {
-  console.log(`Generating ${count} fallback ${skillArea} questions for ${difficulty} level ${level}`);
+function getLevelSpecificInstructions(level, difficulty) {
+  // Convert level to a 1-10 scale within each difficulty tier
+  let tierLevel = 0;
   
-  const fallbackQuestions = [];
-  
-  // Difficulty multiplier (1 for Beginner, 2 for Moderate, 3 for Expert)
-  const difficultyMultiplier = difficulty === 'Beginner' ? 1 : 
-                              difficulty === 'Moderate' ? 2 : 3;
-  
-  // Level within tier (1-30)
-  const relativeLevel = level;
-  
-  // Scale difficulty based on both the difficulty tier and the level within that tier
-  const scaledDifficulty = (difficultyMultiplier * 10) + Math.floor(relativeLevel / 3);
-  
-  // Generate different question types based on skill area
-  if (skillArea === 'Listening') {
-    // Sample topics for listening practice
-    const topics = [
-      'a weather forecast', 'a short conversation', 'a news report', 
-      'a travel announcement', 'a shopping dialogue', 'a restaurant conversation',
-      'a job interview', 'a lecture excerpt', 'a phone call', 'a podcast snippet'
-    ];
-    
-    for (let i = 0; i < count; i++) {
-      const topicIndex = (i + level) % topics.length;
-      const timeLimit = 30 + (scaledDifficulty * 5); // More difficult = more time
-      
-      fallbackQuestions.push({
-        cardId: `L-${difficulty[0]}-${level.toString().padStart(2, '0')}-${(i+1).toString().padStart(2, '0')}`,
-        instructions: `Listen to the audio and answer the question below.`,
-        content: `This audio is ${topics[topicIndex]} for the upcoming weekend. The speaker discusses the expected details and important information.`,
-        questionText: `What is the main topic of this ${topics[topicIndex]}?`,
-        options: [
-          `Weather conditions for Saturday`,
-          `Travel advisories for local area`,
-          `Main events happening this weekend`, 
-          `Important announcements about local services`
-        ],
-        expectedResponse: `Main events happening this weekend`,
-        timeLimit: timeLimit,
-        level: level,
-        evaluationCriteria: {
-          basic: "Can identify the basic topic and one key point from the audio",
-          intermediate: "Can identify the main topic and several key details from the audio",
-          advanced: "Can fully comprehend the topic, all key details, and make inferences about implied information"
-        }
-      });
-    }
-  } 
-  else if (skillArea === 'Reading') {
-    // Sample reading passages of increasing complexity
-    const passages = [
-      { 
-        text: "Mary went to the store to buy some milk. On her way home, she saw her friend John. They talked for a few minutes about school.",
-        question: "Where did Mary go?",
-        options: ["To the park", "To the store", "To school", "To John's house"],
-        answer: "To the store"
-      },
-      {
-        text: "The small café on Main Street has been serving delicious pastries since 1985. The owner, Mrs. Garcia, still uses recipes from her grandmother. Many locals visit every morning for coffee and fresh bread.",
-        question: "How long has the café been open?",
-        options: ["Since 1958", "Since 1985", "Since Mrs. Garcia was young", "Since her grandmother's time"],
-        answer: "Since 1985"
-      },
-      {
-        text: "Scientists have discovered a new species of frog in the Amazon rainforest. This tiny amphibian is less than one centimeter long and has unique bright blue markings. Researchers believe it may produce compounds that could be useful in medicine.",
-        question: "What is special about the newly discovered frog?",
-        options: ["It can jump very high", "It is extremely large", "It has bright blue markings", "It lives in trees"],
-        answer: "It has bright blue markings"
-      }
-    ];
-    
-    for (let i = 0; i < count; i++) {
-      const passageIndex = Math.min(Math.floor(scaledDifficulty/10), passages.length-1);
-      const passage = passages[passageIndex];
-      const timeLimit = 40 + (scaledDifficulty * 3);
-      
-      fallbackQuestions.push({
-        cardId: `R-${difficulty[0]}-${level.toString().padStart(2, '0')}-${(i+1).toString().padStart(2, '0')}`,
-        instructions: "Read the passage and answer the question below.",
-        content: passage.text,
-        questionText: passage.question,
-        options: passage.options,
-        expectedResponse: passage.answer,
-        timeLimit: timeLimit,
-        level: level,
-        evaluationCriteria: {
-          basic: "Can identify explicitly stated information in the text",
-          intermediate: "Can understand both explicit and implicit information",
-          advanced: "Can analyze and evaluate the content, making connections beyond the text"
-        }
-      });
-    }
-  }
-  else if (skillArea === 'Speaking') {
-    // Sample speaking prompts
-    const prompts = [
-      "Describe your favorite hobby and why you enjoy it.",
-      "Talk about a place you would like to visit and why.", 
-      "Describe a person who has influenced you significantly.",
-      "Discuss the advantages and disadvantages of living in a city.",
-      "Express your opinion on whether technology is making people more connected or more isolated."
-    ];
-    
-    for (let i = 0; i < count; i++) {
-      const promptIndex = Math.min(Math.floor(scaledDifficulty/8), prompts.length-1);
-      const timeLimit = 20 + (scaledDifficulty * 4);
-      
-      fallbackQuestions.push({
-        cardId: `S-${difficulty[0]}-${level.toString().padStart(2, '0')}-${(i+1).toString().padStart(2, '0')}`,
-        instructions: "Respond to the following prompt with a spoken answer.",
-        content: prompts[promptIndex],
-        questionText: prompts[promptIndex],
-        timeLimit: timeLimit,
-        level: level,
-        evaluationCriteria: {
-          basic: "Can provide a basic response with simple vocabulary and sentence structures",
-          intermediate: "Can provide a detailed response with good vocabulary and mostly correct grammar",
-          advanced: "Can provide a comprehensive response with rich vocabulary, complex sentence structures, and natural fluency"
-        }
-      });
-    }
-  }
-  else {
-    // General fallback for any other skill area
-    for (let i = 0; i < count; i++) {
-      fallbackQuestions.push({
-        cardId: `G-${difficulty[0]}-${level.toString().padStart(2, '0')}-${(i+1).toString().padStart(2, '0')}`,
-        instructions: `This is a practice ${skillArea} question for ${difficulty} level ${level}.`,
-        content: `Sample content for ${skillArea} practice at ${difficulty} level ${level}.`,
-        questionText: `Sample question for ${skillArea} practice at ${difficulty} level ${level}?`,
-        options: ["Option A", "Option B", "Option C", "Option D"],
-        expectedResponse: "Option B",
-        timeLimit: 60,
-        level: level,
-        evaluationCriteria: {
-          basic: "Basic performance criteria",
-          intermediate: "Intermediate performance criteria",
-          advanced: "Advanced performance criteria"
-        }
-      });
-    }
+  if (difficulty === 'Beginner') {
+    tierLevel = Math.min(Math.max(level, 1), 10); // 1-10
+  } else if (difficulty === 'Moderate') {
+    tierLevel = Math.min(Math.max(level - 10, 1), 10); // 11-20 → 1-10
+  } else { // Expert
+    tierLevel = Math.min(Math.max(level - 20, 1), 10); // 21-30 → 1-10
   }
   
-  console.log(`Generated ${fallbackQuestions.length} fallback questions successfully`);
-  return fallbackQuestions;
+  // Define specific instructions for different level ranges
+  if (difficulty === 'Beginner') {
+    if (tierLevel <= 3) {
+      return "very simple questions about personal information, daily routines, and basic descriptions using elementary vocabulary and simple present tense";
+    } else if (tierLevel <= 6) {
+      return "simple questions about likes/dislikes, family, hobbies, and basic past experiences using common vocabulary and simple present/past tenses";
+    } else if (tierLevel <= 9) {
+      return "moderately simple questions about recent activities, future plans, and preferences with some supporting details using basic compound sentences";
+    } else {
+      return "straightforward questions requiring brief opinions, comparisons, and descriptions using present, past and future tenses with some detail";
+    }
+  } else if (difficulty === 'Moderate') {
+    if (tierLevel <= 3) {
+      return "questions requiring explanations of preferences, detailed descriptions, and personal experiences with reasons and examples";
+    } else if (tierLevel <= 6) {
+      return "questions about hypothetical situations, detailed comparisons, and explanations of processes using varied vocabulary and complex sentences";
+    } else if (tierLevel <= 9) {
+      return "questions requiring expression of opinions with supporting arguments, detailed narratives, and explanation of advantages/disadvantages";
+    } else {
+      return "challenging questions about social issues, personal choices with consequences, and detailed explanations of complex topics";
+    }
+  } else { // Expert
+    if (tierLevel <= 3) {
+      return "complex questions requiring well-structured arguments, detailed analysis of issues, and nuanced opinions with supporting evidence";
+    } else if (tierLevel <= 6) {
+      return "sophisticated questions about abstract concepts, hypothetical scenarios with multiple factors, and detailed persuasive arguments";
+    } else if (tierLevel <= 9) {
+      return "highly challenging questions requiring critical analysis, evaluation of complex issues from multiple perspectives, and coherent, well-structured responses";
+    } else {
+      return "extremely demanding questions requiring academic-level discourse, sophisticated analysis of complex issues, and presentation of nuanced arguments with precise vocabulary";
+    }
+  }
 }
 
-export default flexibleAuth(connectDb(handler));
-
-// For testing purposes only - remove in production
-// export default connectDb(handler);
+// Export the handler as default
+export default handler;

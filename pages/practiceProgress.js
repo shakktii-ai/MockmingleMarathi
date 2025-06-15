@@ -325,7 +325,7 @@ function PracticeProgress() {
               
               {/* Recent Activity */}
               <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">रीसेंट अ‍ॅक्टिव्हिटी</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">लेटेस्ट अ‍ॅक्टिव्हिटी</h2>
                 
                 {recentActivity.length > 0 ? (
                   <div className="divide-y divide-gray-200">
@@ -366,7 +366,7 @@ function PracticeProgress() {
                             </span>
                             {activity.timeSpent && (
                               <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                                {activity.timeSpent} seconds
+                                {activity.timeSpent} सेकंद
                               </span>
                             )}
                           </div>

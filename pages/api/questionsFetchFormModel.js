@@ -49,7 +49,7 @@ async function generateQuestionsWithOpenAI(level, standard, board, subject) {
     'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
   };
 
-  const systemPrompt = `You are an experienced primary school teacher. Generate 10 simple, beginner-friendly questions in Marathi.`;
+  const systemPrompt = `You are an experienced primary school teacher. Generate 10 simple, beginner-friendly questions in Marathi. `;
   
   const userPrompt = `Generate 10 well-structured, syllabus-aligned academic questions in Marathi based on the following details:
 
@@ -65,6 +65,7 @@ Education Board: ${board}
 All questions must be written in Marathi language only.
 
 Each question must contain at least 2 full sentences to ensure clarity and depth. Avoid short or incomplete prompts.
+Make sure sentences use proper grammer.
 
 Use Marathi numerals to number the questions (e.g., १, २, ३, ...).
 

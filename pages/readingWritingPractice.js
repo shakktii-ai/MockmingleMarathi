@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import { processWordByWordTransliteration, handleSpecialKeys, handleKeyUp } from '../utils/transliterator';
 
 function ReadingWritingPractice() {
   const router = useRouter();
@@ -27,9 +28,12 @@ function ReadingWritingPractice() {
   const [responses, setResponses] = useState([]);
   const [evaluationResult, setEvaluationResult] = useState(null);
   const [showEvaluation, setShowEvaluation] = useState(false);
+  const [shiftTransliterationPending, setShiftTransliterationPending] = useState(false);
   
   const timerRef = useRef(null);
   const audioRef = useRef(null);
+
+
 
   useEffect(() => {
     // Check if user is authenticated
@@ -69,7 +73,7 @@ function ReadingWritingPractice() {
       const userId = userObj?._id || userObj?.id || '6462d8fbf6c3e30000000001';
       
       // Fetch progress data from API
-      const response = await fetch(`/api/getPracticeProgress?skillArea=${mode === 'reading' ? 'Reading' : 'Writing'}&difficulty=${selectedDifficulty}&userId=${userId}&t=${Date.now()}`);
+      const response = await fetch(`/api/getPracticeProgress?skillArea=${mode === 'reading' ? 'Reading' : 'Writing'}&difficulty=${selectedDifficulty}&userId=${userId}`);
       const data = await response.json();
       
       if (response.ok && data.progress) {
@@ -144,11 +148,11 @@ function ReadingWritingPractice() {
       setTestStarted(false);
 
       // If it's a double-click or if it's a single click on a level that was already selected, start the practice
-     if (selectedLevel === level) {
+      if (selectedLevel === level) {
         fetchQuestions();
       }
     } else {
-      alert('हा लेव्हल लॉक आहे. अनलॉक करण्यासाठी मागील लेव्हल्स पूर्ण करा');
+      alert('हा लेव्हल लॉक आहे. अनलॉक करण्यासाठी मागील लेव्हल्स पूर्ण करा.');
     }
   };
   
@@ -256,7 +260,7 @@ function ReadingWritingPractice() {
         }
       }
     } catch (error) {
-      console.error(' लेव्हल प्रोग्रेस अपडेट करताना एरर:', error);
+      console.error('Error refreshing level progress:', error);
     } finally {
       setLoading(false);
       setShowLevelSelection(true);
@@ -299,18 +303,18 @@ function ReadingWritingPractice() {
           router.push("/login");
           return;
         }
-        throw new Error(data.error || 'प्रश्न फेच करण्यात अडचण आली');
+        throw new Error(data.error || 'Failed to fetch questions');
       }
       
       if (!data.questions || data.questions.length === 0) {
-        throw new Error('कोणतेही प्रश्न मिळाले नाहीत');
+        throw new Error('No questions received');
       }
-      console.log(data.questions);
       
       // Add default properties to questions if not present and ensure question text is properly set
       const processedQuestions = data.questions.map(question => {
         // Extract actual question text, filtering out any text that looks like instructions or card IDs
         let questionText = question.questionText || question.question;
+        
         // Filter out questionText that contains card ID patterns or generic instructions
         if (questionText && (
             questionText.match(/card\s+[a-zA-Z]+-[a-zA-Z]+-\d+-\d+/i) ||
@@ -320,7 +324,6 @@ function ReadingWritingPractice() {
             // This is likely not a real question but instructions or card ID
             questionText = null;
         }
-        
         
         // If no valid question text, generate a default question based on content
         if (!questionText && question.content) {
@@ -344,7 +347,7 @@ function ReadingWritingPractice() {
           instructions: question.instructions || 'Read the passage and answer the question.'
         };
       });
-console.log(processedQuestions);
+
       // Set the processed questions
       setQuestions(processedQuestions);
       setTestStarted(true);
@@ -366,7 +369,7 @@ console.log(processedQuestions);
         }, 100);
       }
     } catch (error) {
-      console.error("प्रश्न फेच करण्यात अडचण आली", error);
+      console.error("Error fetching questions:", error);
       alert(`${mode} प्रॅक्टिस प्रश्न लोड करण्यात अयशस्वी. कृपया पुन्हा प्रयत्न करा.`);
       // Reset to level selection on failure
       backToLevelSelection();
@@ -377,28 +380,18 @@ console.log(processedQuestions);
 
   const startTimer = () => {
     // Safety check to make sure questions and currentIndex are valid
-    if(!questions){
-      console.log('Questions missing');
+    if (!questions ) {
+      console.log('No valid question found to start timer1');
       return;
     }
-    else if(questions.length===null){
-      console.log('length problem 0');
+    if (!questions.length ) {
+      console.log('No valid question found to start timer2');
       return;
     }
-    else if(questions.length===undefined){
-      console.log('undefined');
+    if ( currentIndex >= questions.length) {
+      console.log('No valid question found to start timer3');
       return;
     }
-    else if(currentIndex>=questions.length){
-      console.log('current index..')
-    }else{
-      console.log('another ');
-      return;
-    }
-    // if (!questions || !questions.length || currentIndex >= questions.length) {
-    //   console.log(' टायमर सुरु करण्यासाठी वैध प्रश्न सापडले नाहीत');
-    //   return;
-    // }
     
     const currentQuestion = questions[currentIndex];
     // Safety check for timeLimit property
@@ -420,6 +413,17 @@ console.log(processedQuestions);
       });
     }, 1000);
   };
+    // ✅ Ensure timer starts for each question, including first one
+  useEffect(() => {
+    startTimer();
+
+    // Cleanup timer when component unmounts or question changes
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [currentIndex, questions]);
 
   const handleOptionSelect = (option) => {
     setSelectedOptions(prevSelected => {
@@ -437,8 +441,48 @@ console.log(processedQuestions);
     });
   };
 
-  const handleTextResponseChange = (e) => {
-    setUserResponse(e.target.value);
+  // Handle keyboard events for Marathi transliteration
+  const handleKeyDown = (e) => {
+    handleSpecialKeys(e, async () => {
+      // When Shift key is pressed, force transliteration of current text
+      try {
+        const transliterated = await processWordByWordTransliteration(userResponse, userResponse, true);
+        setUserResponse(transliterated);
+      } catch (error) {
+        console.error('Transliteration error on Shift press:', error);
+      }
+    });
+  };
+
+  // Handle key up events to reset transliteration flags
+  const handleKeyUpEvent = (e) => {
+    handleKeyUp(e);
+  };
+  
+  // Enhanced text response handler with transliteration
+  const handleTextResponseChange = async (e) => {
+    const inputValue = e.target.value;
+    const cursorPosition = e.target.selectionStart;
+    
+    try {
+      // Use the transliterator utility with space and shift triggers
+      const forceTransliterate = false; // Let the utility handle triggers internally
+      const transliterated = await processWordByWordTransliteration(inputValue, userResponse, forceTransliterate);
+      
+      setUserResponse(transliterated);
+      
+      // Preserve cursor position after transliteration
+      setTimeout(() => {
+        if (e.target) {
+          const lengthDifference = transliterated.length - inputValue.length;
+          const newPosition = cursorPosition + lengthDifference;
+          e.target.setSelectionRange(newPosition, newPosition);
+        }
+      }, 0);
+    } catch (error) {
+      console.error('Transliteration error:', error);
+      setUserResponse(inputValue);
+    }
   };
 
   // Function to count words in a string
@@ -512,7 +556,7 @@ console.log(processedQuestions);
         
         // For MCQ questions, if the answer is correct, override Claude's feedback with more appropriate feedback
         if (isMCQ && currentQuestion.expectedResponse && responseToSubmit.includes(currentQuestion.expectedResponse)) {
-          const mcqFeedback = " छान! तुम्ही बरोबर उत्तर निवडले आहे.";
+          const mcqFeedback = "छान! तुम्ही बरोबर उत्तर निवडले आहे.";
           setFeedback(mcqFeedback);
           setScore(3); // Give full score for correct MCQ answer
         } else if (isMCQ) {
@@ -536,7 +580,7 @@ console.log(processedQuestions);
           expectedResponse = currentQuestion.answer;
         }
         
-        console.log('अपेक्षित उत्तरासह प्रतिसाद नोंदवला जात आहे:', expectedResponse);
+        console.log('Storing response with expected response:', expectedResponse);
         
         // Calculate correct score for storing in responses
         let calculatedScore = data.score || 1;
@@ -554,7 +598,7 @@ console.log(processedQuestions);
           completedAt: new Date()
         }]);
       } else {
-        throw new Error(' उत्तर सबमिट करताना त्रुटी आली');
+        throw new Error('Error submitting answer');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -593,7 +637,7 @@ console.log(processedQuestions);
   const evaluateWithClaude = async () => {
     // Evaluate responses with Claude AI
     // This is a placeholder for actual evaluation logic
-    console.log('Claude AI सह प्रतिसादांचे मूल्यांकन करत आहे...');
+    console.log('Evaluating responses with Model');
   };
 
   // Function to evaluate level completion using Claude AI
@@ -609,7 +653,7 @@ console.log(processedQuestions);
       
       // Make sure we have responses to evaluate
       if (!responses || responses.length === 0) {
-        console.error('मूल्यमापनासाठी कोणतेही प्रतिसाद नाहीत!');
+        console.error('No responses to evaluate!');
         setEvaluationResult({
           evaluation: {
             overallRating: 1,
@@ -708,7 +752,7 @@ console.log(processedQuestions);
         setEvaluationResult({
           evaluation: {
             overallRating: 1,
-            feedback: " आम्ही तुमच्या लेव्हलचे मूल्यमापन प्रक्रिया करू शकलो नाही, पण तुमची प्रगती नोंदवली आहे..",
+            feedback: "आम्ही तुमच्या लेव्हलचे मूल्यमापन प्रक्रिया करू शकलो नाही, पण तुमची प्रगती नोंदवली आहे.",
             completed: true
           },
           levelProgress: {
@@ -773,7 +817,7 @@ console.log(processedQuestions);
   return (
     <>
       <Head>
-        <title>SHAKKTII AI -  वाचन आणि लेखन सराव</title>
+        <title>SHAKKTII AI - वाचन आणि लेखन सराव</title>
       </Head>
       <div className="min-h-screen bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8" style={{ backgroundImage: "url('/BG.jpg')" }}>
         <div className="absolute top-4 left-4">
@@ -795,9 +839,9 @@ console.log(processedQuestions);
         <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-12">
           {!mode ? (
             <div className="p-8 text-center">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4"> वाचन आणि लेखन सराव</h1>
+              <h1 className="text-3xl font-bold text-gray-800 mb-4">वाचन आणि लेखन सराव</h1>
               <p className="text-lg text-gray-600 mb-8">
-                 तुम्हाला कोणती कौशल्ये प्रॅक्टिस करायची आहेत ती निवडा.
+                तुम्हाला कोणती कौशल्ये प्रॅक्टिस करायची आहेत ती निवडा.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -835,7 +879,7 @@ console.log(processedQuestions);
                       }}
                     />
                   </div>
-                  <h3 className="text-xl font-bold text-purple-900 mt-4">लेखनाचा सराव</h3>
+                  <h3 className="text-xl font-bold text-purple-900 mt-4">लेखन सराव</h3>
                   <p className="text-gray-600 mt-2">
                     मार्गदर्शित लेखन सरावांद्वारे तुमची लेखन कौशल्ये विकसित करा.
                   </p>
@@ -845,10 +889,10 @@ console.log(processedQuestions);
           ) : mode && !difficulty ? (  
             <div className="p-8 text-center">  
               <h1 className="text-3xl font-bold text-gray-800 mb-4">  
-                {mode === 'reading' ? 'वाचन सराव' : 'लेखनाचा सराव'}  
+                {mode === 'reading' ? 'वाचन सराव' : 'लेखन सराव'}  
               </h1>  
               <p className="text-lg text-gray-600 mb-6">  
-                तुमचा सराव सुरू करण्यासाठी कठीणतेचा स्तर निवडा. 
+                सराव सुरू करण्यासाठी एक लेवल निवडा.  
               </p>  
               
               <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">  
@@ -871,7 +915,7 @@ console.log(processedQuestions);
                 onClick={() => setMode('')}  
                 className="bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700"  
               >  
-               मागे जा  
+                मागे जा  
               </button>  
             </div>  
           ) : showLevelSelection ? (  
@@ -880,7 +924,7 @@ console.log(processedQuestions);
                 {mode === 'reading' ? 'वाचन सराव' : 'लेखनाचा सराव'} - {difficulty}  
               </h1>  
               <p className="text-lg text-gray-600 mb-6">  
-                सराव सुरू करण्यासाठी एक लेवल निवडा 
+                सराव सुरू करण्यासाठी एक लेवल निवडा  
               </p>  
               
               {loading ? (  
@@ -913,7 +957,7 @@ console.log(processedQuestions);
                               'bg-white border border-gray-200 hover:border-purple-300 hover:bg-purple-50'  
                             } flex flex-col items-center justify-center`}  
                           >  
-                            <div className="text-2xl font-bold text-pink-900 mb-2"> लेवल {levelData.level}</div>  
+                            <div className="text-2xl font-bold text-pink-900 mb-2">लेव्हल {levelData.level}</div>  
                             
                             {/* Star display */}  
                             <div className="flex space-x-1">  
@@ -955,7 +999,7 @@ console.log(processedQuestions);
                   }}  
                   className="bg-gray-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700"  
                 >  
-                  मागे जा 
+                  मागे जा  
                 </button>  
                 <button  
                   onClick={fetchQuestions}  
@@ -995,7 +1039,7 @@ console.log(processedQuestions);
                       <li>आपल्याला आपल्या स्तरानुसार लेखनासाठी विषय दिले जातील.</li>
                       <li>दिलेल्या मजकूर क्षेत्रात आपल्या विचारांचे स्पष्ट आणि सुसंगत लेखन करा.</li>
                       <li>प्रत्येक लेखन कार्य पूर्ण करण्यासाठी निश्चित वेळ मर्यादा असणार आहे.</li>
-                      <li>लेखनामध्ये स्पष्टता, सुव्यवस्था, तसेच व्याकरणाच्या शुद्धतेवर विशेष लक्ष द्या.</li>
+                      <li>लेखनामध्ये स्पष्टता, सुव्यवस्था, तसेच व्याकरणाच्या शुद्धतेवर विशेष लक्ष द्या</li>
                     </>
                   )}
                 </ul>
@@ -1009,7 +1053,7 @@ console.log(processedQuestions);
                   }}
                   className="px-4 py-2 rounded-lg font-medium bg-gray-600 text-white hover:bg-gray-700"
                 >
-                  मागे जा 
+                  मागे जा
                 </button>
                 <button
                   onClick={fetchQuestions}
@@ -1030,7 +1074,7 @@ console.log(processedQuestions);
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-pink-500 mb-4"></div>
-                  <p className="text-lg text-gray-600">तुमच्या उत्तरांचे Claude AI सोबत मूल्यांकन केले जात आहे..."</p>
+                  <p className="text-lg text-gray-600">मॉडेलच्या आधारे तुमच्या प्रतिसादांचे मूल्यांकन सुरू आहे...</p>
                 </div>
               ) : (
                 <>
@@ -1040,7 +1084,7 @@ console.log(processedQuestions);
                     }} />
                   </div>
                   <p className="text-lg text-gray-600 mb-6">
-                 छान! तुम्ही {mode} सराव सत्र पूर्ण केले आहे.
+                    छान! तुम्ही {mode} सराव सत्र पूर्ण केले आहे.
                   </p>
                   <div className="flex justify-center space-x-4">
                     <button
@@ -1089,7 +1133,7 @@ console.log(processedQuestions);
               <div className="mb-8">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">लेव्हल {selectedLevel} यशस्वीरित्या पूर्ण झाला!</h2>
                 <p className="text-lg text-gray-600">
-                 तुम्हाला या लेव्हलसाठी {evaluationResult?.levelProgress?.stars || 1} स्टार{(evaluationResult?.levelProgress?.stars || 1) !== 1 ? 's' : ''} मिळाले आहेत.
+                  तुम्हाला या लेव्हलसाठी {evaluationResult?.levelProgress?.stars || 1} स्टार{(evaluationResult?.levelProgress?.stars || 1) !== 1 ? 's' : ''} मिळाले आहेत.
                 </p>
                 {evaluationResult?.levelProgress?.stars === 3 && (
                   <div className="mt-2 text-green-600 font-bold">अभिनंदन! तुम्ही सर्वोत्तम गुण मिळवले आहेत.</div>
@@ -1141,7 +1185,7 @@ console.log(processedQuestions);
                     {loading ? (
                       <>
                         <span className="inline-block animate-spin h-4 w-4 border-t-2 border-white rounded-full mr-2"></span>
-                        रिव्ह्यू होत आहे...
+                         रिव्ह्यू होत आहे..
                       </>
                     ) : (
                       'पुढील लेव्हल'
@@ -1191,7 +1235,7 @@ console.log(processedQuestions);
                     <h3 className="text-lg font-semibold mb-2">उतारा:</h3>
                     <div className="prose max-w-none">
                       <p className="text-gray-800 whitespace-pre-line">
-                        {questions[currentIndex]?.content || questions[currentIndex]?.passage || questions[currentIndex]?.text || "लोड होत आहे..."}
+                        {questions[currentIndex]?.content || questions[currentIndex]?.passage || questions[currentIndex]?.text || "परिच्छेद लोड होत आहे..."}
                       </p>
                     </div>
                     
@@ -1231,14 +1275,12 @@ console.log(processedQuestions);
                     (questions[currentIndex]?.questionText || 
                      (questions[currentIndex]?.content && !questions[currentIndex]?.questionText ? 
                        "कथेतील मुख्य घटना काय आहे?" : "प्रश्न लोड होत आहे...")) :
-                     
                     (questions[currentIndex]?.content || questions[currentIndex]?.passage || questions[currentIndex]?.text || 
                      questions[currentIndex]?.questionText || "तुमच्या आवडत्या छंदाची किंवा उपक्रमाची थोडक्यात ओळख देणारा परिच्छेद लिहा.")
                   }
-                  
                 </p>
                 
-                {/* STEP 4: MULTIPLE CHOICE OPTIONS */}
+                {/* STEP 4: MULTIPLE CHOICE OPTIONS OR TEXT INPUT */}
                 {isMultipleChoice() ? (
                   <div>
                     <h3 className="text-lg font-semibold mb-3">योग्य पर्याय निवडा:</h3>
@@ -1274,10 +1316,17 @@ console.log(processedQuestions);
                     <textarea
                       value={userResponse}
                       onChange={handleTextResponseChange}
+                      onKeyDown={handleKeyDown}
+                      onKeyUp={handleKeyUp}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       rows={6}
                       placeholder={mode === 'reading' ? "इथे तुमचे उत्तर लिहा..." : "कृपया इथे तुमचा प्रतिसाद लिहा (किमान ५० शब्द असणे आवश्यक आहे)..."}
                       disabled={!!feedback}
+                      lang="mr"
+                      dir="ltr"
+                      spellCheck="false"
+                      inputMode="text"
+                      autoComplete="off"
                     />
                     {mode === 'writing' && (
                       <div className="mt-2 flex justify-between items-center">

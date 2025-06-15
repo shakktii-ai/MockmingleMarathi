@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
 
 // Schema for tracking level progress and stars
 const LevelProgressSchema = new mongoose.Schema(
@@ -40,4 +40,4 @@ const PracticeProgressSchema = new mongoose.Schema(
 // Create model or use existing one if available
 const PracticeProgress = mongoose.models.PracticeProgress || mongoose.model("PracticeProgress", PracticeProgressSchema);
 
-export default PracticeProgress;
+module.exports = PracticeProgress;
