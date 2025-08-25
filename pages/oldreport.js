@@ -76,7 +76,6 @@ function Oldreport() {
 
     return { score, feedback };
   };
-
   const extractRecommendations = (report) => {
     const regex = /Recommendation:([\s\S]*?)(?=(\n|$))/i;
     const match = report.reportAnalysis.match(regex);
@@ -727,7 +726,7 @@ function Oldreport() {
                       className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4 cursor-pointer flex items-center justify-between hover:from-purple-700 hover:to-indigo-700 transition-all duration-300"
                     >
                       <div className="flex items-center space-x-3">
-                        <span className="font-bold text-lg">{report.role}</span>
+                        <span className="font-bold text-lg"> {report.role}</span>
                         <span className="bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full">
                           {reportVisibility[index] ? 'तपशील डिस्प्ले बंद करा' : 'तपशील शो करा'}
                         </span>

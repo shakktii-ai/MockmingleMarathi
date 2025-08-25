@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const ReportsSchema = new mongoose.Schema({
   role: {
-    type: Number,
+    type: String,
     required: true,
   },
   subject:{
