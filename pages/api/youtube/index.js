@@ -4,18 +4,7 @@ import Youtube from "../../../models/Youtube";
 export default async function handler(req, res) {
   await connectDB();
 
-  // Handle GET request
-  // if (req.method === 'GET') {
-  //   try {
-  //     const { userId } = req.query;
-  //     const query = userId ? { userId } : {};
-  //     const recommendations = await Youtube.find(query);
-  //     console.log("Recommendations:", recommendations);
-  //     return res.status(200).json({ success: true, data: recommendations });
-  //   } catch (error) {
-  //     return res.status(500).json({ success: false, error: error.message });
-  //   }
-  // }
+  
   
   if (req.method === 'GET') {
     try {
