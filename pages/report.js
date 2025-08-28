@@ -393,7 +393,7 @@ console.log("match Score",scoreMatch);
 
   useEffect(() => {
     // if (!jobRoleId) return;
-    if (!jobRoleId) return;
+    if (!recordId) return;
 
     const fetchJobRole = async () => {
       try {
@@ -449,7 +449,7 @@ console.log("match Score",scoreMatch);
     };
 
     fetchJobRole();
-  }, [jobRoleId]);
+  }, [recordId]);
 
   const storeReport = async (role,subject, email, reportAnalysis) => {
     // Ensure collageName has a default value if it's undefined
