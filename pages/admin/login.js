@@ -11,7 +11,7 @@ export default function Login() {
     const router = useRouter();
 
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
-    
+
     const handleChange = (e) => {
         if (e.target.name === 'email') {
             setEmail(e.target.value);
@@ -27,7 +27,7 @@ export default function Login() {
         const data = { email, password };
 
         try {
-              
+
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/collageLogin`, {
                 method: 'POST',
@@ -77,7 +77,7 @@ export default function Login() {
 
                 setTimeout(() => {
                     router.push({
-                        pathname: '/', 
+                        pathname: '/',
                         query: { user: response.user },
                     });
                 }, 1000);
@@ -114,50 +114,50 @@ export default function Login() {
             <img src="/
             " className="absolute  w-full h-full object-cover z-[-1]" alt="background" />
             <img src="/Logoo.png" className="absolute top-4 right-8 w-20 mb-4" alt="Logo" />
-            
+
             <div className="bg-transparent text-center p-6 w-full max-w-md rounded-lg">
-            <h1 className="text-4xl text-purple-500 font-bold mb-6">Welcome <span className="text-black">Back!</span></h1>
-                
+                <h1 className="text-4xl text-purple-500 font-bold mb-6">तुमचे <span className="text-black">स्वागत आहे!</span></h1>
+
                 <form onSubmit={handleSubmit}>
-                    
-                    <input 
-                        type="email" 
+
+                    <input
+                        type="email"
                         id="email"
                         name="email"
                         value={email}
                         onChange={handleChange}
-                        placeholder="Email Address" 
+                        placeholder="ईमेल पत्ता"
                         className="w-full p-3  bg-[#6c57ec] bg-opacity-20 rounded-full  text-base mb-4 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
                     />
-                    
+
                     <div className="relative mb-4">
                         <input
                             type={showPassword ? 'text' : 'password'}
-                            id="password" 
+                            id="password"
                             name="password"
                             value={password}
                             onChange={handleChange}
-                            placeholder="Password"
+                            placeholder="पासवर्ड"
                             className="w-full p-3 bg-[#6c57ec] bg-opacity-20 rounded-full  text-base focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent"
                         />
-                        <span 
+                        <span
                             className="absolute top-1/2 transform -translate-y-1/2 right-4 cursor-pointer text-white text-xl"
                             onClick={togglePasswordVisibility}
                         >
                             {showPassword ? '🙈' : '👁️'}
                         </span>
                     </div>
-                    
-                    
-                    
-                    <button 
-                        type="submit" 
+
+
+
+                    <button
+                        type="submit"
                         className="w-full py-3 rounded-full bg-[#6c57ec] text-white text-base transition-all hover:bg-[#5037f4]"
                     >
-                        LOG IN
+                        लॉगिन करा
                     </button>
                 </form>
-{/*                 
+                {/*                 
                 <a href="#" className="text-pink-400 text-sm mt-4 block">Forgot Password?</a>
                 
                 <div className=" text-sm mt-4">

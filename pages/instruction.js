@@ -96,8 +96,8 @@ function Instruction() {
     // Function to handle text-to-speech
     const speak = (text) => {
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        utterance.rate = 1.2;
+        utterance.lang = 'mr-IN'; // Changed from 'en-US' to 'mr-IN'
+        utterance.rate = 1.0; // Slightly slower for better clarity in Marathi
         window.speechSynthesis.speak(utterance);
         return new Promise(resolve => {
             utterance.onend = resolve;
@@ -105,7 +105,7 @@ function Instruction() {
     };
 
     // Test speaker by reading a sentence
-     const testSpeaker = async () => {
+    const testSpeaker = async () => {
         setTestMessage('स्पीकर तपासणी चालू आहे... कृपया काळजीपूर्वक ऐका');
         await speak('हा स्पीकर चाचणी संदेश आहे. जर तुम्हाला हा स्पष्टपणे ऐकू येत असेल, तर तुमचा स्पीकर व्यवस्थित कार्यरत आहे.');
         setTestMessage('स्पीकर तपासणी पूर्ण झाली आहे. मायक्रोफोन तपासण्यासाठी कृपया पुढील बटणावर क्लिक करा.');
@@ -113,32 +113,33 @@ function Instruction() {
 
     // Test microphone by having user read a sentence
     const testMicrophone = async () => {
-        setTestMessage('मायक्रोफोन तपासणी सुरू आहे. कृपया खालील वाक्य नीट उच्चारावे: "The quick brown fox jumps over the lazy dog."');
-        
+        setTestMessage('मायक्रोफोन तपासणी सुरू आहे. कृपया खालील वाक्य नीट उच्चारावे: "नमस्कार, मी मुलाखतीसाठी तयार आहे."');
+
         // Initialize speech recognition
         recognitionRef.current = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognitionRef.current.lang = 'mr-IN'; // Explicitly set to Marathi
         recognitionRef.current.continuous = false;
         recognitionRef.current.interimResults = false;
-        
+
         // Speak the test sentence
-        await speak('कृपया माझ्या नंतर पुनः उच्चार करा: The quick brown fox jumps over the lazy dog.');
-        
+        await speak('कृपया माझ्या नंतर पुनः उच्चार करा: नमस्कार, मी मुलाखतीसाठी तयार आहे.');
+
         // Start listening for user response
         recognitionRef.current.start();
-        setTestMessage('आम्ही तुमचा आवाज ऐकत आहोत, कृपया बोला: "The quick brown fox jumps over the lazy dog."');
-        
+        setTestMessage('आम्ही तुमचा आवाज ऐकत आहोत, कृपया बोला: "नमस्कार, मी मुलाखतीसाठी तयार आहे."');
+
         return new Promise(resolve => {
             recognitionRef.current.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
-                if (transcript.toLowerCase().includes('quick brown fox')) {
+                if (transcript.includes('नमस्कार') || transcript.includes('तयार')) {
                     setTestMessage('मायक्रोफोन तपासणी यशस्वीरीत्या पूर्ण झाली आहे');
                     resolve(true);
                 } else {
-                    setTestMessage('कृपया पुन्हा प्रयत्न करा. खालील वाक्य माझ्या नंतर बोला: "The quick brown fox jumps over the lazy dog."');
+                    setTestMessage('कृपया पुन्हा प्रयत्न करा. खालील वाक्य माझ्या नंतर बोला: "नमस्कार, मी मुलाखतीसाठी तयार आहे."');
                     resolve(false);
                 }
             };
-            
+
             recognitionRef.current.onerror = () => {
                 setTestMessage('मायक्रोफोन एक्सेस डिनायड आहे. कृपया मायक्रोफोनसाठी परवानगी ऑन करा.');
                 resolve(false);
@@ -164,7 +165,7 @@ function Instruction() {
     // Run speaker test on component mount
     useEffect(() => {
         testSpeaker();
-        
+
         // Cleanup speech recognition on unmount
         return () => {
             if (recognitionRef.current) {
@@ -175,17 +176,17 @@ function Instruction() {
 
     useEffect(() => {
         if (!localStorage.getItem("token")) {
-          router.push("/login");
+            router.push("/login");
         } else {
-          const userFromStorage = JSON.parse(localStorage.getItem('user'));
-        //   console.log(userFromStorage);
-          
-          if (userFromStorage) {
-            
-            setCollageName(userFromStorage.collageName || '');  // Initialize email here directly
-          }
+            const userFromStorage = JSON.parse(localStorage.getItem('user'));
+            //   console.log(userFromStorage);
+
+            if (userFromStorage) {
+
+                setCollageName(userFromStorage.collageName || '');  // Initialize email here directly
+            }
         }
-      }, []);
+    }, []);
 
     // Check API response status periodically
     useEffect(() => {
@@ -202,7 +203,7 @@ function Instruction() {
         return () => clearInterval(intervalId);
     }, []);
 
-    const handleButtonClick = async(e) => {
+    const handleButtonClick = async (e) => {
         // Remove apiResponseStatus from localStorage
         localStorage.removeItem("apiResponseStatus");
 
@@ -210,7 +211,7 @@ function Instruction() {
 
         try {
             // const collageName = "Dynamic Crane Engineers Pvt. Ltd.";  // You can replace this with dynamic data
-        
+
             // 1. Attempt to get the existing collage data by collageName using GET method
             const getRes = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/isActive?collageName=${collageName}`, {
                 method: 'GET',  // Use GET method to check if the collage exists
@@ -218,10 +219,10 @@ function Instruction() {
                     'Content-Type': 'application/json',
                 }
             });
-        
+
             let isActive = 1;  // Default is 1 if collage doesn't exist
             let collageExists = false;
-        
+
             if (getRes.ok) {
                 const collageData = await getRes.json();
                 if (collageData?.isActive !== undefined) {
@@ -229,12 +230,12 @@ function Instruction() {
                     collageExists = true;
                 }
             }
-        
+
             // 2. Prepare the data to be saved
             const data = { collageName, isActive };
-        
+
             let finalRes;
-        
+
             // 3. Use PUT if the collage already exists, else POST to create
             if (collageExists) {
                 // collage exists, update with PUT method
@@ -255,12 +256,12 @@ function Instruction() {
                     body: JSON.stringify(data),
                 });
             }
-        
+
             if (!finalRes.ok) {
                 const errorData = await finalRes.json();
                 throw new Error(errorData?.error || "कॉलेजची माहिती जतन करण्यात अयशस्वी झाले.");
             }
-        
+
             const finalResponse = await finalRes.json();
             if (finalResponse.success) {
                 console.log("कॉलेज डेटा यशस्वीपणे अपडेट/तयार केला गेला आहे.");
@@ -272,18 +273,18 @@ function Instruction() {
 
     return (
         <>
-            <button onClick={() => router.back()} className="absolute font-bold h-20 w-20 text-4xl top-10 left-10 text-purple-400 hover:text-purple-300">
+            <button onClick={() => window.location.href = '/'} className="absolute font-bold h-20 w-20 text-4xl top-10 left-10 text-purple-400 hover:text-purple-300">
                 <img src="/2.svg" className=' top-10 left-10 ' alt="Back" />
             </button>
             <div className="absolute top-10 right-10">
-                <div className="rounded-full flex items-center justify-center">
+                {/* <div className="rounded-full flex items-center justify-center">
                     <img src="/logoo.png" alt="Logo" className="w-16 h-16" />
-                </div>
+                </div> */}
             </div>
-            <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/BG.jpg')" }}>
-                <div className="relative  max-w-xl   bg-opacity-80 rounded-xl shadow-lg sm:max-w-md md:max-w-lg">
-                    <div className="m-10 mb-20 rounded-lg text-sm text-center bg-gradient-to-r from-pink-800 to-purple-900 p-2">डिव्हाइस टेस्ट</div>
-                    <div className="bg-white h-44 rounded-xl shadow-lg p-6 w-96 relative">
+            <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{backgroundColor:'black'}}>
+                <div className="relative  max-w-xl   bg-opacity-80 rounded-xl shadow-lg sm:max-w-md md:max-w-lg bg-white p-6">
+                    <div className="m-8 mb-20 rounded-lg text-sm text-center bg-gradient-to-r from-pink-800 to-purple-900 p-2 text-white">डिव्हाइस टेस्ट</div>
+                    <div className="bg-white h-44 rounded-xl shadow-lg p-6 w-90 relative">
                         {/* Header Badge */}
                         {slides.map((slide, index) => (
                             <div
@@ -312,7 +313,7 @@ function Instruction() {
                     <div className="mt-4 text-center">
                         <p className="mb-4">{testMessage}</p>
                         {testPhase !== 'done' && (
-                            <button 
+                            <button
                                 onClick={handleNextTest}
                                 className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-md text-white"
                             >
@@ -322,9 +323,9 @@ function Instruction() {
                     </div>
 
                     <div className="mt-32 text-center ">
-                        <button 
-                            onClick={handleButtonClick} 
-                            disabled={!isButtonEnabled} 
+                        <button
+                            onClick={handleButtonClick}
+                            disabled={!isButtonEnabled}
                             className={`${isButtonEnabled ? 'bg-gradient-to-r from-pink-800 to-purple-900' : 'bg-gradient-to-r from-pink-200 to-purple-300 cursor-not-allowed'} px-4 py-2  rounded-md text-white`}
                         >
                             मी तयार आहे, सुरू करूया!

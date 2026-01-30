@@ -1,15 +1,7 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const OverallScoreSchema = new mongoose.Schema({
   role: {
-    type: String,
-    required: true,
-  },
-  subject: {
-    type: String,
-    
-  },
-   email: {
     type: String,
     required: true,
   },
@@ -17,13 +9,16 @@ const OverallScoreSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
- 
-  overallScore: {
-    type: Number,
+  email: {
+    type: String,
     required: true,
   },
-  
-},{timestamps:true});
+  overallScore: {
+    type: String,
+    required: true,
+  },
+
+}, { timestamps: true });
 
 
-export default mongoose.models.OverallScore || mongoose.model('OverallScore', OverallScoreSchema);
+module.exports = mongoose.models.OverallScore || mongoose.model('OverallScore', OverallScoreSchema);

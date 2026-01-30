@@ -6,7 +6,7 @@ export default function Document() {
     <Html lang="mr">
       <Head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
         <meta name="description" content="SHAKKTII AI - मराठी मध्ये मॉक इंटरव्ह्यूचा सराव करा" />
 
         {/* Google Font: Itim */}

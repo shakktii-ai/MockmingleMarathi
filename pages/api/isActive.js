@@ -1,6 +1,6 @@
 
 
-import connectDb from '../../middleware/dbConnect';  // Import DB connection utility
+import connectDb from '@/middleware/dbConnect';  // Import DB connection utility
 import ActiveUser from '../../models/ActiveUser';  // Import the ActiveUser model
 import mongoose from 'mongoose';
 

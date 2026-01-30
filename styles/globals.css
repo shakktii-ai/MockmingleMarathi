@@ -221,3 +221,191 @@ img, video, iframe {
     background-color: #0056b3;
   }
   
+
+
+
+
+
+
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+@layer base {
+  :root {
+    /* MockMingle Brand Colors */
+    --primary: 222 72% 43%;
+    --primary-foreground: 0 0% 100%;
+    
+    --teal: 163 56% 48%;
+    --teal-foreground: 0 0% 100%;
+    
+    /* Secondary */
+    --gold: 43 91% 62%;
+    --gold-foreground: 225 14% 12%;
+    
+    --purple: 264 52% 48%;
+    --purple-foreground: 0 0% 100%;
+    
+    --indigo: 264 46% 19%;
+    --indigo-foreground: 0 0% 100%;
+    
+    /* Backgrounds */
+    --background: 240 100% 98%;
+    --foreground: 225 14% 12%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 225 14% 12%;
+    
+    --lavender: 249 100% 95%;
+    --lavender-foreground: 225 14% 12%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 14% 12%;
+    
+    /* Text */
+    --muted: 240 7% 89%;
+    --muted-foreground: 249 6% 45%;
+    
+    --secondary: 163 56% 48%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --accent: 249 100% 95%;
+    --accent-foreground: 225 14% 12%;
+    
+    /* Status */
+    --success: 145 63% 49%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 32 100% 64%;
+    --warning-foreground: 225 14% 12%;
+    
+    --destructive: 0 67% 65%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --info: 206 100% 67%;
+    --info-foreground: 0 0% 100%;
+    
+    /* Borders */
+    --border: 220 16% 84%;
+    --border-light: 240 20% 93%;
+    --input: 220 16% 84%;
+    --ring: 222 72% 43%;
+    
+    --radius: 0.75rem;
+    
+    /* Gradients */
+    --gradient-blue-teal: linear-gradient(135deg, hsl(222 72% 43%) 0%, hsl(163 56% 48%) 100%);
+    --gradient-purple-indigo: linear-gradient(135deg, hsl(264 52% 48%) 0%, hsl(264 46% 19%) 100%);
+    --gradient-gold-blue: linear-gradient(135deg, hsl(43 91% 62%) 0%, hsl(222 72% 43%) 100%);
+    
+    /* Shadows */
+    --shadow-card: 0 4px 20px -4px hsl(222 72% 43% / 0.08);
+    --shadow-elevated: 0 8px 30px -8px hsl(222 72% 43% / 0.15);
+    --shadow-glow-primary: 0 0 40px hsl(222 72% 43% / 0.25);
+    --shadow-glow-teal: 0 0 40px hsl(163 56% 48% / 0.25);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 264 46% 8%;
+    --foreground: 0 0% 98%;
+    
+    --card: 264 46% 12%;
+    --card-foreground: 0 0% 98%;
+    
+    --lavender: 264 30% 18%;
+    --lavender-foreground: 0 0% 98%;
+    
+    --popover: 264 46% 12%;
+    --popover-foreground: 0 0% 98%;
+    
+    --muted: 264 20% 20%;
+    --muted-foreground: 240 7% 70%;
+    
+    --accent: 264 30% 18%;
+    --accent-foreground: 0 0% 98%;
+    
+    --border: 264 20% 25%;
+    --border-light: 264 20% 20%;
+    --input: 264 20% 25%;
+    --ring: 163 56% 48%;
+
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+@layer components {
+  .gradient-blue-teal {
+    background: var(--gradient-blue-teal);
+  }
+  
+  .gradient-purple-indigo {
+    background: var(--gradient-purple-indigo);
+  }
+  
+  .gradient-gold-blue {
+    background: var(--gradient-gold-blue);
+  }
+  
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+  
+  .glow-primary {
+    box-shadow: var(--shadow-glow-primary);
+  }
+  
+  .glow-teal {
+    box-shadow: var(--shadow-glow-teal);
+  }
+}
+
+@layer utilities {
+  .text-gradient-blue-teal {
+    background: var(--gradient-blue-teal);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-purple {
+    background: var(--gradient-purple-indigo);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}

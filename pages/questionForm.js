@@ -36,12 +36,12 @@ const QuestionForm = () => {
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [collageName, setCollageName] = useState('');
   const [voice, setVoice] = useState(null);
-  
+
   // Refs
   const isSpeakingRef = useRef(false);
   const questionSpokenRef = useRef(false);
   const questionTimerRef = useRef(null);
-  
+
   useEffect(() => {
     // Disable all speech synthesis globally - runs only on client side
     if (typeof window !== 'undefined') {
@@ -51,7 +51,7 @@ const QuestionForm = () => {
           console.warn('[Speech Blocked] Speech synthesis call skipped.');
         };
       }
-      
+
       // Add event listener for page visibility changes (important for mobile)
       const handleVisibilityChange = () => {
         if (document.visibilityState === 'visible' && isListening) {
@@ -68,9 +68,9 @@ const QuestionForm = () => {
           }, 1000);
         }
       };
-      
+
       document.addEventListener('visibilitychange', handleVisibilityChange);
-      
+
       return () => {
         document.removeEventListener('visibilitychange', handleVisibilityChange);
       };
@@ -85,7 +85,7 @@ const QuestionForm = () => {
         window.microphoneStream.getTracks().forEach(track => track.stop());
         window.microphoneStream = null;
       }
-      
+
       // Try to get microphone access with specific constraints for mobile
       const constraints = {
         audio: {
@@ -97,12 +97,12 @@ const QuestionForm = () => {
         // Mobile-specific constraints
         video: false
       };
-      
+
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      
+
       // Store the stream globally for later use
       window.microphoneStream = stream;
-      
+
       // Handle track ended events (important for mobile)
       stream.getAudioTracks().forEach(track => {
         track.onended = () => {
@@ -113,10 +113,10 @@ const QuestionForm = () => {
           }
         };
       });
-      
+
       setMicPermission('granted');
       setShowPermissionModal(false);
-      
+
       // On mobile, we don't want to reload the page as it breaks the flow
       if (!/Mobi|Android/i.test(navigator.userAgent)) {
         window.location.reload();
@@ -125,16 +125,16 @@ const QuestionForm = () => {
       console.error('Failed to get microphone permission:', error);
       setMicPermission('denied');
       setShowPermissionModal(true);
-      
+
       // More user-friendly error message
-      const errorMessage = error.name === 'NotAllowedError' 
-        ? 'Microphone access was denied. Please allow microphone access in your browser settings and try again.'
-        : 'Microphone access is required for this application. Please check your device settings and try again.';
-      
+      const errorMessage = error.name === 'NotAllowedError'
+        ? 'मायक्रोफोन एक्सेस नाकारला गेला आहे. कृपया तुमच्या ब्राउझर सेटिंग्जमध्ये मायक्रोफोन एक्सेसला परवानगी द्या आणि पुन्हा प्रयत्न करा.'
+        : 'या ॲप्लिकेशनसाठी मायक्रोफोन एक्सेस आवश्यक आहे. कृपया तुमच्या डिव्हाइस सेटिंग्ज तपासा आणि पुन्हा प्रयत्न करा.';
+
       alert(errorMessage);
     }
   };
-  
+
   // Refresh function for mic issues
   const handleRefreshPage = () => {
     window.location.reload();
@@ -158,7 +158,7 @@ const QuestionForm = () => {
     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
       setIsIphone(true);
     }
-    
+
     // States moved to component level
 
     // Request microphone permissions and test if it's working
@@ -168,10 +168,10 @@ const QuestionForm = () => {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         console.log("✅ Microphone access granted.");
         setMicPermission('granted');
-        
+
         // Store the mic stream in a ref for later use
         window.microphoneStream = stream;
-        
+
         // Test if the microphone is actually working by analyzing audio levels
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const analyser = audioContext.createAnalyser();
@@ -180,7 +180,7 @@ const QuestionForm = () => {
         analyser.fftSize = 256;
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
-        
+
         // Check audio levels for 3 seconds to make sure mic is really working
         let checkCount = 0;
         let audioDetectedCount = 0;
@@ -188,11 +188,11 @@ const QuestionForm = () => {
           analyser.getByteFrequencyData(dataArray);
           // Check if there's any audio signal
           const audioDetected = dataArray.some(value => value > 20); // Threshold for audio detection
-          
+
           if (audioDetected) {
             audioDetectedCount++;
           }
-          
+
           if (audioDetectedCount >= 3) {
             console.log("✅ Microphone is working and detecting audio.");
             setMicWorking(true);
@@ -206,7 +206,7 @@ const QuestionForm = () => {
               console.warn("⚠️ No audio detected from microphone. It might be muted or not working properly.");
               setMicWorking(false);
               // Show guidance without blocking
-              const shouldShowHelp = confirm("No audio detected from your microphone. Would you like to see troubleshooting tips?");
+              const shouldShowHelp = confirm("तुमच्या मायक्रोफोनमधून कोणताही आवाज येत नाही. तुम्हाला काही उपाय पाहायचे आहेत का?");
               if (shouldShowHelp) {
                 showMicrophoneTroubleshooting();
               }
@@ -215,7 +215,7 @@ const QuestionForm = () => {
           }
           checkCount++;
         }, 200);
-        
+
       } catch (err) {
         console.error("❌ Microphone access denied or not available:", err);
         setMicPermission('denied');
@@ -224,17 +224,17 @@ const QuestionForm = () => {
     };
 
     requestPermissions();
-    
+
     // Function to show microphone troubleshooting guidance
     const showMicrophoneTroubleshooting = () => {
-      alert(`Microphone Troubleshooting Tips:\n\n
-1. Make sure your microphone is not muted in your system settings\n
-2. Check if your browser has permission to access the microphone\n
-3. Try using another browser like Chrome or Edge\n
-4. If using headphones with a mic, try unplugging and using the built-in mic\n
-5. Check Windows Sound settings to ensure the right microphone is selected as default\n
-6. Speak louder or move closer to the microphone\n\n
-After fixing, please refresh the page.`);
+      alert(`मायक्रोफोन दुरुस्त करण्यासाठी काही टिप्स:\n\n
+1. तुमचा मायक्रोफोन तुमच्या सिस्टम सेटिंग्जमध्ये म्यूट (Mute) केलेला नाही याची खात्री करा.\n
+2. तुमच्या ब्राउझरला मायक्रोफोन एक्सेस करण्याची परवानगी आहे का ते तपासा.\n
+3. क्रोम (Chrome) किंवा एज (Edge) सारखा दुसरा ब्राउझर वापरून पहा.\n
+4. जर तुम्ही माईक असलेले हेडफोन वापरत असाल, तर ते काढून इनबिल्ट माईक वापरून पहा.\n
+5. तुमचा योग्य मायक्रोफोन डिफॉल्ट म्हणून निवडला आहे याची विंडोज साऊंड सेटिंग्जमध्ये खात्री करा.\n
+6. थोडे जोरात बोला किंवा मायक्रोफोनच्या जवळ जा.\n\n
+दुरुस्त केल्यानंतर, कृपया पेज रिफ्रेश करा.`);
     };
 
     const checkStorage = () => {
@@ -248,39 +248,39 @@ After fixing, please refresh the page.`);
   }, []);
 
   const goodResponses = [
-    "Great! Let's move on to the next question.",
-    "Awesome! Let's continue to the next one",
-    "Perfect, let's go ahead with the next question.",
-    "Let's move on to the next question now and keep going strong!",
-    "Wonderful! Proceeding to the next question.",
-    "Let's move forward to the next one with excitement!",
-    "Next question, please, let's dive right in!",
-    "Let's go to the next one and keep the momentum going.",
-    "Moving on to the next question, excited to see what's next!",
-    "Let's continue with the next question and keep up the good work!",
-    "Now, let's go to the next question and stay on track!",
-    "Time to proceed with the next question, let's keep it up!",
-    "Next question, let's go, we're doing great!",
-    "Let's keep going with the next question and stay positive!",
-    "Let's continue with the next one, things are going well!"
+    "उत्तम! चला पुढच्या प्रश्नाकडे वळूया.",
+    "छान! आता पुढचा प्रश्न पाहूया.",
+    "अगदी बरोबर, चला पुढच्या प्रश्नाला सुरुवात करूया.",
+    "खूपच छान! आपण आता पुढच्या प्रश्नाकडे जाऊया आणि जोमाने पुढे चालूया!",
+    "मस्त! पुढचा प्रश्न तुमच्यासाठी येत आहे.",
+    "उत्तम अनुभव! उत्साहाने पुढच्या प्रश्नाकडे वळूया.",
+    "पुढचा प्रश्न, कृपया, आपण आता सविस्तर चर्चा करूया!",
+    "छान सुरू आहे, चला पुढच्या प्रश्नाकडे जाऊया.",
+    "पुढच्या प्रश्नाकडे वळताना आनंद होत आहे, पाहूया पुढे काय आहे!",
+    "पुढच्या प्रश्नासह आपले काम असेच चालू ठेवा!",
+    "आता, पुढच्या प्रश्नाकडे जाऊया आणि लक्ष केंद्रित करूया!",
+    "पुढच्या प्रश्नाकडे जाण्याची वेळ आली आहे, असेच प्रयत्न करत राहा!",
+    "पुढचा प्रश्न, चला, आपण चांगले करत आहोत!",
+    "पुढच्या प्रश्नासह असेच सकारात्मक राहा!",
+    "पुढच्या प्रश्नाकडे वळूया, सर्व काही चांगले चालले आहे!"
   ];
 
   const badResponses = [
-    "Um, okay, let's move to the next question.",
-    "Not quite, but let's move to the next question.",
-    "Hmm, not exactly, let's continue to the next question.",
-    "Well, that's not right, but let's go on to the next one.",
-    "Close enough, let's move on to the next question.",
-    "It's not perfect, but let's proceed to the next one.",
-    "Hmm, I see where you're going, but let's move to the next one.",
-    "That's not the answer we were looking for, but let's continue.",
-    "Not quite right, but let's continue to the next question.",
-    "Almost, but we'll keep going.",
-    "I think we missed it, let's move on.",
-    "Hmm, not quite, but let's keep going.",
-    "That's a bit off, but let's move to the next one.",
-    "Not exactly what we needed, but let's continue.",
-    "Close, but not quite there, let's move on."
+    "ठीक आहे, पुढच्या प्रश्नाकडे जाऊया.",
+    "अगदी तसं नाही, पण चला पुढचा प्रश्न पाहूया.",
+    "हम्म, पूर्णपणे नाही, पुढच्या प्रश्नाकडे वळूया.",
+    "बरं, ते पूर्णपणे बरोबर नाही, तरीही आपण पुढच्या प्रश्नाकडे जाऊया.",
+    "जवळपास पोहोचला आहात, चला पुढच्या प्रश्नाकडे वळूया.",
+    "हे पूर्णपणे योग्य नाही, पण आपण पुढचा प्रयत्न करूया.",
+    "मला समजतेय तुम्हाला काय म्हणायचे आहे, पण चला पुढचा प्रश्न पाहूया.",
+    "आम्हाला अपेक्षित असलेले हे उत्तर नाही, पण आपण पुढे जाऊया.",
+    "थोडं चुकीचं आहे, पण आपण पुढच्या प्रश्नाकडे वळूया.",
+    "जवळपास, पण आपण पुढे चालू ठेवूया.",
+    "मला वाटते आपण काहीतरी विसरलो, चला पुढचा प्रश्न पाहूया.",
+    "हम्म, पूर्णपणे नाही, पण आपण प्रयत्न चालू ठेवूया.",
+    "हे थोडं वेगळं आहे, पण पुढच्या प्रश्नाकडे वळूया.",
+    "आम्हाला हवे तसे नाही, पण आपण पुढे जाऊया.",
+    "जवळपास, पण पूर्ण नाही, चला पुढच्या प्रश्नाकडे गौरव करूया."
   ];
 
   useEffect(() => {
@@ -356,20 +356,20 @@ After fixing, please refresh the page.`);
         alert('Speech recognition is not supported in this browser.');
         return null;
       }
-      
+
       // Check if we're on mobile
       const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-      
+
       // Create a new SpeechRecognition instance
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognitionInstance = new SpeechRecognition();
-      
+
       // Configure recognition with mobile-specific settings
       recognitionInstance.lang = 'mr-IN';
       recognitionInstance.continuous = true; // Keep listening continuously
       recognitionInstance.interimResults = true; // Get partial results
       recognitionInstance.maxAlternatives = 1;
-      
+
       // Mobile-specific configurations
       if (isMobile) {
         console.log('Mobile device detected, applying mobile-specific settings');
@@ -381,11 +381,11 @@ After fixing, please refresh the page.`);
         recognitionInstance.maxAlternatives = 3;
         // Add a small delay between recognition restarts
         recognitionInstance.pause = false;
-        
+
         // Add error handling for mobile-specific issues
         recognitionInstance.onerror = (event) => {
           console.error('Mobile speech recognition error:', event.error);
-          
+
           // Handle specific mobile errors
           if (event.error === 'not-allowed') {
             setMicPermission('denied');
@@ -395,7 +395,7 @@ After fixing, please refresh the page.`);
           } else if (event.error === 'network') {
             alert('Network error occurred. Please check your internet connection.');
           }
-          
+
           // Try to recover if we're supposed to be listening
           if (isListening) {
             setTimeout(() => {
@@ -411,10 +411,10 @@ After fixing, please refresh the page.`);
           }
         };
       }
-      
+
       // Current accumulated transcript - stored outside React state for reliability
       let currentTranscript = '';
-      
+
       // Reset state when recognition starts
       recognitionInstance.onstart = () => {
         console.log('Speech recognition started');
@@ -425,54 +425,54 @@ After fixing, please refresh the page.`);
         }
         setIsListening(true);
       };
-      
+
       // Handle speech results
       recognitionInstance.onresult = (event) => {
         if (event.results && event.results.length > 0) {
           // Get the latest transcript - accumulate it instead of replacing
           const latestTranscript = event.results[event.results.length - 1][0].transcript;
-          
+
           // Append latest transcript to current transcript if it's a new segment
           // This is important to prevent repetition while maintaining continuous recording
           if (event.results[event.results.length - 1].isFinal) {
             currentTranscript = currentTranscript + ' ' + latestTranscript;
           }
-          
+
           // Create full transcript (current accumulated + latest interim result)
-          const fullTranscript = currentTranscript + ' ' + 
-              (event.results[event.results.length - 1].isFinal ? '' : latestTranscript);
-          
+          const fullTranscript = currentTranscript + ' ' +
+            (event.results[event.results.length - 1].isFinal ? '' : latestTranscript);
+
           // Clean the transcript
           const cleanText = fullTranscript
             .replace(/\s+/g, ' ') // Normalize spaces
             .trim();
-          
+
           // Update UI with the accumulating transcript
           setRecordedText(cleanText);
         }
       };
-      
+
       // Handle end of recognition with improved mobile handling
       recognitionInstance.onend = () => {
         console.log('Speech recognition service disconnected');
-        
+
         // If we're on mobile and still supposed to be listening
         if (isMobile && isListening && !isAnswerSubmitted && !window.stopRecognitionRequested) {
           console.log('Mobile: Auto-restarting speech recognition');
-          
+
           // Use a more robust restart mechanism for mobile
           const restartRecognition = () => {
             if (!isListening || isAnswerSubmitted || window.stopRecognitionRequested) return;
-            
+
             try {
               // Clear any existing timeouts to prevent multiple restarts
               if (window.recognitionRestartTimeout) {
                 clearTimeout(window.recognitionRestartTimeout);
               }
-              
+
               // Add a small random delay to prevent tight loops
               const delay = 100 + Math.random() * 200; // 100-300ms
-              
+
               window.recognitionRestartTimeout = setTimeout(() => {
                 try {
                   if (recognitionInstance && isListening) {
@@ -489,13 +489,13 @@ After fixing, please refresh the page.`);
                   }
                 }
               }, delay);
-              
+
             } catch (e) {
               console.error('Mobile: Error in recognition restart logic:', e);
               setIsListening(false);
             }
           };
-          
+
           // Start the restart process
           restartRecognition();
         } else if (!isMobile && isListening && !isAnswerSubmitted && !window.stopRecognitionRequested) {
@@ -516,27 +516,27 @@ After fixing, please refresh the page.`);
           setIsListening(false);
         }
       };
-      
+
       // Enhanced error handling specifically for speech recognition
       recognitionInstance.onerror = (event) => {
         console.error('Speech recognition error:', event);
-        
+
         // Special handling by error type
-        switch(event.error) {
+        switch (event.error) {
           case 'no-speech':
             // This is common and expected - user didn't speak yet
             console.log('No speech detected yet, continuing to listen...');
-            
+
             // Visually indicate we're still listening (flash the mic icon)
             const micIcon = document.querySelector('.mic-icon');
             if (micIcon) {
               micIcon.classList.add('pulse');
               setTimeout(() => micIcon.classList.remove('pulse'), 1000);
             }
-            
+
             // Don't stop listening on no-speech errors
             break;
-            
+
           case 'not-allowed':
           case 'audio-capture':
             // Permission or mic hardware errors - show the permission modal
@@ -545,20 +545,20 @@ After fixing, please refresh the page.`);
             setShowPermissionModal(true);
             setIsListening(false);
             break;
-            
+
           case 'network':
             // Network issues
             console.error('Network error affecting speech recognition');
             alert('Network issue detected. Check your internet connection and try again.');
             setIsListening(false);
             break;
-            
+
           case 'aborted':
             // User or system aborted - often normal
             console.log('Speech recognition aborted');
             // Don't alert the user for aborted events
             break;
-            
+
           default:
             // Other errors
             console.error('Other speech recognition error:', event.error);
@@ -567,12 +567,12 @@ After fixing, please refresh the page.`);
               setIsListening(false);
             }
         }
-        
+
         // Auto-restart recognition for non-critical errors
-        if (isListening && !isAnswerSubmitted && 
-            event.error !== 'not-allowed' && 
-            event.error !== 'audio-capture' && 
-            event.error !== 'network') {
+        if (isListening && !isAnswerSubmitted &&
+          event.error !== 'not-allowed' &&
+          event.error !== 'audio-capture' &&
+          event.error !== 'network') {
           setTimeout(() => {
             try {
               recognitionInstance.start();
@@ -584,10 +584,10 @@ After fixing, please refresh the page.`);
           }, 300);
         }
       };
-      
+
       return recognitionInstance;
     };
-    
+
     // Clean up any existing instance
     if (recognition) {
       try {
@@ -601,11 +601,11 @@ After fixing, please refresh the page.`);
         console.error('Error cleaning up recognition:', e);
       }
     }
-    
+
     // Create new recognition instance
     const newRecognition = setupSpeechRecognition();
     setRecognition(newRecognition);
-    
+
     return () => {
       // Clean up on unmount
       if (recognition) {
@@ -629,19 +629,19 @@ After fixing, please refresh the page.`);
     const useGoodResponse = Math.random() < 0.7;
     const responses = useGoodResponse ? goodResponses : badResponses;
     const feedbackText = responses[Math.floor(Math.random() * responses.length)];
-    
+
     // Clean up any special characters that might cause issues with speech
     const cleanFeedback = feedbackText.replace(/[\u2014\u2013\u201C\u201D\u2018\u2019`*()\[\]{}|\\^<>]/g, '');
-    
+
     console.log('🗣️ SPEAKING FEEDBACK:', cleanFeedback);
-    
+
     // CRITICAL: Set a failsafe timeout to move to next question
     // This ensures we'll move on even if speech fails
     const failsafeTimeout = setTimeout(() => {
       console.log('⚠️ FAILSAFE: Moving to next question after speech timeout');
       handleNext();
     }, 5000);
-    
+
     // Speak the feedback with the female voice
     try {
       speakResponse(cleanFeedback, () => {
@@ -656,12 +656,12 @@ After fixing, please refresh the page.`);
       handleNext();
     }
   };
-  
+
   const submitAnswer = async (questionId, answer) => {
     try {
       // Get the authentication token from localStorage
       const token = localStorage.getItem('token');
-      
+
       if (!token) {
         console.error('Authentication token not found. User may need to log in again.');
         // Optional: Redirect to login or show a message
@@ -703,7 +703,7 @@ After fixing, please refresh the page.`);
       alert('Speech recognition not available');
       return;
     }
-    
+
     // Check if we're on mobile and handle permissions
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
     if (isMobile && micPermission !== 'granted') {
@@ -716,10 +716,10 @@ After fixing, please refresh the page.`);
       console.log('Stopping speech recognition');
       setIsListening(false);
       setLoading(true);
-      
+
       // Important: Set a flag to prevent auto-restart
       window.stopRecognitionRequested = true;
-      
+
       try {
         recognition.stop();
       } catch (e) {
@@ -733,27 +733,27 @@ After fixing, please refresh the page.`);
         const currentAnswers = [...answers];
         currentAnswers[currentQuestionIndex] = recordedText;
         setAnswers(currentAnswers);
-        
+
         // Submit the answer to the server
         if (questions[currentQuestionIndex] && questions[currentQuestionIndex]._id) {
           submitAnswer(questions[currentQuestionIndex]._id, recordedText);
         } else {
           console.error('Question ID not found for submission');
         }
-        
+
         // Reset recorded text
         setRecordedText('');
-        
+
         // Mark answer as submitted
         setIsAnswerSubmitted(true);
-        
+
         // IMPORTANT: Set loading to false to ensure UI updates
         setLoading(false);
-        
+
         // SUPER IMPORTANT: DIRECT QUESTION PROGRESSION
         // This is the safest approach - just move to the next question directly
         console.log('⏭️ DIRECTLY MOVING to next question');
-        
+
         // Check if this is the last question
         if (currentQuestionIndex >= questions.length - 1) {
           console.log('🏁 LAST QUESTION - showing completion modal');
@@ -776,7 +776,7 @@ After fixing, please refresh the page.`);
           submitAnswer(questions[currentQuestionIndex]._id, noAnswerText);
         }
         setLoading(false);
-        
+
         // DIRECT QUESTION PROGRESSION instead of using handleNext
         // Check if this is the last question
         if (currentQuestionIndex >= questions.length - 1) {
@@ -796,10 +796,10 @@ After fixing, please refresh the page.`);
     } else {
       // START RECORDING
       console.log('Starting speech recognition');
-      
+
       // Clear the flag to allow auto-restart
       window.stopRecognitionRequested = false;
-      
+
       // On mobile, we need to ensure we have a fresh stream
       if (isMobile && (!window.microphoneStream || window.microphoneStream.getAudioTracks().length === 0)) {
         console.log('Refreshing microphone stream for mobile');
@@ -810,7 +810,7 @@ After fixing, please refresh the page.`);
           return;
         }
       }
-      
+
       // CRITICAL: Clear the question timer when mic is activated
       // This prevents "Time's up" from interrupting while speaking
       if (questionTimerRef.current) {
@@ -818,13 +818,13 @@ After fixing, please refresh the page.`);
         clearTimeout(questionTimerRef.current);
         questionTimerRef.current = null;
       }
-      
+
       // Check if questions are available
       if (!questions.length) {
         alert('No questions loaded');
         return;
       }
-      
+
       // Check if microphone permission is denied - show the modal
       if (micPermission === 'denied') {
         setShowPermissionModal(true);
@@ -834,7 +834,7 @@ After fixing, please refresh the page.`);
       // Clear previous text
       setRecordedText('Listening...');
       setIsListening(true);
-      
+
       // Mobile-specific: Add a small delay and check if recognition is still active
       if (/Mobi|Android/i.test(navigator.userAgent)) {
         setTimeout(() => {
@@ -862,10 +862,10 @@ After fixing, please refresh the page.`);
           }
         }, 1000); // Check after 1 second if we need to restart
       }
-      
+
       // Store the silence timeout ID
       setSilenceTimeout(silenceTimeout);
-      
+
       // Verify microphone access
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then(() => {
@@ -893,159 +893,159 @@ After fixing, please refresh the page.`);
    * Speech Synthesis System
    * A centralized module for handling all speech synthesis in the application
    */
-  
+
   // Central speech utility that handles all speech with improved reliability
   const speechManager = {
-  queue: [],
-  speaking: false,
+    queue: [],
+    speaking: false,
 
-  init() {
-    if (window.speechSynthesis) {
-      window.speechSynthesis.getVoices();
-    }
-  },
+    init() {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.getVoices();
+      }
+    },
 
-  getBestVoice() {
-    const voices = window.speechSynthesis.getVoices();
+    getBestVoice() {
+      const voices = window.speechSynthesis.getVoices();
 
-    let marathiVoice = voices.find(v => v.lang === 'mr-IN');
-    if (marathiVoice) return marathiVoice;
+      let marathiVoice = voices.find(v => v.lang === 'mr-IN');
+      if (marathiVoice) return marathiVoice;
 
-    let hindiVoice = voices.find(v => v.lang === 'hi-IN');
-    if (hindiVoice) return hindiVoice;
+      let hindiVoice = voices.find(v => v.lang === 'hi-IN');
+      if (hindiVoice) return hindiVoice;
 
-    const preferredVoice = voices.find(voice =>
-      (voice.name.includes('Female') && voice.name.includes('Google')) ||
-      voice.name.includes('Microsoft Zira') ||
-      voice.name.includes('Samantha')
-    );
+      const preferredVoice = voices.find(voice =>
+        (voice.name.includes('Female') && voice.name.includes('Google')) ||
+        voice.name.includes('Microsoft Zira') ||
+        voice.name.includes('Samantha')
+      );
 
-    if (preferredVoice) return preferredVoice;
+      if (preferredVoice) return preferredVoice;
 
-    const femaleVoice = voices.find(voice =>
-      voice.name.includes('Female') ||
-      voice.name.includes('woman') ||
-      voice.name.includes('Girl')
-    );
+      const femaleVoice = voices.find(voice =>
+        voice.name.includes('Female') ||
+        voice.name.includes('woman') ||
+        voice.name.includes('Girl')
+      );
 
-    if (femaleVoice) return femaleVoice;
+      if (femaleVoice) return femaleVoice;
 
-    return voices[0];
-  },
+      return voices[0];
+    },
 
-  speakQuestion(text, onComplete) {
-    const cleanText = text.replace(/(currentQuestion|[,*])/g, "").trim();
-    this.speak(cleanText, {
-      rate: 0.9,
-      pitch: 1.0,
-      onComplete: onComplete,
-      priority: 'high'
-    });
-  },
+    speakQuestion(text, onComplete) {
+      const cleanText = text.replace(/(currentQuestion|[,*])/g, "").trim();
+      this.speak(cleanText, {
+        rate: 0.9,
+        pitch: 1.0,
+        onComplete: onComplete,
+        priority: 'high'
+      });
+    },
 
-  speakResponse(text, onComplete) {
-    this.speak(text, {
-      rate: 1.0,
-      pitch: 1.0,
-      onComplete: onComplete,
-      priority: 'medium'
-    });
-  },
+    speakResponse(text, onComplete) {
+      this.speak(text, {
+        rate: 1.0,
+        pitch: 1.0,
+        onComplete: onComplete,
+        priority: 'medium'
+      });
+    },
 
-  speak(text, options = {}) {
-    if (!text) return;
+    speak(text, options = {}) {
+      if (!text) return;
 
-    const settings = {
-      rate: 1.0,
-      pitch: 1.0,
-      volume: 1.0,
-      lang: 'mr-IN',
-      onComplete: null,
-      onError: null,
-      priority: 'medium',
-      ...options
-    };
+      const settings = {
+        rate: 1.0,
+        pitch: 1.0,
+        volume: 1.0,
+        lang: 'mr-IN',
+        onComplete: null,
+        onError: null,
+        priority: 'medium',
+        ...options
+      };
 
-    if (this.speaking && settings.priority === 'low') {
-      console.log('Already speaking, skipping low priority speech');
-      return;
-    }
+      if (this.speaking && settings.priority === 'low') {
+        console.log('Already speaking, skipping low priority speech');
+        return;
+      }
 
-    if (settings.priority === 'high') {
+      if (settings.priority === 'high') {
+        try {
+          window.speechSynthesis.cancel();
+          this.queue = [];
+          this.speaking = false;
+        } catch (e) { }
+      }
+
+      setIsSpeaking(true);
+      isSpeakingRef.current = true;
+      this.speaking = true;
+
       try {
-        window.speechSynthesis.cancel();
-        this.queue = [];
-        this.speaking = false;
-      } catch (e) {}
-    }
+        // 🔇 Speech is disabled — skipping actual synthesis
+        console.log('[Speech Disabled] Text:', text);
 
-    setIsSpeaking(true);
-    isSpeakingRef.current = true;
-    this.speaking = true;
+        // Simulate async completion
+        setTimeout(() => {
+          this.speaking = false;
+          setIsSpeaking(false);
+          isSpeakingRef.current = false;
 
-    try {
-      // 🔇 Speech is disabled — skipping actual synthesis
-      console.log('[Speech Disabled] Text:', text);
-
-      // Simulate async completion
-      setTimeout(() => {
+          if (typeof settings.onComplete === 'function') {
+            settings.onComplete();
+          }
+        }, 0);
+      } catch (e) {
+        console.error('Error in speech simulation:', e);
         this.speaking = false;
         setIsSpeaking(false);
         isSpeakingRef.current = false;
 
-        if (typeof settings.onComplete === 'function') {
+        if (typeof settings.onError === 'function') {
+          settings.onError(e);
+        } else if (typeof settings.onComplete === 'function') {
           settings.onComplete();
         }
-      }, 0);
-    } catch (e) {
-      console.error('Error in speech simulation:', e);
-      this.speaking = false;
-      setIsSpeaking(false);
-      isSpeakingRef.current = false;
-
-      if (typeof settings.onError === 'function') {
-        settings.onError(e);
-      } else if (typeof settings.onComplete === 'function') {
-        settings.onComplete();
       }
     }
-  }
-};
+  };
 
-  
+
   // Initialize speech manager
   // Direct timer function with no state checks - moved to component level for proper scoping
   const startQuestionTimer = () => {
     console.log('⏱️ STARTING 20-SECOND TIMER for question', currentQuestionIndex + 1);
-    
+
     // Always clear any existing timer first
     if (questionTimerRef.current) {
       clearTimeout(questionTimerRef.current);
       questionTimerRef.current = null;
     }
-    
+
     // Set a pure timeout that will execute after 20 seconds
     const timerId = setTimeout(() => {
       // When timer finishes, log the state
       console.log('⏱️ 20-SECOND TIMER EXPIRED for question', currentQuestionIndex + 1);
       console.log('⏱️ Current state: isListening =', isListening);
-      
+
       // ONLY check if mic is active - that's all that matters
       if (!isListening) {
         console.log('⏱️ AUTO-PROGRESSING: Timer expired');
-        
+
         // Force update UI state
         setIsAnswerSubmitted(true);
         setRecordedText('No answer provided - timed out');
-        
+
         // Stop any ongoing listening
         if (isListening && recognition) {
           try {
             recognition.stop();
             setIsListening(false);
-          } catch (e) {}
+          } catch (e) { }
         }
-        
+
         // Save the timeout answer
         if (questions.length > 0 && currentQuestionIndex < questions.length) {
           const currentQuestion = questions[currentQuestionIndex];
@@ -1053,17 +1053,17 @@ After fixing, please refresh the page.`);
             submitAnswer(currentQuestion._id, "No answer provided - timed out");
           }
         }
-        
+
         // Cancel any previous speech before announcing
         try {
           window.speechSynthesis.cancel();
-        } catch (e) {}
-        
+        } catch (e) { }
+
         // Announce timeout with proper speech handling
         try {
           // First, cancel any previous speech
           forceStopAllSpeech();
-          
+
           // Choose from a variety of timeout messages
           const timeoutMessages = [
             "Time's up. Let's move to the next question.",
@@ -1071,38 +1071,38 @@ After fixing, please refresh the page.`);
             "Let's continue to the next question since time is up.",
             "Time's up for this question. Let's proceed to the next one."
           ];
-          
+
           const timeoutMessage = timeoutMessages[Math.floor(Math.random() * timeoutMessages.length)];
           console.log('⏱️ SPEAKING TIMEOUT MESSAGE:', timeoutMessage);
-          
+
           const utterance = new SpeechSynthesisUtterance(timeoutMessage);
           utterance.lang = 'mr-IN';
           utterance.volume = 1.0;
-          
+
           // Set female voice if available
           const femaleVoice = getFemaleVoice();
           if (femaleVoice) utterance.voice = femaleVoice;
-          
+
           // Add unique ID to track this specific utterance
           utterance.timeoutId = Date.now().toString();
-          
+
           utterance.onend = () => {
             console.log('⏱️ TIMEOUT SPEECH COMPLETED');
             // Move to next question after speech ends
             moveToNextQuestion();
           };
-          
+
           utterance.onerror = () => {
             console.log('⏱️ TIMEOUT SPEECH ERROR');
             // Move to next question even if speech fails
             moveToNextQuestion();
           };
-          
+
           // Start speaking with a small delay to ensure cancellation is complete
           setTimeout(() => {
             window.speechSynthesis.speak(utterance);
           }, 100);
-          
+
           // Failsafe: If speech doesn't trigger callbacks, still move on
           setTimeout(moveToNextQuestion, 3000);
         } catch (e) {
@@ -1114,17 +1114,17 @@ After fixing, please refresh the page.`);
         console.log('⏱️ NOT AUTO-PROGRESSING: User has activated mic');
       }
     }, 20000); // 20 seconds
-    
+
     // Store the timer ID in a ref so it persists across renders
     questionTimerRef.current = timerId;
     return timerId;
   }
-  
+
   // Initialize the timer system with useEffect
   useEffect(() => {
     // This effect handles the timer initialization and cleanup
     console.log('Timer system initialized for question', currentQuestionIndex + 1);
-    
+
     // Return cleanup function to clear timers when component unmounts or dependencies change
     return () => {
       if (questionTimerRef.current) {
@@ -1134,20 +1134,20 @@ After fixing, please refresh the page.`);
       }
     };
   }, [currentQuestionIndex]);
-  
+
   // SIMPLIFIED function to move to next question
   const moveToNextQuestion = () => {
     console.log('⏱️ MOVING TO NEXT QUESTION from', currentQuestionIndex);
-    
+
     // Stop any ongoing speech before changing questions
     forceStopAllSpeech();
-    
+
     // Clear any existing timer
     if (questionTimerRef.current) {
       clearTimeout(questionTimerRef.current);
       questionTimerRef.current = null;
     }
-    
+
     // Stop any ongoing listening
     if (isListening) {
       try {
@@ -1155,9 +1155,9 @@ After fixing, please refresh the page.`);
           recognition.stop();
         }
         setIsListening(false);
-      } catch (e) {}
+      } catch (e) { }
     }
-    
+
     if (currentQuestionIndex >= questions.length - 1) {
       // This was the last question
       setIsModalVisible(true);
@@ -1167,7 +1167,7 @@ After fixing, please refresh the page.`);
       setCurrentQuestionIndex(nextIndex);
     }
   };
-  
+
 
 
   // ======== QUESTION CHANGE HANDLER ========
@@ -1175,27 +1175,27 @@ After fixing, please refresh the page.`);
   // SIMPLIFIED question change handler - pure focus on mic and timer
   useEffect(() => {
     console.log('🔄 QUESTION INDEX CHANGED TO', currentQuestionIndex);
-    
+
     // ===== COMPLETE RESET =====
     // Reset all timers
     if (questionTimerRef.current) {
       clearTimeout(questionTimerRef.current);
       questionTimerRef.current = null;
     }
-    
+
     if (micTimeout) {
       clearTimeout(micTimeout);
       setMicTimeout(null);
     }
-    
+
     if (silenceTimeout) {
       clearTimeout(silenceTimeout);
       setSilenceTimeout(null);
     }
-    
+
     // Reset all speech
     forceStopAllSpeech();
-    
+
     // Reset all listening
     if (isListening) {
       try {
@@ -1203,9 +1203,9 @@ After fixing, please refresh the page.`);
           recognition.stop();
         }
         setIsListening(false);
-      } catch (e) {}
+      } catch (e) { }
     }
-    
+
     // Reset all state
     setIsAnswerSubmitted(false);
     const resetTimerId = setTimeout(() => {
@@ -1214,7 +1214,7 @@ After fixing, please refresh the page.`);
         setIsAnswerSubmitted(false);
       }
     }, 100);
-    
+
     // Stop any ongoing listening
     if (isListening) {
       try {
@@ -1222,40 +1222,40 @@ After fixing, please refresh the page.`);
           recognition.stop();
         }
         setIsListening(false);
-      } catch (e) {}
+      } catch (e) { }
     }
-    
+
     // Only process if we have questions
     if (questions.length > 0 && currentQuestionIndex < questions.length) {
       const currentQuestion = questions[currentQuestionIndex];
-      
+
       if (currentQuestion && currentQuestion.questionText) {
-        console.log(`🔄 LOADING QUESTION ${currentQuestionIndex + 1}:`, 
-                    currentQuestion.questionText.substring(0, 30) + '...');
-        
+        console.log(`🔄 LOADING QUESTION ${currentQuestionIndex + 1}:`,
+          currentQuestion.questionText.substring(0, 30) + '...');
+
         // Reset all state related to this question
         setRecordedText('');
         setIsSpeaking(false);
         isSpeakingRef.current = false;
-        
+
         // Stop any recognition
         try {
           if (isListening && recognition) {
             recognition.stop();
             setIsListening(false);
           }
-        } catch (e) {}
-        
+        } catch (e) { }
+
         // Clear all timers
         if (questionTimerRef.current) {
           clearTimeout(questionTimerRef.current);
           questionTimerRef.current = null;
         }
-        
+
         // Store the question text locally to prevent state changes affecting it
         const questionText = currentQuestion.questionText;
         console.log('🗣️ WILL SPEAK QUESTION SOON:', questionText.substring(0, 30) + '...');
-        
+
         // Wait for a short time to let previous cleanup complete
         setTimeout(() => {
           try {
@@ -1264,14 +1264,14 @@ After fixing, please refresh the page.`);
               console.log('🔄 FINAL RESET of isAnswerSubmitted before speaking');
               setIsAnswerSubmitted(false);
             }
-            
+
             // Force stop any previous speech
             try {
               window.speechSynthesis.cancel();
             } catch (e) {
               console.error('Error canceling speech:', e);
             }
-            
+
             // Speak the CURRENT question with the stored questionText
             if (currentQuestionIndex === questions.indexOf(currentQuestion)) {
               console.log('🗣️ DEFINITELY SPEAKING QUESTION', currentQuestionIndex + 1);
@@ -1296,7 +1296,7 @@ After fixing, please refresh the page.`);
       }
     }
   }, [questions, currentQuestionIndex]);
-  
+
   // ======== QUESTION SPEAKING HANDLER ========
   // COMPLETELY REBUILT SPEECH SYSTEM to prevent repetition
   // This system ensures proper speech queue management and prevents duplicate speech
@@ -1308,17 +1308,17 @@ After fixing, please refresh the page.`);
     try {
       const voices = window.speechSynthesis.getVoices();
       let femaleVoice = null;
-      
+
       // Try to find a female voice in this order
       // 1. English US female voice
       femaleVoice = voices.find(v => v.name.toLowerCase().includes('female') && v.lang.includes('mr-IN'));
-      
+
       // 2. Any female voice
       if (!femaleVoice) femaleVoice = voices.find(v => v.name.toLowerCase().includes('female'));
-      
+
       // 3. Microsoft Zira (known female voice)
       if (!femaleVoice) femaleVoice = voices.find(v => v.name.includes('Zira'));
-      
+
       // 4. Common female voice names
       if (!femaleVoice) {
         const femaleNames = ['samantha', 'karen', 'lisa', 'amy', 'victoria'];
@@ -1330,11 +1330,11 @@ After fixing, please refresh the page.`);
           }
         }
       }
-      
+
       if (femaleVoice) {
         console.log('🔈 Using female voice:', femaleVoice.name);
       }
-      
+
       return femaleVoice;
     } catch (e) {
       console.error('Error getting voices:', e);
@@ -1346,31 +1346,31 @@ After fixing, please refresh the page.`);
   const speakDirectly = (text) => {
     // Clean the text of any special characters including programming symbols
     const cleanText = text.replace(/[\u2014\u2013\u201C\u201D\u2018\u2019`*()\[\]{}|\\^<>]/g, '');
-    
+
     // Basic fallback speech - directly use the Web Speech API with minimal processing
     console.log('🔊 EMERGENCY DIRECT SPEECH:', cleanText.substring(0, 30) + '...');
-    
+
     try {
       // Cancel any ongoing speech
       window.speechSynthesis.cancel();
-      
+
       // Create a simple utterance
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.lang = 'mr-IN';
       utterance.volume = 1.0;
-      
+
       // Set female voice if available
       const femaleVoice = getFemaleVoice();
       if (femaleVoice) utterance.voice = femaleVoice;
-      
+
       // Speak immediately
       window.speechSynthesis.speak(utterance);
-      
+
       // Start timer after a fixed delay
       setTimeout(() => {
         startTimerDirectly();
       }, 5000);
-      
+
       return true;
     } catch (e) {
       console.error('🔊 EMERGENCY SPEECH FAILED:', e);
@@ -1381,16 +1381,16 @@ After fixing, please refresh the page.`);
   // Main function to speak the current question with guaranteed execution
   const speakQuestion = (questionText) => {
     console.log(`🗣️ PREPARING TO SPEAK QUESTION ${currentQuestionIndex + 1}`);
-    
+
     // First, completely clear any speech
     forceStopAllSpeech();
-    
+
     // Always clear any existing timers before speaking
     if (questionTimerRef.current) {
       clearTimeout(questionTimerRef.current);
       questionTimerRef.current = null;
     }
-    
+
     // Enhanced cleaning for question text
     let cleanedText = "";
     if (questionText) {
@@ -1410,36 +1410,36 @@ After fixing, please refresh the page.`);
       startQuestionTimer();
       return;
     }
-    
+
     // Mark as speaking
     setIsSpeaking(true);
     isSpeakingRef.current = true;
-    
+
     // Store the current question text to prevent repeats
     currentlySpeakingText.current = cleanedText;
-    
+
     // Always reset isAnswerSubmitted when speaking a question
     if (isAnswerSubmitted) {
       setIsAnswerSubmitted(false);
     }
-    
+
     try {
       console.log(`🗣️ SPEAKING QUESTION ${currentQuestionIndex + 1}:`, cleanedText.substring(0, 50) + '...');
-      
+
       // Create the utterance
       const utterance = new SpeechSynthesisUtterance(cleanedText);
       utterance.lang = 'mr-IN';
       utterance.rate = 0.9;
       utterance.volume = 1.0;
-      
+
       // Set female voice if available
       const femaleVoice = getFemaleVoice();
       if (femaleVoice) utterance.voice = femaleVoice;
-      
+
       // Store unique ID to prevent duplicate callbacks
       const speechId = Date.now().toString();
       utterance.speechId = speechId;
-      
+
       // When speech ends, start the timer
       utterance.onend = () => {
         // Verify this is still the current speech
@@ -1447,22 +1447,22 @@ After fixing, please refresh the page.`);
           console.log('🗣️ Ignoring speech end event for old utterance');
           return;
         }
-        
+
         console.log('🗣️ FINISHED SPEAKING QUESTION, STARTING TIMER');
         setIsSpeaking(false);
         isSpeakingRef.current = false;
         currentlySpeakingText.current = '';
-        
+
         // Double-check isAnswerSubmitted is false before starting timer
         if (isAnswerSubmitted) {
           console.log('🗣️ FORCE RESETTING isAnswerSubmitted before starting timer');
           setIsAnswerSubmitted(false);
         }
-        
+
         // Start the timer AFTER speech completes
         startQuestionTimer();
       };
-      
+
       // If speech fails, still start the timer
       utterance.onerror = (e) => {
         console.log('🗣️ SPEECH ERROR, STARTING TIMER ANYWAY', e);
@@ -1471,17 +1471,17 @@ After fixing, please refresh the page.`);
         currentlySpeakingText.current = '';
         startQuestionTimer();
       };
-      
+
       // Speak with a 50ms delay to ensure the speech queue is properly cleared
       setTimeout(() => {
         // Before speaking, cancel any previous speech one more time
         try {
           window.speechSynthesis.cancel();
-        } catch (e) {}
-        
+        } catch (e) { }
+
         // Start speaking
         window.speechSynthesis.speak(utterance);
-        
+
         // FAILSAFE: If speech doesn't trigger callbacks, force start the timer
         setTimeout(() => {
           if (isSpeakingRef.current && currentlySpeakingText.current === cleanedText) {
@@ -1496,7 +1496,7 @@ After fixing, please refresh the page.`);
     } catch (e) {
       // If the main speech system fails, try the emergency direct speech
       console.error('🗣️ MAIN SPEECH SYSTEM ERROR:', e);
-      
+
       // Try emergency direct speech
       if (speakDirectly(cleanedText)) {
         console.log('🗣️ EMERGENCY SPEECH ACTIVATED');
@@ -1510,11 +1510,11 @@ After fixing, please refresh the page.`);
       }
     }
   };
-  
+
   // Initialize voice list on component mount - client-side only
   useEffect(() => {
     if (!isBrowser || !window.speechSynthesis) return;
-    
+
     const loadVoices = () => {
       const voices = window.speechSynthesis.getVoices();
       const marathiVoice = voices.find(voice => voice.lang === 'mr-IN' || voice.lang.startsWith('mr-'));
@@ -1525,10 +1525,10 @@ After fixing, please refresh the page.`);
         setVoice(voices[0]);
       }
     };
-    
+
     // Load voices immediately and when they change
     loadVoices();
-    
+
     // Cleanup
     return () => {
       if (window.speechSynthesis) {
@@ -1536,7 +1536,7 @@ After fixing, please refresh the page.`);
       }
     };
   }, [isBrowser]);
-  
+
   // Fully stop all speech and clear all queues
   const forceStopAllSpeech = () => {
     // Cancel ongoing speech synthesis
@@ -1548,7 +1548,7 @@ After fixing, please refresh the page.`);
     } catch (e) {
       console.error('Error stopping speech:', e);
     }
-    
+
     // Reset speaking state
     setIsSpeaking(false);
     isSpeakingRef.current = false;
@@ -1560,28 +1560,28 @@ After fixing, please refresh the page.`);
     if (window.questionProgressionStarted) {
       window.questionProgressionStarted = false;
     }
-    
+
     console.log('⏭️ HANDLING NEXT QUESTION');
-    
+
     // Reset ALL state - simple and direct
     if (questionTimerRef.current) {
       clearTimeout(questionTimerRef.current);
       questionTimerRef.current = null;
     }
-    
+
     if (micTimeout) {
       clearTimeout(micTimeout);
       setMicTimeout(null);
     }
-    
+
     if (silenceTimeout) {
       clearTimeout(silenceTimeout);
       setSilenceTimeout(null);
     }
-    
+
     // Stop ANY speech
     forceStopAllSpeech();
-    
+
     // Stop ANY listening
     if (isListening && recognition) {
       try {
@@ -1591,14 +1591,14 @@ After fixing, please refresh the page.`);
         console.error('Error stopping recognition in handleNext:', e);
       }
     }
-    
+
     // Clean up state
     setRecordedText('');
     setLoading(false); // Ensure loading state is reset
-    
+
     // IMPORTANT: Mark answer as submitted to prevent duplicate actions
     setIsAnswerSubmitted(true);
-    
+
     // Use setTimeout to ensure state updates have time to process
     // This is critical for ensuring the UI updates properly
     setTimeout(() => {
@@ -1641,7 +1641,7 @@ After fixing, please refresh the page.`);
   // This will also count it as a completed interview
   const handleExitConfirmation = async () => {
     setIsExitModalVisible(false);
-    
+
     try {
       // First, initialize the interview fields if they don't exist
       const initResponse = await fetch(`${process.env.NEXT_PUBLIC_HOST || ''}/api/initializeInterviewFields`, {
@@ -1678,7 +1678,7 @@ After fixing, please refresh the page.`);
       } else {
         const data = await response.json();
         console.log('Interview marked as completed even though exited early');
-        
+
         // Update the user data in localStorage with the updated counts
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         const updatedUser = {
@@ -1691,7 +1691,7 @@ After fixing, please refresh the page.`);
     } catch (error) {
       console.error('Error handling exit confirmation:', error);
     }
-    
+
     // Continue with navigation and updating active status
     router.push('/report');
     updateIsActive();
@@ -1817,7 +1817,7 @@ After fixing, please refresh the page.`);
       } else {
         const data = await response.json();
         console.log('Interview completion count updated successfully');
-        
+
         // Update the user data in localStorage with the updated counts
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         const updatedUser = {
@@ -1854,14 +1854,14 @@ After fixing, please refresh the page.`);
           }
         `}</style>
       </Head>
-      
+
       {/* Microphone Permission Modal */}
       {showPermissionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-[#29064b] p-6 rounded-xl shadow-2xl max-w-md w-full mx-4">
             <h2 className="text-2xl font-bold text-[#e600ff] mb-4">मायक्रोफोनसाठी परवानगी आवश्यक आहे.</h2>
             <p className="text-white mb-6">
-             ही मुलाखत अ‍ॅप्लिकेशन योग्यरित्या काम करण्यासाठी तुमच्या मायक्रोफोनचा प्रवेश आवश्यक आहे. कृपया पुढे जाण्यासाठी मायक्रोफोनची परवानगी द्या.
+              ही मुलाखत अ‍ॅप्लिकेशन योग्यरित्या काम करण्यासाठी तुमच्या मायक्रोफोनचा प्रवेश आवश्यक आहे. कृपया पुढे जाण्यासाठी मायक्रोफोनची परवानगी द्या.
             </p>
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-[#e600ff] mb-2">समस्या निवारण टिपा:</h3>
@@ -1869,7 +1869,7 @@ After fixing, please refresh the page.`);
                 <li>तुमचा मायक्रोफोन व्यवस्थित कनेक्ट आहे का ते तपासा</li>
                 <li>सिस्टम सेटिंग्जमध्ये तो म्युट नाही याची खात्री करा</li>
                 <li>Google Chrome किंवा Microsoft Edge ब्राउझर वापरून पहा</li>
-               <li>ब्राउझरच्या परवानगी सेटिंग्ज तपासा</li>
+                <li>ब्राउझरच्या परवानगी सेटिंग्ज तपासा</li>
 
               </ul>
             </div>
@@ -1878,7 +1878,7 @@ After fixing, please refresh the page.`);
                 onClick={requestMicPermission}
                 className="bg-[#e600ff] hover:bg-[#ca00e3] text-white font-bold py-3 px-4 rounded-lg flex-1 transition-colors"
               >
-               मायक्रोफोन वापरण्याची परवानगी द्या
+                मायक्रोफोन वापरण्याची परवानगी द्या
               </button>
               <button
                 onClick={handleRefreshPage}
@@ -1924,9 +1924,9 @@ After fixing, please refresh the page.`);
         </div>
       )}
 
-      <div className="flex justify-center mb-8">
+      {/* <div className="flex justify-center mb-8">
         <img id="mainImage" src="mock.png" className="w-60 h-60 text-center rounded-full shadow-lg" alt="Shakti AI Logo" />
-      </div>
+      </div> */}
 
       {questions.length > 0 && (
         <div className="w-full max-w-2xl bg-gray-900 bg-opacity-70 backdrop-blur-lg p-6 rounded-xl shadow-2xl mx-4 mb-8 border border-gray-800">
@@ -1976,7 +1976,7 @@ After fixing, please refresh the page.`);
                 <div className="wave bg-purple-500 delay-300"></div>
               </div>
             )}
-            
+
             {/* {isSpeaking && (
               <div className="text-center mb-4">
                 <div className="inline-block px-3 py-1 bg-green-600 text-white text-sm rounded-full animate-pulse">
@@ -1991,9 +1991,9 @@ After fixing, please refresh the page.`);
               disabled={isSpeaking}
             >
               {isListening ? <FaMicrophoneSlash className="w-8 h-8" /> : <FaMicrophone className="w-8 h-8" />}
-              <span className="absolute -bottom-8 text-xs text-white font-medium">
+              {/* <span className="absolute -bottom-8 text-xs text-white font-medium">
                 {isListening ? 'रेकॉर्डिंग बंद करा' : 'बोलायला सुरुवात करा'}
-              </span>
+              </span> */}
             </button>
           </div>
         </div>
@@ -2044,7 +2044,7 @@ After fixing, please refresh the page.`);
                 onClick={handleExitModalClose}
                 className="flex-1 py-3 bg-gray-700 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none transition-all duration-200"
               >
-              नाही, इथेच राहा
+                नाही, इथेच राहा
               </button>
             </div>
           </div>

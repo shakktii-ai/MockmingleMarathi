@@ -7,24 +7,24 @@ const Suggestion = () => {
   const [videosByDate, setVideosByDate] = useState({});
 
   useEffect(() => {
-   
+
     const fetchRecommendations = async () => {
-        const user = JSON.parse(localStorage.getItem('user'));
-const userEmail = user?.email;
-console.log(userEmail);
+      const user = JSON.parse(localStorage.getItem('user'));
+      const userEmail = user?.email;
+      console.log(userEmail);
       try {
         const response = await fetch('/api/youtube', {
-            method: 'GET',
-            headers: {
-              'user-email': userEmail
-            }
-          });
-          
-          const data = await response.json();
+          method: 'GET',
+          headers: {
+            'user-email': userEmail
+          }
+        });
+
+        const data = await response.json();
         if (data.success && data.data.length > 0) {
           // Group videos by date
           const groupedVideos = {};
-          
+
           data.data.forEach(entry => {
             if (entry.recommendations && Array.isArray(entry.recommendations)) {
               const date = new Date(entry.createdAt).toLocaleDateString('en-US', {
@@ -32,11 +32,11 @@ console.log(userEmail);
                 month: 'long',
                 day: 'numeric'
               });
-              
+
               if (!groupedVideos[date]) {
                 groupedVideos[date] = [];
               }
-              
+
               entry.recommendations.forEach(recommendation => {
                 groupedVideos[date].push({
                   ...recommendation,
@@ -45,7 +45,7 @@ console.log(userEmail);
               });
             }
           });
-          
+
           // Sort dates in descending order (newest first)
           const sortedGroups = {};
           Object.keys(groupedVideos)
@@ -53,7 +53,7 @@ console.log(userEmail);
             .forEach(key => {
               sortedGroups[key] = groupedVideos[key];
             });
-            
+
           setVideosByDate(sortedGroups);
         }
       } catch (error) {
@@ -80,7 +80,7 @@ console.log(userEmail);
       return (
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-          <p className="mt-2 text-gray-300">Finding helpful video recommendations...</p>
+          <p className="mt-2 text-gray-300">उपयुक्त व्हिडिओ शिफारसी शोधत आहे...</p>
         </div>
       );
     }
@@ -88,18 +88,18 @@ console.log(userEmail);
     if (!videosByDate || Object.keys(videosByDate).length === 0) {
       return (
         // <div className="text-center py-8">
-        //   <p className="text-gray-400">No video recommendations available at the moment.</p>
+        //   <p className="text-gray-400">सध्या कोणतीही व्हिडिओ शिफारस उपलब्ध नाही.</p>
         // </div>
-         <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
+        <div className="flex justify-center items-center h-40">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
       );
     }
 
     return (
       <div className="mt-8 p-6 bg-gray-800 rounded-lg">
         <h2 className="flex items-center text-2xl font-bold mb-6 text-red-500">
-          <FaYoutube className="mr-2" /> Recommended Videos by Skill
+          <FaYoutube className="mr-2" /> कौशल्यानुसार शिफारस केलेले व्हिडिओ
         </h2>
 
         {Object.entries(videosByDate).map(([date, groups]) => (
@@ -152,14 +152,14 @@ console.log(userEmail);
   return (
     <div className="min-h-screen bg-gray-900 text-white px-4 py-6">
       <div className="container mx-auto max-w-7xl">
-        <button 
-          onClick={() => router.push('/dashboard')}
+        <button
+          onClick={() => window.location.href = '/'}
           className="flex items-center text-blue-400 hover:text-blue-300 mb-6 transition-colors"
         >
           <FaArrowLeft className="mr-2" />
-          Back to Dashboard
+          डॅशबोर्डवर परत जा
         </button>
-        <h1 className="text-3xl font-bold mb-8 text-center">Skill-Based Video Suggestions</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center">कौशल्य-आधारित व्हिडिओ सुधारणा</h1>
         {renderYoutubeRecommendations()}
       </div>
     </div>

@@ -1,13 +1,13 @@
 // pages/signup.js
 
-import React, { useState ,useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/router';
 
 const SignUp = () => {
     const router = useRouter()
- 
+
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [mobileNo, setMobileNo] = useState("");
@@ -20,19 +20,19 @@ const SignUp = () => {
     const [DOB, setDOB] = useState("");
     const [profileImg, setProfileImg] = useState("");
 
-const [user, setUser] = useState(null);
+    const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    if (!localStorage.getItem("token")) {
-      router.push("/admin/login");
-    } else {
-      const userFromStorage = JSON.parse(localStorage.getItem('user'));
-      if (userFromStorage) {
-        setUser(userFromStorage);
-        
-      }
-    }
-  }, []);
+    useEffect(() => {
+        if (!localStorage.getItem("token")) {
+            router.push("/admin/login");
+        } else {
+            const userFromStorage = JSON.parse(localStorage.getItem('user'));
+            if (userFromStorage) {
+                setUser(userFromStorage);
+
+            }
+        }
+    }, []);
 
 
     const handlePasswordChange = (e) => {
@@ -50,7 +50,7 @@ const [user, setUser] = useState(null);
         e.target.textContent = type === "password" ? "👁️" : "🙈";
     };
 
-    
+
     const handleChange = (e) => {
         if (e.target.name == 'fullName') {
             setFullName(e.target.value)
@@ -72,63 +72,76 @@ const [user, setUser] = useState(null);
         }
         else if (e.target.name == 'education') {
             setEducation(e.target.value)
-        }else if (e.target.name == 'DOB') {
+        } else if (e.target.name == 'DOB') {
             setDOB(e.target.value)
-        }else if (e.target.name == "profileImg") {
+        } else if (e.target.name == "profileImg") {
             const file = e.target.files[0];
             if (file) {
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                setProfileImg(reader.result);
-              };
-              reader.readAsDataURL(file);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setProfileImg(reader.result);
+                };
+                reader.readAsDataURL(file);
             }
-          }
+        }
     }
 
-const handleSubmit = async (e) => {
-    e.preventDefault();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-    if (password !== confirmPassword) {
-        setPasswordError("Passwords do not match!");
-        return;
-    } else {
-        setPasswordError("");
-    }
-
-    const data = { profileImg, fullName, email, DOB, password, mobileNo, address, education,collageName };
-
-    try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/signup`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        // Check if response is not OK
-        if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData?.error || "Something went wrong. Please try again.");
+        if (password !== confirmPassword) {
+            setPasswordError("Passwords do not match!");
+            return;
+        } else {
+            setPasswordError("");
         }
 
-        const response = await res.json();
-        if (response.success) {
-            setProfileImg('');
-            setMobileNo('');
-            setConfirmPassword('');
-            setAddress('');
-            setEducation('');
-            setCollageName('');
-            setDOB('');
-            setEmail('');
-            setFullName('');
-            setPassword('');
+        const data = { profileImg, fullName, email, DOB, password, mobileNo, address, education, collageName };
 
-            toast.success('Your account has been created!', {
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            // Check if response is not OK
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData?.error || "Something went wrong. Please try again.");
+            }
+
+            const response = await res.json();
+            if (response.success) {
+                setProfileImg('');
+                setMobileNo('');
+                setConfirmPassword('');
+                setAddress('');
+                setEducation('');
+                setCollageName('');
+                setDOB('');
+                setEmail('');
+                setFullName('');
+                setPassword('');
+
+                toast.success('Your account has been created!', {
+                    position: "top-left",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+            }
+
+        } catch (error) {
+            toast.error(`Error: ${error.message}`, {
                 position: "top-left",
-                autoClose: 3000,
+                autoClose: 5000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
@@ -137,175 +150,162 @@ const handleSubmit = async (e) => {
                 theme: "light",
             });
         }
-
-    } catch (error) {
-        toast.error(`Error: ${error.message}`, {
-            position: "top-left",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-        });
-    }
-};
+    };
 
 
-    return (<> 
-    <ToastContainer
-        position="top-left"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-    />
-       <div className="relative grid grid-cols-1 place-items-center w-full min-h-screen">
-    <img
-        src="/bg.gif"
-        alt="background"
-        className="absolute top-0 left-0 w-full h-full object-cover z-[-1]"
-    />
-    <img
-        src="/Logoo.png"
-        alt="Shakti AI Logo"
-        className="absolute top-4 right-8 w-20 mb-5"
-    />
-
-    <div className="container ml-2 mr-2 w-full max-w-5xl p-4 rounded-lg bg-white bg-opacity-30">
-        <h1 className="text-2xl text-white mb-4">
-            Create an <span className="text-pink-400">Account!</span>
-        </h1>
-
-        <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-4">
-            <input
-                type="file"
-                name="profileImg"
-                accept="image/*"
-                onChange={handleChange}
-                placeholder="fullName"
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
+    return (<>
+        <ToastContainer
+            position="top-left"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+        />
+        <div className="relative grid grid-cols-1 place-items-center w-full min-h-screen">
+            <img
+                src="/bg.gif"
+                alt="background"
+                className="absolute top-0 left-0 w-full h-full object-cover z-[-1]"
             />
-            <input
-                type="text"
-                name="fullName"
-                value={fullName}
-                onChange={handleChange}
-                placeholder="Full Name"
-                required
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-            />
-            <input
-                type="email"
-                name="email"
-                value={email}
-                onChange={handleChange}
-                placeholder="Email Address"
-                required
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-            />
-            <input
-                type="text"
-                name="mobileNo"
-                value={mobileNo}
-                onChange={handleChange}
-                placeholder="Mobile Number"
-                required
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-            />
-            <input
-                type="text"
-                name="address"
-                value={address}
-                onChange={handleChange}
-                placeholder="Address"
-                required
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-            />
-            <input
-                type="text"
-                name="DOB"
-                value={DOB}
-                onChange={handleChange}
-                placeholder="DOB"
-                required
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-            />
-            <input
-                type="text"
-                name="education"
-                value={education}
-                onChange={handleChange}
-                placeholder="Education"
-                required
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-            />
-            <input
-                type="text"
-                name="collageName"
-                value={collageName}
-                onChange={handleChange}
-                placeholder="College Name"
-                required
-                className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
+            <img
+                src="/Logoo.png"
+                alt="Shakti AI Logo"
+                className="absolute top-4 right-8 w-20 mb-5"
             />
 
-            <div className="relative">
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    placeholder="🔒 Password"
-                    required
-                    className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-                />
-                <span
-                    className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-white"
-                    onClick={(e) => handlePasswordToggle(e, "password")}
-                >
-                    👁️
-                </span>
+            <div className="container ml-2 mr-2 w-full max-w-5xl p-4 rounded-lg bg-white bg-opacity-30">
+                <h1 className="text-2xl text-white mb-4">
+                    नवीन <span className="text-pink-400">खाते तयार करा!</span>
+                </h1>
+
+                <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-4">
+                    <input
+                        type="file"
+                        name="profileImg"
+                        accept="image/*"
+                        onChange={handleChange}
+                        placeholder="fullName"
+                        className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
+                    />
+                    <input
+                        type="text"
+                        name="fullName"
+                        value={fullName}
+                        onChange={handleChange}
+                        placeholder="पूर्ण नाव"
+                        required
+                        className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
+                    />
+                    <input
+                        type="email"
+                        name="email"
+                        value={email}
+                        onChange={handleChange}
+                        placeholder="ईमेल पत्ता"
+                        required
+                        className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
+                    />
+                    <input
+                        type="text"
+                        name="mobileNo"
+                        value={mobileNo}
+                        onChange={handleChange}
+                        placeholder="मोबाईल नंबर"
+                        required
+                        className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
+                    />
+                    <input
+                        type="text"
+                        name="address"
+                        value={address}
+                        onChange={handleChange}
+                        placeholder="पत्ता"
+                        required
+                        className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
+                    />
+                    <input
+                        type="text"
+                        name="DOB"
+                        value={DOB}
+                        onChange={handleChange}
+                        placeholder="जन्मतारीख"
+                        required
+                        className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
+                    />
+                    <input
+                        type="text"
+                        name="education"
+                        value={education}
+                        onChange={handleChange}
+                        placeholder="शिक्षण"
+                        required
+                        className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
+                    />
+                    <input
+                        type="text"
+                        name="collageName"
+                        value={collageName}
+                        onChange={handleChange}
+                        placeholder="कॉलेजचे नाव"
+                        required
+                        className="p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
+                    />
+
+                    <div className="relative">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            value={password}
+                            onChange={handlePasswordChange}
+                            placeholder="🔒 पासवर्ड"
+                            required
+                            className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
+                        />
+                        <span
+                            className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-white"
+                            onClick={(e) => handlePasswordToggle(e, "password")}
+                        >
+                            👁️
+                        </span>
+                    </div>
+
+                    <div className="relative">
+                        <input
+                            type="password"
+                            id="confirm-password"
+                            value={confirmPassword}
+                            onChange={handleConfirmPasswordChange}
+                            placeholder="🔒 पासवर्डची पुष्टी करा"
+                            required
+                            className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
+                        />
+                        <span
+                            className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-white"
+                            onClick={(e) => handlePasswordToggle(e, "confirm-password")}
+                        >
+                            👁️
+                        </span>
+                    </div>
+
+                    {passwordError && <p className="text-red-500 mt-2">{passwordError}</p>}
+
+                    <button
+                        type="submit"
+                        className="p-3 text-white bg-pink-400 rounded-md hover:bg-pink-500 transition duration-300"
+                    >
+                        साइन अप करा
+                    </button>
+                </form>
             </div>
+        </div>
 
-            <div className="relative">
-                <input
-                    type="password"
-                    id="confirm-password"
-                    value={confirmPassword}
-                    onChange={handleConfirmPasswordChange}
-                    placeholder="🔒 Confirm Password"
-                    required
-                    className="w-full p-3 rounded-md bg-white bg-opacity-20 text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400"
-                />
-                <span
-                    className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-white"
-                    onClick={(e) => handlePasswordToggle(e, "confirm-password")}
-                >
-                    👁️
-                </span>
-            </div>
-
-            {passwordError && <p className="text-red-500 mt-2">{passwordError}</p>}
-
-            <button
-                type="submit"
-                className="p-3 text-white bg-pink-400 rounded-md hover:bg-pink-500 transition duration-300"
-            >
-                Sign Up
-            </button>
-        </form>
-    </div>
-</div>
-
-        </>
+    </>
     );
 };
 

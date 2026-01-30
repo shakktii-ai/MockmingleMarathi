@@ -10,7 +10,7 @@
 //   const [education, setEducation] = useState('');
 //   const [profilePic, setProfilePic] = useState('');  // Declare the profilePic state
 
- 
+
 
 //   useEffect(() => {
 //     if (!localStorage.getItem("token")) {
@@ -51,7 +51,7 @@
 //                 className="absolute top-0 left-0 w-full h-full object-cover z-[-1]"
 //             />
 //     <div className="max-w-md mx-auto    p-6 rounded-lg shadow-lg">
-        
+
 //       <h2 className="text-2xl font-semibold text-orange-500 text-center mb-6">Edit Profile</h2>
 //       <form onSubmit={handleSubmit} className="space-y-4">
 //         <div className="flex flex-col">
@@ -199,7 +199,7 @@ function EditProfile() {
   const [mobileNo, setMobileNo] = useState('');
   const [education, setEducation] = useState('');
   const [profileImg, setProfileImg] = useState('');
-  
+
   const router = useRouter();  // For navigating the user to login page if not authenticated
 
   useEffect(() => {
@@ -264,7 +264,7 @@ function EditProfile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
       const updatedUser = {
         fullName,
@@ -275,30 +275,30 @@ function EditProfile() {
         education,
         profileImg
       };
-  
+
       // Make the API request
       const res = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/signup`, {
         method: 'PUT',
         headers: {
-            'Content-Type': 'application/json',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(updatedUser),
-    });
-    
-    if (!res.ok) {
+      });
+
+      if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData?.error || "Something went wrong. Please try again.");
-    }
-    
-    const response = await res.json();
-    if (response.success) {
+        throw new Error(errorData?.error || "काहीतरी चूक झाली. कृपया पुन्हा प्रयत्न करा.");
+      }
+
+      const response = await res.json();
+      if (response.success) {
         localStorage.setItem('user', JSON.stringify(updatedUser)); // Save updated user
-        toast.success('Profile updated successfully!');
+        toast.success('प्रोफाईल यशस्वीरित्या अपडेट झाले!');
         router.push("/profile");
       }
-  
+
     } catch (error) {
-      toast.error(`Error: ${error.message}`);
+      toast.error(`त्रुटी: ${error.message}`);
     }
   };
   const goBack = () => {
@@ -307,19 +307,19 @@ function EditProfile() {
 
   return (
     <div className="relative min-h-screen">
-        <div className='absolute top-5 left-3 text-4xl text-white' onClick={goBack} ><IoIosArrowBack /></div>
-        <ToastContainer
-                position="top-left"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-            />
+      <div className='absolute top-5 left-3 text-4xl text-white' onClick={goBack} ><IoIosArrowBack /></div>
+      <ToastContainer
+        position="top-left"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <img
         src="/bg.gif"
         alt="background"
@@ -327,18 +327,18 @@ function EditProfile() {
       />
       <div className="max-w-md mx-auto p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold text-orange-500 text-center mb-6">प्रोफाईल अपडेट करा</h2>
-        <form onSubmit={handleSubmit}  className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
 
-        <div className="flex flex-col">
-           
-           {profileImg && (
+          <div className="flex flex-col">
+
+            {profileImg && (
               <img
                 src={profileImg}
                 alt="प्रोफाईल पूर्वदृश्य"
                 className="w-24 h-24 rounded-full object-cover mx-auto"
               />
-           )}
-             <label htmlFor="profileImg" className="text-sm font-medium text-white mb-1">
+            )}
+            <label htmlFor="profileImg" className="text-sm font-medium text-white mb-1">
               प्रोफाईल पिक्चर
             </label>
             <input
@@ -358,7 +358,7 @@ function EditProfile() {
               type="text"
               id="fullName"
               name="fullName"
-               value={fullName}
+              value={fullName}
               onChange={handleInputChange}
               placeholder="पूर्ण नाव अपडेट करा"
               required
@@ -406,7 +406,7 @@ function EditProfile() {
               type="text"
               id="address"
               name="address"
-             value={address}
+              value={address}
               onChange={handleInputChange}
               placeholder="पत्ता अपडेट करा"
               required
@@ -438,7 +438,7 @@ function EditProfile() {
               type="text"
               id="education"
               name="education"
-               value={education}
+              value={education}
               onChange={handleInputChange}
               placeholder="शिक्षण अपडेट करा"
               required
@@ -446,7 +446,7 @@ function EditProfile() {
             />
           </div>
 
-          
+
 
           <button
             type="submit"

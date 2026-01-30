@@ -95,7 +95,7 @@ function PersonalityTest() {
     } catch (e) {
       console.error('Error getting user ID:', e);
     }
-    
+
     // Check if user is authenticated
     const storedToken = localStorage.getItem("token");
     if (!storedToken) {
@@ -107,30 +107,30 @@ function PersonalityTest() {
   }, [fetchQuestions, router]);
 
   // Start the test timer (30 minutes)
- useEffect(() => {
-     // Timer logic for the test
-     if (testStarted && !results) {
-       const totalTime = 1800; // 5 minutes in seconds
-       setTimeLeft(totalTime);
- 
-       const timer = setInterval(() => {
-         setTimeLeft(prevTime => {
-           if (prevTime <= 1) {
-             clearInterval(timer);
-             handleSubmitTest();
-             return 0;
-           }
-           return prevTime - 1;
-         });
-       }, 1000);
- 
-       return () => clearInterval(timer);
-     }
-   }, [testStarted, results]);
- 
-   const startTest = () => {
-     setTestStarted(true);
-   };
+  useEffect(() => {
+    // Timer logic for the test
+    if (testStarted && !results) {
+      const totalTime = 1800; // 5 minutes in seconds
+      setTimeLeft(totalTime);
+
+      const timer = setInterval(() => {
+        setTimeLeft(prevTime => {
+          if (prevTime <= 1) {
+            clearInterval(timer);
+            handleSubmitTest();
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [testStarted, results]);
+
+  const startTest = () => {
+    setTestStarted(true);
+  };
 
   // Handle option selection
   const handleSelectOption = (questionId, value) => {
@@ -163,11 +163,11 @@ function PersonalityTest() {
       document.cookie.split(';').forEach(c => {
         document.cookie = c.trim().split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
       });
-      
+
       // Clear localStorage items
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      
+
       // Force reload to clear any cached data
       window.location.href = '/login';
     } catch (error) {
@@ -184,9 +184,9 @@ function PersonalityTest() {
         acc[question.id] = Number(responses[question.id]);
         return acc;
       }, {});
-      
+
       console.log('Submitting test responses');
-      
+
       // Prepare minimal request body
       const requestBody = {
         responses: formattedResponses,
@@ -196,14 +196,14 @@ function PersonalityTest() {
           // Don't include options here as they're not needed for evaluation
         }))
       };
-      
+
       // Use minimal headers - no authentication
       const headers = { 'Content-Type': 'application/json' };
-      
+
       // Simple fetch with increased timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 300000); // Increased to 120 seconds (2 minutes)
-      
+
       try {
         const response = await fetch(`/api/personalityTest/evaluateTest?userId=${encodeURIComponent(userId)}`, {
           method: 'POST',
@@ -212,15 +212,15 @@ function PersonalityTest() {
           signal: controller.signal,
           credentials: 'omit' // Don't send cookies
         });
-        
+
         clearTimeout(timeoutId);
-        console.log("responses......",response);
+        console.log("responses......", response);
         if (!response.ok) {
           const errorMessage = `HTTP error! status: ${response.status}`;
           console.error('Server error:', errorMessage);
           throw new Error(errorMessage);
         }
-        
+
         return response;
       } catch (error) {
         clearTimeout(timeoutId);
@@ -230,10 +230,10 @@ function PersonalityTest() {
         }
         throw new Error(error.message || 'Failed to submit test. Please check your connection and try again.');
       }
-      
+
       const data = await response.json();
       console.log('API Response:', JSON.stringify(data, null, 2));
-      
+
       // Handle both response formats for backward compatibility
       if (data.success) {
         // New format with nested data.analysis
@@ -248,16 +248,16 @@ function PersonalityTest() {
           return data.analysis;
         }
       }
-      
+
       throw new Error('Invalid response format from server');
     } catch (error) {
       console.error(`Attempt ${attempt} failed:`, error);
-      
+
       // If this was a retry or we have no more attempts, rethrow the error
       if (attempt >= maxAttempts) {
         throw error;
       }
-      
+
       // Otherwise, retry
       return submitTestWithRetry(attempt + 1, maxAttempts);
     }
@@ -275,7 +275,7 @@ function PersonalityTest() {
     );
 
     if (unansweredQuestions.length > 0) {
-         alert(`Please answer all questions before submitting. ${unansweredQuestions.length} question(s) remaining.`);
+      alert(`कृपया सबमिट करण्यापूर्वी सर्व प्रश्नांची उत्तरे द्या. ${unansweredQuestions.length} प्रश्न शिल्लक आहेत.`);
       return;
     }
 
@@ -284,9 +284,9 @@ function PersonalityTest() {
     try {
       const response = await submitTest();
       const result = await response.json();
-      
+
       console.log('Test submission result:', result);
-      
+
       if (result.success && result.data?.analysis) {
         setResults({
           ...result.data.analysis,
@@ -349,8 +349,8 @@ function PersonalityTest() {
   if (!testStarted) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
-            <h1 className="text-3xl font-bold text-white text-center mb-6">व्यक्तिमत्त्व चाचणी</h1>
-             <p className="text-lg text-white text-center mb-6">आमच्या सर्वसमावेशक मूल्यमापनाद्वारे आपली व्यक्तिमत्व वैशिष्ट्ये, सामर्थ्ये आणि वाढीच्या क्षेत्रांचा शोध घ्या..</p> 
+        <h1 className="text-3xl font-bold text-white text-center mb-6">व्यक्तिमत्त्व चाचणी</h1>
+        <p className="text-lg text-white text-center mb-6">आमच्या सर्वसमावेशक मूल्यमापनाद्वारे आपली व्यक्तिमत्व वैशिष्ट्ये, सामर्थ्ये आणि वाढीच्या क्षेत्रांचा शोध घ्या..</p>
         <div className="max-w-2xl w-full bg-[#D2E9FA] rounded-xl shadow-lg overflow-hidden">
           <div className="p-8">
             <h1 className="text-3xl font-bold test-gray-800 text-center mb-6">सूचना</h1>
@@ -411,7 +411,7 @@ function PersonalityTest() {
               प्रश्न {currentQuestionIndex + 1} / {questions.length}
             </span>
             <span className="text-sm font-medium text-white">
-              {Math.round(progress)}% Complete
+              {Math.round(progress)}% पूर्ण
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2.5">

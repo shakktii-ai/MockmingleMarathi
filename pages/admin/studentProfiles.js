@@ -166,7 +166,7 @@
 //           setNewDOB={setNewDOB}
 //           setNewEmail={setNewEmail}
 //           setNewAddress={setNewAddress}
-          
+
 //           setNewMobileNo={setNewMobileNo}
 //           setNewEducation={setNewEducation}
 
@@ -195,35 +195,35 @@
 // export default EmployeeProfiles;
 
 
-import React, { useState, useEffect } from 'react'; 
-import Image from 'next/image'; 
-import { Edit } from 'lucide-react'; 
-import EditPopup from '../../components/editPopup'; 
-import ReportDetailPopup from '../../components/reportDetailPopup'; 
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { Edit } from 'lucide-react';
+import EditPopup from '../../components/editPopup';
+import ReportDetailPopup from '../../components/reportDetailPopup';
 import Chart from '../../components/chart'; // Import the Chart component/components/Chart'; // Import the Chart component
 import { useRouter } from 'next/router';
 
-function EmployeeProfiles() { 
+function EmployeeProfiles() {
   const router = useRouter();
-  const [users, setUsers] = useState([]); 
-  const [isModalOpen, setIsModalOpen] = useState(false); 
-  const [isReportOpen, setIsReportOpen] = useState(false); 
-  const [selectedUser, setSelectedUser] = useState(null); 
-  const [selectedReport, setSelectedReport] = useState(null); 
-  const [newFullName, setNewFullName] = useState(''); 
-  const [newLastName, setNewLastName] = useState(''); 
-  const [newDOB, setNewDOB] = useState(''); 
-  const [newMobileNo, setNewMobileNo] = useState(''); 
-  const [newAddress, setNewAddress] = useState(''); 
-  const [newEducation, setNewEducation] = useState(''); 
-  const [newEmail, setNewEmail] = useState(''); 
+  const [users, setUsers] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [newFullName, setNewFullName] = useState('');
+  const [newLastName, setNewLastName] = useState('');
+  const [newDOB, setNewDOB] = useState('');
+  const [newMobileNo, setNewMobileNo] = useState('');
+  const [newAddress, setNewAddress] = useState('');
+  const [newEducation, setNewEducation] = useState('');
+  const [newEmail, setNewEmail] = useState('');
   const collageName = 'SPPU'; // Replace with the actual company name
   const [showChart, setShowChart] = useState(false); // State to toggle chart visibility
   const [chartData, setChartData] = useState([]); // Store chart data
 
 
 
-const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     if (!localStorage.getItem("token")) {
@@ -232,48 +232,48 @@ const [user, setUser] = useState(null);
       const userFromStorage = JSON.parse(localStorage.getItem('user'));
       if (userFromStorage) {
         setUser(userFromStorage);
-        
+
       }
     }
   }, []);
 
 
   // Fetch user data and their report data in one go
-  useEffect(() => { 
-    const fetchUserData = async () => { 
-      try { 
-        const response = await fetch(`/api/editStudentProfile?collageName=${collageName}`); 
-        const data = await response.json(); 
-        if (data.users && data.users.length > 0) { 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`/api/editStudentProfile?collageName=${collageName}`);
+        const data = await response.json();
+        if (data.users && data.users.length > 0) {
           // Get all emails and fetch reports for all of them at once 
-          const emails = data.users.map(user => user.email); 
-          const reportResponse = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAndGetReport?emails=${JSON.stringify(emails)}`); 
-          const reportData = await reportResponse.json(); 
+          const emails = data.users.map(user => user.email);
+          const reportResponse = await fetch(`${process.env.NEXT_PUBLIC_HOST}/api/saveAndGetReport?emails=${JSON.stringify(emails)}`);
+          const reportData = await reportResponse.json();
 
           // Merge the user data and report data 
-          const userReports = data.users.map(user => ({ 
-            ...user, 
-            report: reportData.reports[user.email] || [], 
-          })); 
+          const userReports = data.users.map(user => ({
+            ...user,
+            report: reportData.reports[user.email] || [],
+          }));
 
           setUsers(userReports); // Set users with their reports 
-        } else { 
-          console.error('No users found for this company'); 
-        } 
-      } catch (error) { 
-        console.error('Error fetching user data:', error); 
-      } 
+        } else {
+          console.error('No users found for this company');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
     };
 
     fetchUserData();
   }, [collageName]);
-  
+
   const fetchChartData = async (email) => {
     try {
       const res = await fetch(`/api/overallScore?email=${email}`);
       const data = await res.json();
-      
-      
+
+
       if (data.reports && data.reports.length > 0) {
         // Prepare chart data
         const scores = data.reports.map(report => ({
@@ -289,32 +289,32 @@ const [user, setUser] = useState(null);
     }
   };
   // Function to handle the update of the user profile
-  const updateUserProfile = async () => { 
+  const updateUserProfile = async () => {
     if (!selectedUser) return;
 
-    const updatedData = { 
-      email: selectedUser.email, 
-      updatedData: { 
-        fullName: newFullName, 
-        email: newEmail, 
-        DOB: newDOB, 
-        mobileNo: newMobileNo, 
-        address: newAddress, 
-        education: newEducation, 
+    const updatedData = {
+      email: selectedUser.email,
+      updatedData: {
+        fullName: newFullName,
+        email: newEmail,
+        DOB: newDOB,
+        mobileNo: newMobileNo,
+        address: newAddress,
+        education: newEducation,
       },
     };
 
-    try { 
-      const res = await fetch('/api/editStudentProfile', { 
-        method: 'PUT', 
-        headers: { 
-          'Content-Type': 'application/json', 
-        }, 
-        body: JSON.stringify(updatedData), 
+    try {
+      const res = await fetch('/api/editStudentProfile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
       });
 
       const result = await res.json();
-      if (res.status === 200) { 
+      if (res.status === 200) {
         // Successfully updated the user profile
         setUsers((prevUsers) =>
           prevUsers.map((user) =>
@@ -323,14 +323,14 @@ const [user, setUser] = useState(null);
               : user
           )
         );
-      } else { 
-        console.error(result.message); 
-        alert('Failed to update user profile'); 
-      } 
-    } catch (error) { 
-      console.error(error); 
-      alert('Error updating user profile'); 
-    } 
+      } else {
+        console.error(result.message);
+        alert('Failed to update user profile');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Error updating user profile');
+    }
   };
 
   return (
@@ -355,8 +355,8 @@ const [user, setUser] = useState(null);
               </div>
             </div>
             <hr className="h-px mt-2 bg-gray-200 border-0 dark:bg-gray-700" />
-            
-            <div className="mt-3 text-sm font-medium text-gray-600">NUMBER OF ASSESSMENT</div>
+
+            <div className="mt-3 text-sm font-medium text-gray-600">असेसमेंटची संख्या</div>
             <div className="text-lg font-bold text-gray-700">{userReport.length}</div>
             <div className="flex justify-between mt-2">
               <button
@@ -367,21 +367,21 @@ const [user, setUser] = useState(null);
                 }}
                 className="w-1/2 px-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100"
               >
-                Detail Report
+                तपशीलवार अहवाल
               </button>
               <div className="w-full mt-4 text-center">
-  <button
-    onClick={() => {
-      setShowChart(!showChart);
-      if (!showChart) {
-        fetchChartData(user.email); // Fetch chart data when the chart is shown
-      }
-    }}
-    className="px-4 py-2 bg-[#c3baf7] text-white rounded-lg hover:bg-purple-600"
-  >
-    {showChart ? 'Hide Chart' : 'Show Chart'}
-  </button>
-</div>
+                <button
+                  onClick={() => {
+                    setShowChart(!showChart);
+                    if (!showChart) {
+                      fetchChartData(user.email); // Fetch chart data when the chart is shown
+                    }
+                  }}
+                  className="px-4 py-2 bg-[#c3baf7] text-white rounded-lg hover:bg-purple-600"
+                >
+                  {showChart ? 'चार्ट लपवा' : 'चार्ट दाखवा'}
+                </button>
+              </div>
               <button
                 onClick={() => {
                   setSelectedUser(user);
@@ -395,7 +395,7 @@ const [user, setUser] = useState(null);
                 }}
                 className="w-1/2 flex items-center gap-1 px-4 py-2 bg-[#c3baf7] text-white rounded-lg hover:bg-purple-600"
               >
-                <Edit size={16} /> Edit
+                <Edit size={16} /> संपादन करा
               </button>
             </div>
           </div>
@@ -403,7 +403,7 @@ const [user, setUser] = useState(null);
       })}
 
       {/* Chart Toggle Button */}
-      
+
 
       {/* Show Chart component if showChart is true */}
       {/* {showChart && <Chart chartData={chartData} />} */}

@@ -41,7 +41,7 @@ function SpeakingPractice() {
     // Check if speech recognition is supported
     if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
       setSpeechSupported(false);
-      alert("Speech recognition is not supported in your browser. Please use Chrome, Edge, or Safari.");
+      alert("तुमच्या ब्राउझरमध्ये स्पीच रिकग्निशन सपोर्टेड नाही. कृपया Chrome, Edge किंवा Safari वापरा.");
     }
 
     return () => {
@@ -58,7 +58,7 @@ function SpeakingPractice() {
       }
     };
   }, []);
-  
+
   // Fetch level progress data when difficulty changes
   useEffect(() => {
     if (difficulty) {
@@ -67,17 +67,17 @@ function SpeakingPractice() {
       fetchLevelProgress();
     }
   }, [difficulty]);
-  
+
   // Function to fetch user's level progress
   const fetchLevelProgress = async () => {
     if (!difficulty) return;
-    
+
     setLoading(true);
     try {
       // Simple auth approach - get user info from localStorage
       const userObj = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
       const userId = userObj?._id || userObj?.id || '6462d8fbf6c3e30000000001'; // Use default ID if not found
-      
+
       // Create default progress array for 30 levels
       const defaultProgress = [];
       for (let i = 1; i <= 30; i++) {
@@ -88,7 +88,7 @@ function SpeakingPractice() {
           questionsCompleted: i <= 2 ? 5 : 0
         });
       }
-      
+
       try {
         const response = await fetch(`/api/getPracticeProgress?skillArea=Speaking&difficulty=${difficulty}&userId=${userId}`, {
           method: 'GET',
@@ -98,13 +98,13 @@ function SpeakingPractice() {
         });
 
         const data = await response.json();
-        
+
         if (response.ok && data.progress) {
           // Find progress for this specific skill area and difficulty
-          const speakingProgress = data.progress.find(p => 
+          const speakingProgress = data.progress.find(p =>
             p.skillArea === 'Speaking' && p.difficulty === difficulty
           );
-          
+
           if (speakingProgress && speakingProgress.levelProgress && speakingProgress.levelProgress.length > 0) {
             // Merge the API data with default data to ensure we have all 30 levels
             const mergedProgress = defaultProgress.map(defaultLevel => {
@@ -122,11 +122,11 @@ function SpeakingPractice() {
         console.error("API error, using default progress:", apiError);
         setLevelProgress(defaultProgress);
       }
-      
+
       setShowLevelSelection(true);
     } catch (error) {
       console.error("Error in level progress logic:", error);
-      
+
       // Initialize empty progress for all 30 levels as fallback
       const emptyProgress = Array.from({ length: 30 }, (_, i) => ({
         level: i + 1,
@@ -147,11 +147,11 @@ function SpeakingPractice() {
     setLoading(true);
     try {
       console.log(`Fetching speaking practice questions for ${difficulty} level ${selectedLevel}`);
-      
+
       // Simple auth approach - include user ID in the request body instead of using token in header
       const userObj = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
       const userId = userObj?._id || userObj?.id || '6462d8fbf6c3e30000000001'; // Fallback to default ID
-      
+
       const response = await fetch('/api/fetchPracticeQuestions', {
         method: 'POST',
         headers: {
@@ -169,7 +169,7 @@ function SpeakingPractice() {
 
       const data = await response.json();
       console.log('API response:', data);
-      
+
       if (!response.ok) {
         // If unauthorized, redirect to login
         if (response.status === 401) {
@@ -180,7 +180,7 @@ function SpeakingPractice() {
         }
         throw new Error(data.error || 'प्रश्न लोड करण्यात अडचण आली.');
       }
-      
+
       if (!data.questions || data.questions.length === 0) {
         throw new Error('कोणतेही प्रश्न प्राप्त झाले नाहीत.');
       }
@@ -196,7 +196,7 @@ function SpeakingPractice() {
       setLoading(false);
     }
   };
-  
+
   // Handle level selection
   const handleLevelSelect = (level) => {
     setSelectedLevel(level);
@@ -208,22 +208,22 @@ function SpeakingPractice() {
 
   const startSpeechRecognition = () => {
     if (!speechSupported) return;
-    
+
     // Initialize speech recognition
     if (!recognitionRef.current) {
       recognitionRef.current = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'mr-IN';
-      
+
       recognitionRef.current.onresult = (event) => {
         const transcript = Array.from(event.results)
           .map(result => result[0].transcript)
           .join('');
-        
+
         setUserResponse(transcript);
       };
-      
+
       recognitionRef.current.onerror = (event) => {
         console.error("Speech recognition error", event);
         if (event.error === 'not-allowed') {
@@ -231,16 +231,16 @@ function SpeakingPractice() {
         }
       };
     }
-    
+
     // Start recording
     try {
       recognitionRef.current.start();
       setRecording(true);
-      
+
       // Start timer
       const currentQuestion = questions[currentIndex];
       setTimeLeft(currentQuestion.timeLimit);
-      
+
       timerRef.current = setInterval(() => {
         setTimeLeft(prevTime => {
           if (prevTime <= 1) {
@@ -258,19 +258,19 @@ function SpeakingPractice() {
 
   const stopSpeechRecognition = async () => {
     if (!speechSupported || !recognitionRef.current) return;
-    
+
     try {
       recognitionRef.current.stop();
     } catch (e) {
       console.error("Error stopping recognition:", e);
     }
-    
+
     setRecording(false);
-    
+
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
-    
+
     // Submit for feedback if there's a response
     if (userResponse.trim()) {
       await submitForFeedback();
@@ -279,12 +279,12 @@ function SpeakingPractice() {
 
   const submitForFeedback = async () => {
     if (!userResponse.trim()) return;
-    
+
     try {
       // Get user ID from localStorage to avoid token-in-header issues
       const userObj = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
       const userId = userObj?._id || userObj?.id || '6462d8fbf6c3e30000000001';
-      
+
       const currentQuestion = questions[currentIndex];
       // Check if the question has a valid MongoDB ObjectId
       let testIdToUse = null;
@@ -294,7 +294,7 @@ function SpeakingPractice() {
         // Don't send an invalid testId, the API will use a default
         console.log('No valid ObjectId found for question, using default');
       }
-      
+
       const response = await fetch('/api/submitPracticeResponse', {
         method: 'POST',
         headers: {
@@ -320,7 +320,7 @@ function SpeakingPractice() {
 
       const data = await response.json();
       setFeedback(data.feedback);
-      
+
       // Determine score based on feedback sentiment (simplified)
       let questionScore = 1;
       if (data.feedback.includes("excellent") || data.feedback.includes("perfect")) {
@@ -329,7 +329,7 @@ function SpeakingPractice() {
         questionScore = 2;
       }
       setScore(questionScore);
-      
+
       // Store response data for level evaluation
       setResponses(prevResponses => [...prevResponses, {
         cardId: currentQuestion.cardId,
@@ -361,7 +361,7 @@ function SpeakingPractice() {
       evaluateLevelCompletion();
     }
   };
-  
+
   // Function to evaluate level completion using Claude AI
   const evaluateLevelCompletion = async () => {
     try {
@@ -369,11 +369,11 @@ function SpeakingPractice() {
       // Get userId from localStorage
       const userObj = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
       const userId = userObj?._id || userObj?.id || '6462d8fbf6c3e30000000001'; // Use default ID if not found
-      
+
       // Ensure we have a valid level value (use 1 as default if none is selected)
       const levelToEvaluate = selectedLevel || 1;
       console.log('Evaluating level:', levelToEvaluate);
-      
+
       const response = await fetch('/api/evaluateLevelCompletion', {
         method: 'POST',
         headers: {
@@ -393,13 +393,13 @@ function SpeakingPractice() {
           const result = await response.json();
           setEvaluationResult(result);
           setShowEvaluation(true);
-          
+
           // Update local level progress data to show updated stars
           if (result.levelProgress) {
             setLevelProgress(prev => {
               const updatedProgress = [...prev];
               const levelIndex = updatedProgress.findIndex(p => p.level === selectedLevel);
-              
+
               if (levelIndex > -1) {
                 updatedProgress[levelIndex] = {
                   ...updatedProgress[levelIndex],
@@ -407,7 +407,7 @@ function SpeakingPractice() {
                   completed: true
                 };
               }
-              
+
               return updatedProgress;
             });
           }
@@ -479,7 +479,7 @@ function SpeakingPractice() {
     setShowEvaluation(false);
     // We don't reset difficulty or level selection so user can continue with other levels
   };
-  
+
   const backToLevelSelection = () => {
     resetTest();
     setShowLevelSelection(true);
@@ -496,8 +496,8 @@ function SpeakingPractice() {
           {/* Header */}
           <div className="flex items-center justify-between mb-12">
             <div>
-              <button 
-                onClick={() => router.push('/practices')} 
+              <button
+                onClick={() => router.push('/practices')}
                 className="flex items-center text-pink-600 hover:text-pink-800 transition-colors"
               >
                 <img src="/2.svg" alt="Back" className="w-8 h-8 mr-2" />
@@ -527,11 +527,10 @@ function SpeakingPractice() {
                       <button
                         key={level}
                         onClick={() => setDifficulty(level)}
-                        className={`block w-full py-3 px-6 text-lg rounded-lg transition-colors ${
-                          difficulty === level ? 
-                          'bg-pink-600 text-white' : 
-                          'bg-gray-200 hover:bg-pink-100 text-gray-800'
-                        }`}
+                        className={`block w-full py-3 px-6 text-lg rounded-lg transition-colors ${difficulty === level ?
+                            'bg-pink-600 text-white' :
+                            'bg-gray-200 hover:bg-pink-100 text-gray-800'
+                          }`}
                       >
                         {level}
                       </button>
@@ -541,25 +540,25 @@ function SpeakingPractice() {
               ) : testCompleted && showEvaluation && evaluationResult ? (
                 <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
                   <h2 className="text-2xl font-bold mb-4 text-green-600">लेव्हल {selectedLevel} पूर्ण झाली!</h2>
-                  
+
                   {/* Level evaluation results with stars */}
                   <div className="bg-gray-50 p-6 rounded-lg mb-6 border border-gray-200">
                     <h3 className="text-xl font-semibold mb-3 text-gray-800">तुमचा पर्फॉर्मन्स</h3>
                     <p className="text-gray-600 mb-4">{evaluationResult.evaluation?.feedback || "तुमचा लेव्हल मूल्यांकन केला गेला आहे."}</p>
-                    
+
                     <div className="flex justify-center mb-4">
                       {[...Array(3)].map((_, i) => (
-                        <svg 
-                          key={i} 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          viewBox="0 0 24 24" 
+                        <svg
+                          key={i}
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
                           className={`w-10 h-10 ${i < (evaluationResult.evaluation?.overallRating || 0) ? 'text-yellow-500 fill-current' : 'text-gray-300 fill-current'}`}
                         >
                           <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                         </svg>
                       ))}
                     </div>
-                    
+
                     <div className="text-center text-sm text-gray-500">
                       {evaluationResult.evaluation?.overallRating === 3 ? (
                         <span>छान! तुम्ही हा स्तर पार केला आहे!</span>
@@ -572,13 +571,13 @@ function SpeakingPractice() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-between">
                     <button
                       onClick={backToLevelSelection}
                       className="py-2 px-6 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
                     >
-                     लेव्हल परत जा
+                      लेव्हल परत जा
                     </button>
                     {evaluationResult.nextLevel && (
                       <button
@@ -600,14 +599,14 @@ function SpeakingPractice() {
                     <h2 className="text-2xl font-bold text-pink-900">
                       {difficulty} लेव्हल सराव
                     </h2>
-                    <button 
-                      onClick={() => {setShowLevelSelection(false); setDifficulty('');}}
+                    <button
+                      onClick={() => { setShowLevelSelection(false); setDifficulty(''); }}
                       className="text-pink-600 hover:text-pink-800 transition-colors"
                     >
                       ← लेव्हल कडे परत जा.
                     </button>
                   </div>
-                  
+
                   {loading ? (
                     <div className="flex justify-center py-20">
                       <svg className="animate-spin h-10 w-10 text-pink-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -617,44 +616,42 @@ function SpeakingPractice() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                      {Array.from({length: 30}, (_, i) => i + 1).map((level) => {
+                      {Array.from({ length: 30 }, (_, i) => i + 1).map((level) => {
                         // Find the current level's progress (if it exists)
                         const levelData = levelProgress.find(p => p.level === level) || { level, completed: false, stars: 0 };
-                        
+
                         // Find the previous level's progress
-                        const prevLevelData = level > 1 ? levelProgress.find(p => p.level === level-1) : { completed: true };
-                        
+                        const prevLevelData = level > 1 ? levelProgress.find(p => p.level === level - 1) : { completed: true };
+
                         // Make first three levels always unlocked
                         const isLocked = level > 3 && !prevLevelData?.completed;
                         const isCompleted = levelData.completed;
                         const stars = levelData.stars || 0;
-                        
+
                         return (
-                          <div 
+                          <div
                             key={`level-${level}`}
                             onClick={() => !isLocked && handleLevelSelect(level)}
-                            className={`bg-white rounded-xl shadow-md p-4 flex flex-col items-center justify-center relative ${!isLocked ? 'cursor-pointer hover:shadow-xl hover:bg-pink-50 transform hover:scale-105' : 'cursor-not-allowed opacity-80'} transition-all duration-200 ${
-                              isCompleted ? 'border-2 border-green-500' : ''
-                            } ${
-                              selectedLevel === level ? 'ring-4 ring-pink-500 ring-opacity-70 transform scale-105' : ''
-                            }`}
+                            className={`bg-white rounded-xl shadow-md p-4 flex flex-col items-center justify-center relative ${!isLocked ? 'cursor-pointer hover:shadow-xl hover:bg-pink-50 transform hover:scale-105' : 'cursor-not-allowed opacity-80'} transition-all duration-200 ${isCompleted ? 'border-2 border-green-500' : ''
+                              } ${selectedLevel === level ? 'ring-4 ring-pink-500 ring-opacity-70 transform scale-105' : ''
+                              }`}
                           >
                             <div className="text-2xl font-bold text-pink-900 mb-2">लेव्हल {level}</div>
-                            
+
                             {/* Star display */}
                             <div className="flex space-x-1">
                               {[...Array(3)].map((_, i) => (
-                                <svg 
-                                  key={i} 
-                                  xmlns="http://www.w3.org/2000/svg" 
-                                  viewBox="0 0 24 24" 
+                                <svg
+                                  key={i}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
                                   className={`w-6 h-6 ${i < stars ? 'text-yellow-500 fill-current' : 'text-gray-300 fill-current'}`}
                                 >
                                   <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                                 </svg>
                               ))}
                             </div>
-                            
+
                             {/* Show locked indicator for locked levels */}
                             {isLocked && (
                               <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black bg-opacity-60">
@@ -689,14 +686,14 @@ function SpeakingPractice() {
                     }} />
                   </div>
                   <p className="text-lg text-gray-600 mb-6">
-                   छान! तुम्ही बोलण्याचा सराव सत्र पूर्ण केला आहे.
+                    छान! तुम्ही बोलण्याचा सराव सत्र पूर्ण केला आहे.
                   </p>
                   <div className="flex justify-center space-x-4">
                     <button
                       onClick={backToLevelSelection}
                       className="bg-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-pink-700"
                     >
-                       लेव्हल परत जा
+                      लेव्हल परत जा
                     </button>
                     <button
                       onClick={() => setShowEvaluation(true)}
@@ -711,17 +708,17 @@ function SpeakingPractice() {
           ) : testCompleted && showEvaluation ? (
             <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
               <h1 className="text-3xl font-bold text-gray-800 mb-4">तुमचे सरावाचे निकाल</h1>
-              
+
               <div className="mb-6 p-4 bg-purple-50 rounded-lg">
                 <h2 className="text-xl font-bold text-purple-800 mb-2">एकूण पर्फॉर्मन्स</h2>
                 <div className="flex justify-center mb-4">
                   {/* Star display for overall rating */}
                   <div className="flex space-x-2">
                     {[...Array(3)].map((_, i) => (
-                      <svg 
-                        key={i} 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        viewBox="0 0 24 24" 
+                      <svg
+                        key={i}
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
                         className={`w-10 h-10 ${i < (evaluationResult?.levelProgress?.stars || 0) ? 'text-yellow-500 fill-current' : 'text-gray-300 fill-current'}`}
                       >
                         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
@@ -729,12 +726,12 @@ function SpeakingPractice() {
                     ))}
                   </div>
                 </div>
-                
+
                 <div className="text-lg text-gray-700 mb-4">
                   {evaluationResult?.evaluation?.feedback || "तुम्ही हा स्तर पूर्ण केला आहे. तुमच्या कौशल्यांना सुधारण्यासाठी सराव चालू ठेवा!"}
                 </div>
               </div>
-              
+
               <div className="mb-8">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">लेवल {selectedLevel} पूर्ण झाली</h2>
                 <p className="text-lg text-gray-600">
@@ -744,13 +741,13 @@ function SpeakingPractice() {
                   <div className="mt-2 text-green-600 font-bold">उत्तम गुण! छान!</div>
                 )}
               </div>
-              
+
               <div className="flex justify-center space-x-4">
                 <button
                   onClick={backToLevelSelection}
                   className="bg-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-pink-700"
                 >
-                  लेव्हल्सकडे परत जा 
+                  लेव्हल्सकडे परत जा
                 </button>
                 {selectedLevel < 30 && (
                   <button
@@ -780,8 +777,8 @@ function SpeakingPractice() {
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-1 mb-1">
-                  <div 
-                    className="bg-pink-500 h-1 rounded-full" 
+                  <div
+                    className="bg-pink-500 h-1 rounded-full"
                     style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
                   ></div>
                 </div>
@@ -789,7 +786,7 @@ function SpeakingPractice() {
 
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-gray-800 mb-2">
-                  {questions[currentIndex]?.instructions || "Read the following prompt and respond:"}
+                  {questions[currentIndex]?.instructions || "खालील सूचना वाचा आणि प्रतिसाद द्या:"}
                 </h2>
                 <div className="p-4 bg-pink-50 rounded-lg text-pink-900">
                   {questions[currentIndex]?.content || ""}
@@ -802,13 +799,12 @@ function SpeakingPractice() {
                     <button
                       onClick={recording ? stopSpeechRecognition : startSpeechRecognition}
                       disabled={!!feedback}
-                      className={`relative w-14 h-14 rounded-full flex items-center justify-center transition-colors ${
-                        recording 
-                          ? 'bg-red-500 animate-pulse' 
-                          : feedback 
-                            ? 'bg-gray-300 cursor-not-allowed' 
+                      className={`relative w-14 h-14 rounded-full flex items-center justify-center transition-colors ${recording
+                          ? 'bg-red-500 animate-pulse'
+                          : feedback
+                            ? 'bg-gray-300 cursor-not-allowed'
                             : 'bg-pink-500 hover:bg-pink-600'
-                      }`}
+                        }`}
                     >
                       {recording ? (
                         <span className="w-6 h-6 bg-white rounded-sm"></span>
@@ -852,10 +848,10 @@ function SpeakingPractice() {
                     <div className="flex items-center mb-2">
                       <div className="flex space-x-1 mr-2">
                         {[...Array(3)].map((_, i) => (
-                          <svg 
-                            key={i} 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            viewBox="0 0 24 24" 
+                          <svg
+                            key={i}
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
                             className={`w-5 h-5 ${i < score ? 'text-yellow-500 fill-current' : 'text-gray-300 fill-current'}`}
                           >
                             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
@@ -877,11 +873,10 @@ function SpeakingPractice() {
                 <button
                   onClick={handleNext}
                   disabled={!feedback}
-                  className={`px-4 py-2 rounded-lg font-medium ${
-                    !feedback
+                  className={`px-4 py-2 rounded-lg font-medium ${!feedback
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-purple-600 text-white hover:bg-purple-700'
-                  }`}
+                    }`}
                 >
                   {currentIndex < questions.length - 1 ? 'पुढील प्रश्न' : 'सराव पूर्ण करा'}
                 </button>

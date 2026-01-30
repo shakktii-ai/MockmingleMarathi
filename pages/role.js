@@ -22,27 +22,27 @@ export default function Role() {
 
   // Declare boards array here (not inside JSX)
   const boards = [
-    { label: "Maharashtra State Board", value: "maharashtra" },
-    { label: "CBSE (Central Board of Secondary Education)", value: "cbse" },
-    { label: "ICSE (Indian Certificate of Secondary Education)", value: "icse" },
-    { label: "Other State Board", value: "stateboard" },
-    { label: "NIOS (National Institute of Open Schooling)", value: "nios" },
-    { label: "IB (International Baccalaureate)", value: "ib" },
-    { label: "Cambridge International (CIE)", value: "cie" },
-    { label: "Karnataka State Board", value: "karnataka" },
-    { label: "Tamil Nadu State Board", value: "tamilnadu" },
-    { label: "Andhra Pradesh State Board", value: "andhrapradesh" },
-    { label: "Telangana State Board", value: "telangana" },
-    { label: "Uttar Pradesh State Board", value: "uttarpradesh" },
-    { label: "West Bengal State Board", value: "westbengal" },
-    { label: "Gujarat State Board", value: "gujarat" },
-    { label: "Rajasthan State Board", value: "rajasthan" },
-    { label: "Punjab State Board", value: "punjab" },
-    { label: "Haryana State Board", value: "haryana" },
-    { label: "Madhya Pradesh State Board", value: "madhyapradesh" },
-    { label: "Bihar State Board", value: "bihar" },
-    { label: "Odisha State Board", value: "odisha" },
-    { label: "Chhattisgarh State Board", value: "chhattisgarh" }
+    { label: "महाराष्ट्र राज्य बोर्ड", value: "maharashtra" },
+    { label: "CBSE (केंद्रीय माध्यमिक शिक्षण मंडळ)", value: "cbse" },
+    { label: "ICSE (इंडियन सर्टिफिकेट ऑफ सेकंडरी एज्युकेशन)", value: "icse" },
+    { label: "इतर राज्य बोर्ड", value: "stateboard" },
+    { label: "NIOS (नॅशनल इन्स्टिट्यूट ऑफ ओपन स्कूलिंग)", value: "nios" },
+    { label: "IB (इंटरनॅशनल बॅकलॉरिएट)", value: "ib" },
+    { label: "केंब्रिज इंटरनॅशनल (CIE)", value: "cie" },
+    { label: "कर्नाटक राज्य बोर्ड", value: "karnataka" },
+    { label: "तमिळनाडू राज्य बोर्ड", value: "tamilnadu" },
+    { label: "आंध्र प्रदेश राज्य बोर्ड", value: "andhrapradesh" },
+    { label: "तेलंगणा राज्य बोर्ड", value: "telangana" },
+    { label: "उत्तर प्रदेश राज्य बोर्ड", value: "uttarpradesh" },
+    { label: "पश्चिम बंगाल राज्य बोर्ड", value: "westbengal" },
+    { label: "गुजरात राज्य बोर्ड", value: "gujarat" },
+    { label: "राजस्थान राज्य बोर्ड", value: "rajasthan" },
+    { label: "पंजाब राज्य बोर्ड", value: "punjab" },
+    { label: "हरियाणा राज्य बोर्ड", value: "haryana" },
+    { label: "मध्य प्रदेश राज्य बोर्ड", value: "madhyapradesh" },
+    { label: "बिहार राज्य बोर्ड", value: "bihar" },
+    { label: "ओडिशा राज्य बोर्ड", value: "odisha" },
+    { label: "छत्तीसगड राज्य बोर्ड", value: "chhattisgarh" }
   ];
   useEffect(() => {
     if (!localStorage.getItem("token")) {
@@ -126,7 +126,7 @@ export default function Role() {
 
     // Show loading indicator
     toast.loading("मुलाखतीसाठी तयार होत आहे...");
-    
+
     // Always proceed with the interview without checking limits
     toast.success("मुलाखतीची तयारी सुरू करत आहे...");
 
@@ -391,13 +391,13 @@ export default function Role() {
             </select>
           </div>
           <div>
-          <Link href="/engrole" passHref >
-            <button type="button" className="text-black bg-[#2a72ff] text-lg p-2 rounded w-64 pl-15 mb-6">
-              For English Subject click me
-            </button>
-          </Link>
-          
-            </div>
+            <Link href="/engrole" passHref >
+              <button type="button" className="text-black bg-[#2a72ff] text-lg p-2 rounded w-64 pl-15 mb-6">
+                इंग्रजी विषयासाठी येथे क्लिक करा
+              </button>
+            </Link>
+
+          </div>
 
           <input
             type="text"
@@ -406,7 +406,7 @@ export default function Role() {
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             className="w-full p-2 mb-4 rounded-lg text-xl border border-transparent bg-gray-100 focus:border-purple-500 focus:outline-none"
-            placeholder="विषय निवडा. (e.g. Marathi, Maths)"
+            placeholder="विषय निवडा. (उदा. मराठी, गणित)"
             required
           />
 

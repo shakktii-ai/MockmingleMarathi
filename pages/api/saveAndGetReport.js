@@ -5,6 +5,8 @@ import { cloneUniformsGroups } from 'three/src/renderers/shaders/UniformsUtils';
 
 // API handler to store and retrieve reports
 export default async function handler(req, res) {
+  // Disable caching so clients always receive fresh responses
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   // Ensure the connection to MongoDB is active
   if (!mongoose.connections[0].readyState) {
     await mongoose.connect(process.env.MONGODB_URI);

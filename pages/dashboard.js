@@ -1,548 +1,548 @@
 
 import { useState, useEffect, useRef } from "react";
+import { Bell, Menu, X, User, Mic, Users, Brain, Code, Target } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { StreakBadge } from "@/components/dashboard/StreakBadge";
+import { WelcomeHero } from "@/components/dashboard/WelcomeHero";
+import { RankingCard } from "@/components/dashboard/RankingCard";
+import { CreditsCard } from "@/components/dashboard/CreditsCard";
+import { PracticeZoneCard } from "@/components/dashboard/PracticeZoneCard";
+import { StartSimulationButton } from "@/components/dashboard/StartSimulationButton";
+import { ScoreChart } from "@/components/dashboard/ScoreChart";
+import { DailyNudge } from "@/components/dashboard/DailyNudge";
+
 import Link from "next/link";
 import Head from "next/head";
 import { IoIosArrowBack } from "react-icons/io";
-import { MdAccountCircle } from 'react-icons/md';
+import { MdAccountCircle, MdOutlineAssignment, MdAssignmentTurnedIn, MdOutlinePending } from 'react-icons/md';
 import { useRouter } from 'next/router'; // For programmatic navigation
+import { Line, Radar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  RadialLinearScale,
+  Filler
+} from 'chart.js';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  RadialLinearScale,
+  Filler
+);
 
 export default function dashboard({ Logout, user }) {
   const [dropdown, setDropdown] = useState(false);
   const [notification, setNotification] = useState(false); // State to track the notification
   const [firstName, setFirstName] = useState(null); // State to store the first name
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // State to control mobile menu
+  const [performanceScores, setPerformanceScores] = useState([]);
+
+  const [interviewStats, setInterviewStats] = useState({
+    availableInterviews: 0,
+    completedInterviews: 0,
+    remainingInterviews: 0,
+    loading: true
+  });
+
+
+  const [userRank, setUserRank] = useState({
+    rank: '--',
+    totalUsers: '--',
+    percentile: '--'
+  });
+
+  // Add leaderboard link to the dashboard navigation
+  useEffect(() => {
+    const navLinks = document.querySelector('.dashboard-links');
+    if (navLinks && !document.querySelector('.leaderboard-link')) {
+      const leaderboardLink = document.createElement('a');
+      leaderboardLink.href = '/leaderboard';
+      leaderboardLink.className = 'leaderboard-link flex items-center space-x-2 px-4 py-2 text-white hover:bg-white/10 rounded-lg transition-colors';
+      leaderboardLink.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <span>लीडरबोर्ड</span>
+      `;
+      navLinks.appendChild(leaderboardLink);
+    }
+  }, []);
+
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState({
+    scoreData: {
+      labels: [],
+      datasets: []
+    },
+    radarData: {
+      labels: [],
+      datasets: []
+    }
+  });
   const router = useRouter(); // Next.js router to navigate to /role
 
-
-
   useEffect(() => {
-          if (!localStorage.getItem("token")) {
-            router.push("/login");
-          } else {
-            const userFromStorage = JSON.parse(localStorage.getItem('user'));
-          
-            
-          }
-        }, []);
+    if (!localStorage.getItem("token")) {
+      router.push("/login");
+    } else {
+      const userFromStorage = JSON.parse(localStorage.getItem('user'));
+      if (userFromStorage?.email) {
+        fetchReports(userFromStorage.email);
+        setFirstName(userFromStorage.fullName?.split(" ")[0]);
+      }
+    }
+  }, []);
 
- 
+  const getNormalizedScore = (report, categoryKey) => {
+    if (!report) return 0;
 
- 
+    // First try to get the score directly
+    let score = report.scores?.[categoryKey];
 
- 
-  const toggleDropdown = () => setDropdown(prev => !prev);
-  const toggleMobileMenu = () => setMobileMenuOpen(prev => !prev);
+    // If score is not available, try to extract from reportAnalysis
+    if ((!score || score === 0) && report.reportAnalysis) {
+      const scorePatterns = {
+        'technical_proficiency': /Technical\s*Proficiency[\s:]*([\d.]+)/i,
+        'communication': /Communication[\s:]*([\d.]+)/i,
+        'decision_making': /Decision[-\s]*Making[\s:]*([\d.]+)/i,
+        'confidence': /Confidence[\s:]*([\d.]+)/i,
+        'language_fluency': /Language\s*Fluency[\s:]*([\d.]+)/i,
+        'overall': /Overall[\s:]*([\d.]+)/i
+      };
 
-  // Function to simulate storing an item in localStorage and triggering the notification
-  const handleReportClick = () => {
-    localStorage.removeItem("store"); // Remove notification from localStorage
-    setNotification(false); // Hide the notification dot
+      const match = report.reportAnalysis.match(scorePatterns[categoryKey] || /(?:)/);
+      if (match && match[1]) {
+        score = parseFloat(match[1]);
+        // If we found a score > 10, it might be out of 50 (for overall) or another scale
+        if (score > 10 && categoryKey !== 'overall') {
+          score = (score / 5); // Scale down if it's out of 50
+        }
+      }
+    }
+
+    // Ensure we have a valid number between 0-10 (for categories) or 0-50 (for overall)
+    const maxScore = categoryKey === 'overall' ? 50 : 10;
+    score = parseFloat(score || 0);
+
+    // Ensure score is within valid range
+    return Math.min(Math.max(0, isNaN(score) ? 0 : score), maxScore);
   };
+
+  const prepareChartData = (reports) => {
+    if (!Array.isArray(reports) || reports.length === 0) {
+      return {
+        scoreData: {
+          labels: [],
+          datasets: []
+        },
+        radarData: {
+          labels: [],
+          datasets: []
+        }
+      };
+    }
+
+    // Sort reports by date
+    const sortedReports = [...reports].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Create labels from dates
+    const labels = sortedReports.map(report => {
+      return new Date(report.date).toLocaleDateString();
+    });
+
+    // Define score categories and their colors
+    const scoreCategories = [
+      { key: 'technical_proficiency', label: 'तांत्रिक कौशल्य', color: 'rgba(255, 99, 132, 0.8)' },
+      { key: 'communication', label: 'संवाद कौशल्य', color: 'rgba(54, 162, 235, 0.8)' },
+      { key: 'decision_making', label: 'निर्णय क्षमता', color: 'rgba(255, 206, 86, 0.8)' },
+      { key: 'confidence', label: 'आत्मविश्वास', color: 'rgba(75, 192, 192, 0.8)' },
+      { key: 'language_fluency', label: 'भाषा प्रभुत्व', color: 'rgba(153, 102, 255, 0.8)' }
+    ];
+
+    // Prepare line chart datasets for each score category
+    const datasets = scoreCategories.map(category => {
+      const data = sortedReports.map(report => {
+        // Get normalized score (0-10 scale)
+        return getNormalizedScore(report, category.key);
+      });
+
+      return {
+        label: category.label,
+        data: data,
+        borderColor: category.color,
+        backgroundColor: category.color.replace('0.8', '0.1'),
+        borderWidth: 2,
+        tension: 0.3,
+        fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      };
+    });
+
+    // Prepare radar chart data for the latest report
+    const latestReport = sortedReports[sortedReports.length - 1];
+    const radarData = {
+      labels: scoreCategories.map(cat => cat.label),
+      datasets: [{
+        label: 'अलीकडील कामगिरी',
+        data: scoreCategories.map(cat => getNormalizedScore(latestReport, cat.key)),
+        backgroundColor: 'rgba(124, 58, 237, 0.2)',
+        borderColor: 'rgba(124, 58, 237, 0.8)',
+        pointBackgroundColor: 'rgba(124, 58, 237, 1)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(124, 58, 237, 1)',
+        borderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    };
+
+    return {
+      scoreData: {
+        labels,
+        datasets
+      },
+      radarData
+    };
+  };
+
+
+  const getPerformanceOverview = (reports) => {
+    if (!reports || reports.length === 0) return [];
+
+    // Latest interview
+    const latestReport = [...reports].sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    )[0];
+
+    const categories = [
+      { key: "communication", label: "संवाद कौशल्य", original: "Communication" },
+      { key: "confidence", label: "आत्मविश्वास", original: "Confidence" },
+      { key: "decision_making", label: "निर्णय क्षमता", original: "Decision Making" },
+      { key: "technical_proficiency", label: "तांत्रिक ज्ञान", original: "Technical Depth" },
+    ];
+
+    return categories.map(cat => ({
+      label: cat.label,
+      value: Math.round(getNormalizedScore(latestReport, cat.key)),
+      trend: "up", // can be dynamic later
+    }));
+  };
+
+
+  const fetchUserRank = async (email) => {
+    if (!email) return;
+
+    try {
+      const response = await fetch(`/api/getUserRank?email=${encodeURIComponent(email)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setUserRank({
+          rank: data.rank || '--',
+          totalUsers: data.totalUsers || '--',
+          percentile: data.percentile || '--'
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user rank:', error);
+    }
+  };
+
+  const fetchInterviewStats = async (email) => {
+    if (!email) return;
+
+    try {
+      const response = await fetch(`/api/getUserStats?email=${encodeURIComponent(email)}`);
+      const data = await response.json();
+
+      if (data?.stats) {
+        const { no_of_interviews, no_of_interviews_completed } = data.stats;
+        setInterviewStats({
+          availableInterviews: no_of_interviews || 0,
+          completedInterviews: no_of_interviews_completed || 0,
+          remainingInterviews: Math.max(0, (no_of_interviews || 0) - (no_of_interviews_completed || 0)),
+          loading: false
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching interview stats:', error);
+      setInterviewStats(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  const fetchReports = async (email) => {
+    if (!email) return;
+
+    try {
+      // Fetch interview stats in parallel with reports
+      await Promise.all([
+        fetchInterviewStats(email),
+        (async () => {
+          const response = await fetch(`/api/getAllReports?email=${encodeURIComponent(email)}`);
+          const data = await response.json();
+
+          if (Array.isArray(data)) {
+            setReports(data);
+            setChartData(prepareChartData(data));
+            setPerformanceScores(getPerformanceOverview(data));
+          }
+        })(),
+        fetchUserRank(email)
+      ]);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+
+  const navItems = [
+    { label: "डॅशबोर्ड", href: "/dashboard" },
+    { label: "प्रगती", href: "/progress" },
+    { label: "अहवाल", href: "/oldreport" },
+    { label: "सॉफ्ट स्किल्स", href: "/practices" },
+    { label: "शिका", href: "/suggestion" },
+  ];
+
+  const isActive = (path) => router.pathname === path;
+
+
+  const practiceZones = [
+    {
+      title: "मुलाखत सिम्युलेशन", // Interview Simulations
+      description: "AI-आधारित फीडबॅक आणि रिअल-टाइम विश्लेषणासह पूर्ण मॉक मुलाखतींचा सराव करा.",
+      icon: Mic,
+      color: "blue",
+      progress: 45,
+      link: '/role',
+    },
+    {
+      title: "वर्तणूक", // Behaviour
+      description: "कोणत्याही भूमिकेसाठी STAR पद्धतीची उत्तरे आणि परिस्थितीजन्य प्रश्नांमध्ये प्रभुत्व मिळवा.",
+      icon: Users,
+      color: "purple",
+      progress: 30,
+      link: '/practices'
+    },
+    {
+      title: "सॉफ्ट स्किल्स", // Soft Skills
+      description: "संवाद, नेतृत्व आणि परस्पर संभाषण कौशल्ये सुधारा.",
+      icon: Brain,
+      color: "teal",
+      progress: 60,
+      link: "/practices"
+    },
+    {
+      title: "अॅकॅडेमिक असेसमेंट", // Academic Assessment (changed from Psychometric to match latest user request/button)
+      description: "तुमच्या शैक्षणिक विषयानुसार चाचणी द्या आणि सविस्तर अहवाल मिळवा.",
+      icon: Target,
+      color: "gold",
+      progress: 25,
+      link: '/assessment'
+    },
+  ];
 
   return (
     <>
       <Head>
-        <title>Shakktii मुलाखत प्रशिक्षण केंद्र</title>
+        <title>Shakktii - AI मुलाखत प्रशिक्षक</title>
         <meta name="description" content="Generated by create next app" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div
-        className="min-h-screen bg-gradient-to-b text-white px-4 bg-cover flex flex-col items-center justify-center"
-        style={{ backgroundImage: "url('/bg.gif')" }}
-      >
-        {/* Navigation Bar */}
-        <nav className="flex justify-between items-center mb-20 py-4 px-6 backdrop-blur-md bg-black/40 w-full rounded-xl shadow-lg">
-          <div className="flex items-center gap-2">
-            <img src="/Logo.png" alt="Logo" className="w-8 h-8 object-contain" />
-            <div className="text-white text-xl font-bold">Shakkti<span className="text-pink-500">AI</span></div>
-          </div>
-          
-          {/* Desktop Navigation */}
-          <ul className="hidden md:flex space-x-8 text-sm items-center">
-            <li className="hover:text-pink-400 cursor-pointer transition-colors font-medium">होम</li>
-            
-            <Link href={'/progress'}>
-              <li className="hover:text-pink-400 cursor-pointer transition-colors font-medium">
-                <span className="relative inline-flex">
-                  प्रगती
-                </span>
-              </li>
-            </Link>
-            
-            
-            
-            <Link href={'/oldreport'}>
-              <li className="relative hover:text-pink-400 cursor-pointer transition-colors font-medium" onClick={handleReportClick}>
-                रिपोर्ट्स
-                {notification && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-2.5 h-2.5"></span>
-                )}
-              </li>
-            </Link>
-          </ul>
-          
-          {/* Desktop User Section */}
-          <div className="hidden md:flex items-center gap-4">
-            {user?.value ? (
-              <div className="relative">
-                <div className="flex items-center gap-2 cursor-pointer group" onClick={toggleDropdown}>
-                  <MdAccountCircle className="text-2xl md:text-3xl text-white group-hover:text-pink-400 transition-colors" />
-                  <span className="text-sm font-medium text-white group-hover:text-pink-400 transition-colors">
-                    {firstName || 'खाते'}
-                  </span>
-                </div>
-                
-                {dropdown && (
-                  <div className="absolute right-0 shadow-xl top-12 rounded-lg w-48 border border-gray-200 bg-white text-black overflow-hidden z-50">
-                    <ul>
-                      <Link href={'/profile'}>
-                        <li className="hover:text-blue-700 text-sm font-medium p-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors flex items-center gap-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                          </svg>
-                         प्रोफाइल
-                        </li>
-                      </Link>
-                      <Link href={'/progress'}>
-                        <li className="hover:text-blue-700 text-sm font-medium p-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors flex items-center gap-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
-                          </svg>
-                          माझा प्रगती रिपोर्ट
-                        </li>
-                      </Link>
-                  
-                      <li onClick={Logout} className="hover:text-red-700 text-sm font-medium p-3 cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414l-5-5H3zm7 5a1 1 0 00-1 1v5.586l-1.293-1.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 15.586V9a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                        लॉगआऊट करा
-                      </li>
-                    </ul>
+
+      <div className="min-h-screen mt-20 bg-background">
+        <header className="fixed top-0 z-50 w-full bg-card/80 backdrop-blur-md border-b border-border-light">
+          <div className="container mx-auto px-4">
+            <div className="flex h-16 items-center justify-between">
+              {/* Logo */}
+              <div className="flex items-center gap-8">
+                <Link href="/" className="flex items-center gap-2">
+                  <div className="h-9 w-9 rounded-lg gradient-blue-teal flex items-center justify-center">
+                    <span className="text-lg font-bold text-primary-foreground"><img src="/Logo.png" alt="" className="w-6 h-6" /></span>
                   </div>
-                )}
+                  <span className="text-xl font-bold text-gradient-blue-teal hidden sm:inline">MockMingle</span>
+                </Link>
+
+                {/* Desktop Nav */}
+                <nav className="hidden md:flex items-center gap-1">
+                  {navItems.map((item) => {
+                    const active = isActive(item.href);
+                    return (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${active ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
+                          }`}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </nav>
               </div>
-            ) : (
-              <Link href="/login">
-                <button className="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full hover:from-pink-600 hover:to-purple-700 transition duration-300 shadow-lg hover:shadow-xl font-medium">
-                  लॉगिन करा
-                </button>
-              </Link>
-            )}
-          </div>
-          
-          {/* Mobile Menu Button - Single hamburger icon for mobile */}
-          <button 
-            className="md:hidden text-white focus:outline-none z-20" 
-            onClick={toggleMobileMenu}
-          >
-            {mobileMenuOpen ? (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-              </svg>
-            )}
-          </button>
-          
-          {/* Mobile Navigation - Combining all navigation elements for mobile */}
-          {mobileMenuOpen && (
-            <div className="md:hidden fixed inset-0 bg-black bg-opacity-80 z-10 flex flex-col items-center justify-center">
-              <ul className="flex flex-col space-y-6 text-center items-center">
-                <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer" onClick={toggleMobileMenu}>होम</li>
-                
-                <Link href={'/progress'}>
-                  <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer" onClick={toggleMobileMenu}>
-                    <span className="relative inline-flex">
-                      प्रगती
-                      <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">नवीन</span>
-                    </span>
-                  </li>
-                </Link>
-                
-                <Link href={'/oldreport'}>
-                  <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer relative" onClick={() => { handleReportClick(); toggleMobileMenu(); }}>
-                    रिपोर्ट्स
-                    {notification && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-2.5 h-2.5"></span>
-                    )}
-                  </li>
-                </Link>
-                
+
+              {/* Right side */}
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:block">
+                  <StreakBadge days={3} />
+                </div>
+
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="h-5 w-5 text-muted-foreground" />
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
+                    2
+                  </span>
+                </Button>
                 {user?.value ? (
-                  <>
-                    <Link href={'/profile'}>
-                      <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer" onClick={toggleMobileMenu}>
-                        प्रोफाइल
-                      </li>
-                    </Link>
-                    <li className="text-white hover:text-red-400 font-medium text-xl cursor-pointer" onClick={() => { Logout(); toggleMobileMenu(); }}>
-                      लॉगआऊट करा
-                    </li>
-                  </>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <div className="h-8 w-8 rounded-full gradient-purple-indigo flex items-center justify-center">
+                      <User className="h-4 w-4 text-primary-foreground" />
+                    </div>
+                  </Button>
+
                 ) : (
                   <Link href="/login">
-                    <li className="text-white hover:text-pink-400 font-medium text-xl cursor-pointer bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-2 rounded-full" onClick={toggleMobileMenu}>
-                      लॉगिन करा
-                    </li>
+                    <button className="px-4 py-2 bg-gradient-to-r  text-white rounded-full  transition duration-300 shadow-lg hover:shadow-xl font-medium">
+                      लॉगिन
+                    </button>
                   </Link>
                 )}
-              </ul>
-            </div>
-          )}
-        </nav>
-
-        {/* Main Content */}
-        <div className="flex flex-col items-center   text-center w-full">
-          <div className="w-20 h-20  border-2 border-white rounded-full flex items-center justify-center">
-            <img src="/Logo.png" alt="Logo" className="w-16 h-16 object-contain" />
-          </div>
-
-          
-
-          {/* Hero Section */}
-          <div className="relative mb-10 flex flex-col md:flex-row items-center justify-center text-white max-w-7xl mx-auto">
-            <div className="text-center md:text-left max-w-2xl md:mr-32 order-2 md:order-1 z-10">
-              <div className="flex flex-col gap-3">
-                <span className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium mb-2 w-fit animate-pulse">
-                  नवीन: प्रगतीचे निरीक्षण आणि विश्लेषण
-                </span>
-                
-                <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                  तुमचे <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-600"> मुलाखत कौशल्ये </span>पारंगत करा 
-                  <br />
-                  AI-चालित अभिप्रायासह
-                </h1>
-                
-                <p className="text-gray-300 text-lg mt-2">
-                  आमच्या AI मुलाखतकारासोबत सराव करा, त्वरित अभिप्राय मिळवा, आणि सखोल विश्लेषणासह तुमची प्रगती वेळोवेळी ट्रॅक करा.
-                </p>
-                
-                <div className="mt-6 flex flex-col sm:flex-row gap-4">
-                  <Link href={'/role'}>
-                    <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-8 rounded-full text-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group">
-                      सराव सुरू करा
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </Link>
-                  
-                  <Link href={'/progress'}>
-                    <button className="border-2 border-white hover:border-pink-400 text-white py-3 px-8 rounded-full text-lg font-semibold hover:text-pink-400 transition duration-300 flex items-center gap-2 group">
-                      प्रगती पहा
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </Link>
-                  
-                  <Link href={'/practices'}>
-                    <button className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white py-3 px-8 rounded-full text-lg font-semibold hover:from-indigo-600 hover:to-blue-700 transition duration-300 shadow-lg hover:shadow-xl flex items-center gap-2 group">
-                      सराव चाचण्या
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                        <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </Link>
-                  
-                 
-                 
-
-
-                </div>
+                {/* Mobile menu button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                >
+                  {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </Button>
               </div>
             </div>
-            
-            <div className="order-1 md:order-2 mb-8 md:mb-0">
-              <div className="relative">
-                <img 
-                  src="/mock.png" 
-                  alt="AI Interview Assistant" 
-                  className="relative w-full max-w-md md:max-w-xl rounded-lg" 
+
+            {/* Mobile Nav */}
+            {isMenuOpen && (
+              <nav className="md:hidden py-4 border-t border-border-light animate-fade-in">
+                <div className="flex flex-col gap-1">
+                  {navItems.map((item) => {
+                    const active = isActive(item.href);
+                    return (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${active
+                          ? "text-primary bg-lavender"
+                          : "text-muted-foreground hover:text-purple hover:bg-lavender/50"
+                          }`}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+                <div className="mt-4 px-4">
+                  <StreakBadge days={3} />
+                </div>
+              </nav>
+            )}
+          </div>
+        </header>
+
+        <main className="container mx-auto px-4 py-8">
+          {/* Top Section */}
+          <div className="grid gap-6 lg:grid-cols-3 mb-8">
+            <div className="lg:col-span-2">
+              <WelcomeHero userName={user?.fullName?.split(" ")[0]} />
+            </div>
+            <div className="space-y-6">
+              <RankingCard
+                percentile={userRank.rank}
+                pointsToNext={12}
+                currentPoints={88}
+                maxPoints={100}
+              />
+            </div>
+          </div>
+
+          {/* Middle Section */}
+          <div className="grid gap-6 lg:grid-cols-3 mb-8">
+            <div className="lg:col-span-2">
+              <DailyNudge />
+            </div>
+            <div>
+              <CreditsCard credits={interviewStats.loading ? '...' : interviewStats.remainingInterviews} />
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="flex justify-center mb-12">
+            <StartSimulationButton />
+          </div>
+
+          {/* Practice Zones */}
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">सराव विभाग</h2>
+                <p className="text-muted-foreground">तुमची कौशल्ये सुधारण्यासाठी एक क्षेत्र निवडा</p>
+              </div>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {practiceZones.map((zone, index) => (
+                <PracticeZoneCard
+                  key={zone.title}
+                  {...zone}
+                  delay={`${0.3 + index * 0.1}s`}
                 />
-              </div>
+              ))}
             </div>
-          </div>
-          
+          </section>
 
+          {/* Score Overview */}
+          <section className="mb-8">
+            <div className="max-w-2xl">
+              <ScoreChart scores={performanceScores} />
+            </div>
+          </section>
+        </main>
 
-        </div>
-      </div>
-
-      <div className="text-gray-900 p-8 py-20 min-h-screen bg-cover" style={{ backgroundImage: "url('/whitebg.jpg')" }}>
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-12">
-            तुम्ही मुलाखतीसाठी तयार आहात का?<span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">Shakkti AI </span>द्वारे चाचणी द्या.
-          </h1>
-          
-          {/* Feature Sections */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-24">
-            {/* Progress Tracking Feature */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-2xl shadow-lg">
-              <div className="flex flex-col items-center md:items-start gap-6">
-                <div className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                  मुलाखत विश्लेषण
+        {/* Footer */}
+        <footer className="border-t border-border-light bg-card/50 py-6">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-lg gradient-blue-teal flex items-center justify-center">
+                  <span className="text-sm font-bold text-primary-foreground">M</span>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800 text-center md:text-left">मुलाखतीतील तुमची प्रगती ट्रॅक करा</h2>
-                <p className="text-gray-600">
-                  आमच्या प्रगती ट्रॅकिंग सिस्टममुळे तुम्हाला वेळोवेळी तुमच्या सुधारणा दिसून येतात. विविध कौशल्यांवरील तुमच्या कामगिरीचे सविस्तर चार्ट पाहा आणि वाढीची संधी असलेले क्षेत्र ओळखा.
-                </p>
-                <ul className="space-y-2">
-                  {['कौशल्य विश्लेषण', 'परफॉर्मन्स कम्पेरिजन', 'ग्रोथ व्हिज्युअलायझेशन', 'मुलाखतींचा आढावा'].map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <svg className="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/progress">
-                  <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 px-6 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition duration-300 shadow-md mt-2">
-                    प्रगती अहवाल पहा
-                  </button>
-                </Link>
+                <span className="text-sm font-semibold text-foreground">MockMingle 2.0 (Marathi)</span>
               </div>
+              <p className="text-sm text-muted-foreground">
+                तुमचा AI करिअर कोच • आत्मविश्वास वाढवा, एका वेळी एक मुलाखत.
+              </p>
             </div>
-
-            {/* Practice Tests Feature */}
-            <div className="bg-gradient-to-br from-indigo-50 to-cyan-50 p-8 rounded-2xl shadow-lg">
-              <div className="flex flex-col items-center md:items-start gap-6">
-                <div className="inline-block bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
-                  नवीन फिचर
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 text-center md:text-left">प्रॅक्टिस टेस्ट्स आणि असेसमेंट्स</h2>
-                <p className="text-gray-600">
-                  आमच्या विशेष अभ्यास चाचण्यांसह तुमची भाषा आणि मुलाखत कौशल्ये सुधारा. तुमच्या बोलण्याच्या, ऐकण्याच्या, वाचनाच्या आणि लेखनाच्या क्षमतांना सुधारण्यासाठी वैयक्तिक AI फीडबॅक मिळवा.
-                </p>
-                <ul className="space-y-2">
-                  {['पर्सनालिटी असेसमेंट', 'बोलण्याचा सराव', 'ऐकण्याची समज', 'वाचन आणि लेखन चाचण्या'].map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <svg className="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/practices">
-                  <button className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white py-2 px-6 rounded-lg font-medium hover:from-indigo-600 hover:to-blue-700 transition duration-300 shadow-md mt-2">
-                    प्रॅक्टिस टेस्ट्स सुरू करा
-                  </button>
-                </Link>
-              </div>
-            </div>
-            
-            
           </div>
-
-
-        <div className="relative mt-10 lg:m-40 grid grid-cols-1 lg:grid-cols-2 " style={{ perspective: "1000px" }}>
-          <div
-            className="transform rounded-lg gap-10"
-            style={{
-              transform: "rotateY(50deg)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <img
-              src="/p1.jpeg"
-              width={300}
-
-              alt="Preparation is the key"
-              className="rounded-lg h-40 shadow-2xl shadow-gray-300"
-            />
-          </div>
-
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">1</span>
-              <h2 className="text-xl font-semibold text-purple-700">प्रॅक्टिस करा</h2>
-            </div>
-            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-              तुमच्या मुलाखतीच्या कौशल्यांचा अभ्यास करा, सुधारणा आवश्यक असलेले भाग ओळखा आणि उत्तरे अधिक प्रभावी बनवा. वास्तविक मुलाखतीपूर्वी आत्मविश्वास वाढवा आणि तणाव कमी करा, जेणेकरून तुम्ही यशस्वी होऊ शकता.
-            </p>
-          </div>
-        </div>
-
-
-        <div
-          className="relative lg:m-40 mt-10 grid grid-cols-1 lg:grid-cols-2"
-          style={{ perspective: "1000px" }}
-        >
-          {/* Image Section */}
-          <div
-            className="transform rounded-lg mr-10  sm:order-first lg:order-last"
-            style={{
-              transform: "rotateY(330deg)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <img
-              src="/p2.jpeg"
-              width={300}
-              alt="Preparation is the key"
-              className="rounded-lg h-40 lg:ml-32 shadow-2xl order-1 shadow-gray-300"
-            />
-          </div>
-
-          {/* Text Section */}
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">2</span>
-              <h2 className="text-xl font-semibold text-purple-700">AI आधारित थेट मुलाखत सराव सत्र</h2>
-            </div>
-            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-              AI-सह थेट मॉक इंटरव्ह्यूचा अनुभव घ्या – जिथे तुमच्या बोलण्याची शैली, आत्मविश्वास आणि अचूकतेवर त्वरित प्रतिक्रिया मिळते. डेटा-आधारित विश्लेषणामुळे वेळ वाचतो आणि सुधारण्याच्या दिशा स्पष्ट होतात.
-            </p>
-          </div>
-        </div>
-
-
-
-
-        <div className="relative mt-10 lg:m-40 grid grid-cols-1 lg:grid-cols-2 " style={{ perspective: "1000px" }}>
-          <div
-            className="transform rounded-lg"
-            style={{
-              transform: "rotateY(50deg)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <img
-              src="/p3.jpg"
-              width={300}
-
-              alt="Preparation is the key"
-              className="rounded-lg h-40 shadow-2xl shadow-gray-700"
-            />
-          </div>
-
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">3</span>
-              <h2 className="text-xl font-semibold text-purple-700">तुमच्या सोयीनुसार मुलाखतीचे वेळापत्रक</h2>
-            </div>
-            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-              कधीही आणि कुठेही सराव करा – निश्चित वेळापत्रकाची गरज नाही. विद्यार्थ्यांना आणि व्यावसायिकांना तत्काळ प्रवेश मिळावा यासाठी फ्लेक्सिबल आणि स्ट्रेस-फ्री तयारीची सुविधा.
-            </p>
-          </div>
-        </div>
-
-
-        <div
-          className="relative lg:m-40 mt-10 grid grid-cols-1 lg:grid-cols-2"
-          style={{ perspective: "1000px" }}
-        >
-          {/* Image Section */}
-          <div
-            className="transform rounded-lg lg:ml-32 mr-10 sm:order-first lg:order-last"
-            style={{
-              transform: "rotateY(330deg)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <img
-              src="/p4.png"
-              width={300}
-              alt="Preparation is the key"
-              className="rounded-lg h-40 shadow-2xl order-1 shadow-gray-800"
-            />
-          </div>
-
-          {/* Text Section */}
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">4</span>
-              <h2 className="text-xl font-semibold text-purple-700">शिक्षणात गेमसारखा अनुभव</h2>
-            </div>
-            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-              MockMingle मध्ये स्कोर्स, बॅजेस आणि लीडरबोर्ड्ससह गैमीकरण वापरून शिकणे मजेदार, प्रेरणादायक आणि फलदायी बनवले आहे, तसेच तुमच्या प्रगतीवर लक्ष ठेवले जाते.
-            </p>
-          </div>
-        </div>
-
-        <div className="relative mt-10 lg:m-40 grid grid-cols-1 lg:grid-cols-2 " style={{ perspective: "1000px" }}>
-          <div
-            className="transform rounded-lg"
-            style={{
-              transform: "rotateY(50deg)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <img
-              src="/p5.png"
-              width={300}
-
-              alt="Preparation is the key"
-              className="rounded-lg h-40 shadow-2xl shadow-gray-700"
-            />
-          </div>
-
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">5</span>
-              <h2 className="text-xl font-semibold text-purple-700"> तज्ज्ञांकडून फीडबॅक मिळवा</h2>
-            </div>
-            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-              AI आणि इंडस्ट्री तज्ज्ञांकडून संवाद, तांत्रिक कौशल्ये आणि कामगिरी यावर सखोल फीडबॅक मिळवा, तसेच तुमच्या मुलाखतीतील यशासाठी वैयक्तिक सुधारणा सूचना प्राप्त करा.
-            </p>
-          </div>
-        </div>
-
-
-        <div
-          className="relative lg:m-40 mt-10 grid grid-cols-1 lg:grid-cols-2"
-          style={{ perspective: "1000px" }}
-        >
-          {/* Image Section */}
-          <div
-            className="transform rounded-lg mr-10 lg:ml-32 sm:order-first lg:order-last"
-            style={{
-              transform: "rotateY(330deg)",
-              transformStyle: "preserve-3d",
-            }}
-          >
-            <img
-              src="/p6.jpg"
-              width={300}
-              alt="Preparation is the key"
-              className="rounded-lg h-40 shadow-2xl order-1 shadow-gray-800"
-            />
-          </div>
-
-          {/* Text Section */}
-          <div className="mt-4">
-            <div className="flex items-center gap-2">
-              <span className="bg-purple-500 text-white px-3 py-1 rounded-full text-sm">6</span>
-              <h2 className="text-xl font-semibold text-purple-700">व्हिडिओ स्वरूपात मार्गदर्शन मिळवा
-              </h2>
-            </div>
-            <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-              AI आणि तज्ज्ञांच्या मदतीने तुम्हाला व्हिडिओ स्वरूपात मार्गदर्शन मिळेल, ज्यात उत्तर देण्याच्या पद्धती, शारीरिक भाषा आणि आवाजावर सखोल सूचना दिल्या जातील. यामुळे तुम्हाला सुधारणा सहज आणि आकर्षकपणे करता येईल.
-            </p>
-          </div>
-        </div>
-
-
-        </div>
+        </footer>
       </div>
-      <div className="relative bg-blue-950 grid grid-cols-1 lg:grid-cols-2">
-        <div className="">
-          <img src="/footermock.png" className="" />
-        </div>
-        <div className="text-center mt-5">
-          <h2 className="text-gray-300 text-2xl">संपर्क करा</h2>
-          <h2 className="text-gray-300 text-3xl mt-2 font-bold">info@shakktii.in</h2>
-          <div>
-          </div>
-        </div>
-      </div>
+
     </>
   );
 }

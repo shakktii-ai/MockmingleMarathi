@@ -2,9 +2,14 @@ const mongoose = require('mongoose');
 
 const testReportSchema = new mongoose.Schema({
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.Mixed, // Changed to Mixed to accept both ObjectId and string
     ref: 'User',
-    required: true
+    required: false,
+    index: true
+  },
+  userEmail: {
+    type: String,
+    required: false
   },
   testType: {
     type: String,
