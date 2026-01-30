@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import AssessmentReport from '@/models/assessmentReport'; // Ensure this path matches your file structure
+import AssessmentReport from  '../../models/AssessmentReport'; // Ensure this path matches your file structure
 
 // --- DATABASE CONNECTION ---
 const MONGODB_URI = process.env.MONGODB_URI;
