@@ -61,7 +61,7 @@
 // export default connectDb(handler);
 
 import User from "../../../models/User";
-import connectDb from "../../../middleware/db";
+import connectDb from "../../../middleware/dbConnect";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 

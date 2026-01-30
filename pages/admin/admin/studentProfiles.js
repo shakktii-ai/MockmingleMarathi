@@ -448,9 +448,9 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Edit } from 'lucide-react';
-import EditPopup from '../../components/editPopup';
-import ReportDetailPopup from '../../components/reportDetailPopup';
-import Chart from '../../components/chart';
+import EditPopup from '../../../components/editPopup';
+import ReportDetailPopup from '../../../components/reportDetailPopup';
+import Chart from '../../../components/chart';
 import { useRouter } from 'next/router';
 
 function EmployeeProfiles() {

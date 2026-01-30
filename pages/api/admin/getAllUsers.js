@@ -37,7 +37,7 @@
 
 
 import User from "../../../models/User";
-import connectDb from "../../../middleware/db";
+import connectDb from "../../../middleware/dbConnect";
 import jwt from "jsonwebtoken";
 
 async function handler(req, res) {
