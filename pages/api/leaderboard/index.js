@@ -1,7 +1,7 @@
 // pages/api/leaderboard/index.js
 import dbConnect from '@/middleware/dbConnect';
 import User from '../../../models/User';
-import PsychometricResponseNew from '../../../models/PsychometricResponseNew';
+import PsychometricResponseNew from '../../../models/PsychometricResponse';
 import PracticeResponse from '../../../models/PracticeResponse';
 
 // Cache for leaderboard data (5 minutes)

@@ -1,4 +1,4 @@
-import PsychometricTestNew from '../../../models/PsychometricTestNew';
+import PsychometricTestNew from '../../../models/PsychometricTest';
 import connectDb from '@/middleware/dbConnect';
 
 export const config = {

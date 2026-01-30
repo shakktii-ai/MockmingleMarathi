@@ -1,8 +1,8 @@
 import connectDb from "@/middleware/dbConnect";
 import PsychometricTest from "../../../models/PsychometricTest";
 import PsychometricResponse from "../../../models/PsychometricResponse";
-import PsychometricTestNew from "../../../models/PsychometricTestNew";
-import PsychometricResponseNew from "../../../models/PsychometricResponseNew";
+import PsychometricTestNew from "../../../models/PsychometricTest";
+import PsychometricResponseNew from "../../../models/PsychometricResponse";
 import User from "../../../models/User";
 
 export const config = {

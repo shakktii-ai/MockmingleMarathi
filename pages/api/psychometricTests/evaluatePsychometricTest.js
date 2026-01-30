@@ -1,6 +1,6 @@
 import connectDb from "@/middleware/dbConnect";
-import PsychometricTestNew from "../../../models/PsychometricTestNew";
-import PsychometricResponseNew from "../../../models/PsychometricResponseNew";
+import PsychometricTestNew from "../../../models/PsychometricTest";
+import PsychometricResponseNew from "../../../models/PsychometricResponse";
 import User from "../../../models/User";
 
 // Increase maxDuration to 300 seconds (5 minutes) to allow for longer processing

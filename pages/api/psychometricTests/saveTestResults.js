@@ -1,6 +1,6 @@
 import connectDb from '@/middleware/dbConnect';
-import PsychometricTestNew from '../../../models/PsychometricTestNew';
-import PsychometricResponseNew from '../../../models/PsychometricResponseNew';
+import PsychometricTestNew from '../../../models/PsychometricTest';
+import PsychometricResponseNew from '../../../models/PsychometricResponse';
 import mongoose from 'mongoose';
 
 async function handler(req, res) {

@@ -4,7 +4,7 @@ export const config = {
 };
 
 import connectDb from "@/middleware/dbConnect";
-import PsychometricTestNew from "../../../models/PsychometricTestNew";
+import PsychometricTestNew from "../../../models/PsychometricTest";
 import User from "../../../models/User";
 
 export default async function handler(req, res) {
